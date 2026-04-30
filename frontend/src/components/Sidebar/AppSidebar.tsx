@@ -4,8 +4,9 @@ import {
   FileText,
   Globe,
   Home,
+  LayoutGrid,
   Map,
-  Users,
+  Settings,
 } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -21,20 +22,19 @@ import { type Item, Main } from "./Main"
 import { User } from "./User"
 
 const baseItems: Item[] = [
-  { icon: Home, title: "Tableau de Bord", path: "/" },
   { icon: FilePlus, title: "Demande Stage", path: "/stages" },
   { icon: FileText, title: "Convention Stage", path: "/convention" },
   { icon: ClipboardList, title: "Suivi Stage", path: "/suivi" },
   { icon: Map, title: "Mobilité Nationale", path: "/mobilite", search: { type: "nationale" } },
   { icon: Globe, title: "Mobilité Internationale", path: "/mobilite", search: { type: "internationale" } },
+  { icon: LayoutGrid, title: "Items", path: "/items" },
+  { icon: Settings, title: "User Settings", path: "/settings" },
+  { icon: Home, title: "Dashboard", path: "/" },
 ]
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
-
-  const items = currentUser?.is_superuser
-    ? [...baseItems, { icon: Users, title: "Admin", path: "/admin" }]
-    : baseItems
+  const items = baseItems
 
   return (
     <Sidebar collapsible="icon">
