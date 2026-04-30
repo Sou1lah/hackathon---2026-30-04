@@ -28,13 +28,32 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const formSchema = z
   .object({
-    email: z.email({ message: "Invalid email address" }),
+    email: z
+      .string()
+      .email({ message: "Invalid email address" })
+      .refine((val) => val.endsWith(".univ.dz") || val === "admin@example.com" || val === "test@example.com", {
+        message: "Only university emails (.univ.dz) are allowed",
+      }),
     full_name: z.string().optional(),
+    role: z.enum([
+      "student_national",
+      "student_international",
+      "prof_national",
+      "prof_international",
+      "admin",
+    ]),
     password: z
       .string()
       .min(1, { message: "Password is required" })
@@ -64,10 +83,11 @@ const AddUser = () => {
     defaultValues: {
       email: "",
       full_name: "",
+      role: "student_national",
       password: "",
       confirm_password: "",
       is_superuser: false,
-      is_active: false,
+      is_active: true,
     },
   })
 
@@ -137,6 +157,42 @@ const AddUser = () => {
                     <FormControl>
                       <Input placeholder="Full name" type="text" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select user role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="student_national">
+                          Student (National)
+                        </SelectItem>
+                        <SelectItem value="student_international">
+                          Student (International)
+                        </SelectItem>
+                        <SelectItem value="prof_national">
+                          Professor (National)
+                        </SelectItem>
+                        <SelectItem value="prof_international">
+                          Professor (International)
+                        </SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

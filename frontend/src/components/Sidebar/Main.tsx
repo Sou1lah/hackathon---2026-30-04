@@ -14,6 +14,8 @@ export type Item = {
   icon: LucideIcon
   title: string
   path: string
+  /** Optional TanStack Router search params for this item */
+  search?: Record<string, string>
 }
 
 interface MainProps {
@@ -24,6 +26,7 @@ export function Main({ items }: MainProps) {
   const { isMobile, setOpenMobile } = useSidebar()
   const router = useRouterState()
   const currentPath = router.location.pathname
+  const currentSearch = router.location.search
 
   const handleMenuClick = () => {
     if (isMobile) {
@@ -36,7 +39,14 @@ export function Main({ items }: MainProps) {
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = currentPath === item.path
+            // Match both pathname and, if item has search params, the search string
+            const pathMatch = currentPath === item.path
+            const searchMatch = item.search
+              ? Object.entries(item.search).every(([k, v]) =>
+                  new URLSearchParams(currentSearch).get(k) === v,
+                )
+              : true
+            const isActive = pathMatch && searchMatch
 
             return (
               <SidebarMenuItem key={item.title}>
@@ -45,7 +55,11 @@ export function Main({ items }: MainProps) {
                   isActive={isActive}
                   asChild
                 >
-                  <RouterLink to={item.path} onClick={handleMenuClick}>
+                  <RouterLink
+                    to={item.path}
+                    search={item.search as any}
+                    onClick={handleMenuClick}
+                  >
                     <item.icon />
                     <span>{item.title}</span>
                   </RouterLink>

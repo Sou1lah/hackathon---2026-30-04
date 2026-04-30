@@ -1,0 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router"
+import SuiviStage from "@/components/Mobility/SuiviStage"
+
+export const Route = createFileRoute("/_layout/suivi")({
+  component: SuiviPage,
+  head: () => ({
+    meta: [{ title: "Suivi de Stage - Mobilité & Stages" }],
+  }),
+})
+
+function SuiviPage() {
+  return <SuiviStage />
+}

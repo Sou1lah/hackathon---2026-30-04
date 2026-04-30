@@ -1,4 +1,12 @@
-import { Briefcase, Home, Users } from "lucide-react"
+import {
+  ClipboardList,
+  FilePlus,
+  FileText,
+  Globe,
+  Home,
+  Map,
+  Users,
+} from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -13,8 +21,12 @@ import { type Item, Main } from "./Main"
 import { User } from "./User"
 
 const baseItems: Item[] = [
-  { icon: Home, title: "Dashboard", path: "/" },
-  { icon: Briefcase, title: "Items", path: "/items" },
+  { icon: Home, title: "Tableau de Bord", path: "/" },
+  { icon: FilePlus, title: "Demande Stage", path: "/stages" },
+  { icon: FileText, title: "Convention Stage", path: "/convention" },
+  { icon: ClipboardList, title: "Suivi Stage", path: "/suivi" },
+  { icon: Map, title: "Mobilité Nationale", path: "/mobilite", search: { type: "nationale" } },
+  { icon: Globe, title: "Mobilité Internationale", path: "/mobilite", search: { type: "internationale" } },
 ]
 
 export function AppSidebar() {

@@ -18,12 +18,31 @@ import {
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { PasswordInput } from "@/components/ui/password-input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 const formSchema = z
   .object({
-    email: z.email(),
+    email: z
+      .string()
+      .email()
+      .refine((val) => val.endsWith(".univ.dz") || val === "test@example.com", {
+        message: "Only university emails (.univ.dz) are allowed",
+      }),
     full_name: z.string().min(1, { message: "Full Name is required" }),
+    role: z.enum([
+      "student_national",
+      "student_international",
+      "prof_national",
+      "prof_international",
+      "admin",
+    ]),
     password: z
       .string()
       .min(1, { message: "Password is required" })
@@ -51,7 +70,7 @@ export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
       {
-        title: "Sign Up - FastAPI Template",
+        title: "Sign Up - Mobility Hub",
       },
     ],
   }),
@@ -66,6 +85,7 @@ function SignUp() {
     defaultValues: {
       email: "",
       full_name: "",
+      role: "student_national",
       password: "",
       confirm_password: "",
     },
@@ -119,11 +139,47 @@ function SignUp() {
                   <FormControl>
                     <Input
                       data-testid="email-input"
-                      placeholder="user@example.com"
+                      placeholder="user@univ.dz"
                       type="email"
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="student_national">
+                        Student (National)
+                      </SelectItem>
+                      <SelectItem value="student_international">
+                        Student (International)
+                      </SelectItem>
+                      <SelectItem value="prof_national">
+                        Professor (National)
+                      </SelectItem>
+                      <SelectItem value="prof_international">
+                        Professor (International)
+                      </SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

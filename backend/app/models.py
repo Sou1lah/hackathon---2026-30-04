@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime, timezone
 
-from pydantic import EmailStr
+from enum import Enum
+from pydantic import EmailStr, field_validator
 from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -10,12 +11,28 @@ def get_datetime_utc() -> datetime:
     return datetime.now(timezone.utc)
 
 
+class UserRole(str, Enum):
+    student_national = "student_national"
+    student_international = "student_international"
+    prof_national = "prof_national"
+    prof_international = "prof_international"
+    admin = "admin"
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    role: UserRole = Field(default=UserRole.student_national)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_domain(cls, v: str) -> str:
+        if not v.endswith(".univ.dz") and v not in ["admin@example.com", "test@example.com"]:
+            raise ValueError("Only university emails (.univ.dz) are allowed")
+        return v
 
 
 # Properties to receive via API on creation
@@ -27,6 +44,14 @@ class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=128)
     full_name: str | None = Field(default=None, max_length=255)
+    role: UserRole = Field(default=UserRole.student_national)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_domain(cls, v: str) -> str:
+        if not v.endswith(".univ.dz") and v not in ["admin@example.com", "test@example.com"]:
+            raise ValueError("Only university emails (.univ.dz) are allowed")
+        return v
 
 
 # Properties to receive via API on update, all are optional
