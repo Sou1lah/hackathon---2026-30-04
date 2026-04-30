@@ -78,8 +78,8 @@ services:
             - .venv
         - path: ./backend/pyproject.toml
           action: rebuild
-    # TODO: remove once coverage is done locally
     volumes:
+      - ./backend:/app/backend
       - ./backend/htmlcov:/app/backend/htmlcov
     environment:
       SMTP_HOST: "mailcatcher"
@@ -103,6 +103,10 @@ services:
       args:
         - VITE_API_URL=http://localhost:8000
         - NODE_ENV=development
+
+  prestart:
+    volumes:
+      - ./backend:/app/backend
 
   playwright:
     build:

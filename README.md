@@ -1,4 +1,28 @@
-# Full Stack FastAPI Template
+# Mobility Hub - Full Stack FastAPI & React
+
+This project is a customized version of the Full Stack FastAPI Template, tailored for the **Mobility Hub** hackathon project.
+
+## Quick Start (Development)
+
+To get the project up and running after a restart:
+
+### 1. Start the Backend & Database
+In the root directory, run:
+```bash
+docker compose up -d proxy db backend prestart
+```
+*Note: The database is configured to listen on port **5433** on the host to avoid conflicts with other local Postgres instances.*
+
+### 2. Start the Frontend
+In the root directory, run:
+```bash
+bun run dev
+```
+The frontend will be available at `http://localhost:5173`.
+
+### 3. Interactive API Documentation
+Once the backend is running, you can access the Swagger UI at:
+`http://localhost:8000/docs`
 
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Docker+Compose%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Docker%20Compose/badge.svg" alt="Test Docker Compose"></a>
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Backend%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Backend/badge.svg" alt="Test Backend"></a>
@@ -194,17 +218,12 @@ But don't worry, you can just update any of that in the `.env` files afterwards.
 
 The input variables, with their default values (some auto generated) are:
 
-- `project_name`: (default: `"FastAPI Project"`) The name of the project, shown to API users (in .env).
-- `stack_name`: (default: `"fastapi-project"`) The name of the stack used for Docker Compose labels and project name (no spaces, no periods) (in .env).
-- `secret_key`: (default: `"changethis"`) The secret key for the project, used for security, stored in .env, you can generate one with the method above.
+- `project_name`: (default: `"Mobility Hub"`) The name of the project, shown to API users (in .env).
+- `stack_name`: (default: `"mobility-app"`) The name of the stack used for Docker Compose labels and project name (no spaces, no periods) (in .env).
+- `secret_key`: (default: `"hackathon_secret_123"`) The secret key for the project, used for security, stored in .env.
 - `first_superuser`: (default: `"admin@example.com"`) The email of the first superuser (in .env).
-- `first_superuser_password`: (default: `"changethis"`) The password of the first superuser (in .env).
-- `smtp_host`: (default: "") The SMTP server host to send emails, you can set it later in .env.
-- `smtp_user`: (default: "") The SMTP server user to send emails, you can set it later in .env.
-- `smtp_password`: (default: "") The SMTP server password to send emails, you can set it later in .env.
-- `emails_from_email`: (default: `"info@example.com"`) The email account to send emails from, you can set it later in .env.
-- `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env, you can generate one with the method above.
-- `sentry_dsn`: (default: "") The DSN for Sentry, if you are using it, you can set it later in .env.
+- `first_superuser_password`: (default: `"changethis123"`) The password of the first superuser (in .env).
+- `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env.
 
 ## Backend Development
 

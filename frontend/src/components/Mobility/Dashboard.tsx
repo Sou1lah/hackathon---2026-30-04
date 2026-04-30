@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import {
   BarChart,
   Bar,
@@ -21,37 +22,10 @@ import {
   Users,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const statsData = [
-  {
-    label: "Dossiers Actifs",
-    value: "1,284",
-    icon: FolderIcon,
-    color: "bg-blue-500",
-    trend: "+12%",
-  },
-  {
-    label: "Demandes en Attente",
-    value: "45",
-    icon: Clock,
-    color: "bg-amber-500",
-    trend: "-2%",
-  },
-  {
-    label: "Validés ce Mois",
-    value: "112",
-    icon: CheckCircle,
-    color: "bg-green-500",
-    trend: "+18%",
-  },
-  {
-    label: "Alertes Critiques",
-    value: "8",
-    icon: AlertTriangle,
-    color: "bg-red-500",
-    trend: "+5%",
-  },
-]
+import useAuth from "@/hooks/useAuth"
+import StudentHome from "./StudentHome"
+import { OpenAPI } from "@/client/core/OpenAPI"
+import { request as __request } from "@/client/core/request"
 
 const chartData = [
   { name: "Jan", demande: 400, convention: 240 },
@@ -72,11 +46,61 @@ const statusData = [
 const COLORS = ["#3B82F6", "#F59E0B", "#10B981", "#6366F1"]
 
 export default function Dashboard() {
+  const { user } = useAuth()
+
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["dashboardStats"],
+    queryFn: () =>
+      __request(OpenAPI, {
+        method: "GET",
+        url: "/api/v1/dashboard/stats",
+      }),
+    enabled: !!user && (user.role === "admin" || user.is_superuser),
+  })
+
+  if (!user) return null
+
+  // If not admin, show Student Home
+  if (user.role !== "admin" && !user.is_superuser) {
+    return <StudentHome />
+  }
+
+  const statsCards = [
+    {
+      label: "Dossiers Actifs",
+      value: stats?.active_internships ?? "...",
+      icon: FolderIcon,
+      color: "bg-blue-500",
+      trend: "+12%",
+    },
+    {
+      label: "Demandes en Attente",
+      value: stats?.pending_requests ?? "...",
+      icon: Clock,
+      color: "bg-amber-500",
+      trend: "-2%",
+    },
+    {
+      label: "Validés ce Mois",
+      value: stats?.validated_this_month ?? "...",
+      icon: CheckCircle,
+      color: "bg-green-500",
+      trend: "+18%",
+    },
+    {
+      label: "Alertes Critiques",
+      value: stats?.critical_alerts ?? "...",
+      icon: AlertTriangle,
+      color: "bg-red-500",
+      trend: "+5%",
+    },
+  ]
+
   return (
-    <div className="space-y-8">
+    <div className={cn("space-y-8", isLoading && "opacity-50 pointer-events-none transition-opacity")}>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Tableau de Bord</h1>
+          <h1 className="text-2xl font-bold italic tracking-tight">Tableau de Bord - Admin</h1>
           <p className="text-muted-foreground">
             Aperçu en temps réel de l'activité académique et de mobilité.
           </p>
@@ -93,7 +117,7 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsData.map((stat, i) => (
+        {statsCards.map((stat, i) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -114,16 +138,16 @@ export default function Dashboard() {
                     : "text-red-500"
                 }
               >
-                <span className="text-xs font-bold px-2 py-1 bg-current/10 rounded-full flex items-center gap-1">
+                <span className="text-xs font-bold px-2 py-1 bg-current/10 rounded-full flex items-center gap-1 text-slate-400">
                   <TrendingUp size={12} /> {stat.trend}
                 </span>
               </div>
             </div>
             <div className="mt-4">
-              <h3 className="text-muted-foreground text-sm font-medium">
+              <h3 className="text-muted-foreground text-sm font-medium italic">
                 {stat.label}
               </h3>
-              <p className="text-3xl font-bold mt-1">{stat.value}</p>
+              <p className="text-3xl font-bold mt-1 tracking-tighter">{stat.value}</p>
             </div>
           </motion.div>
         ))}
@@ -132,7 +156,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Charts */}
         <div className="lg:col-span-2 bg-card p-8 rounded-2xl border border-border shadow-sm">
-          <h3 className="text-lg font-bold mb-6">Activité Mensuelle</h3>
+          <h3 className="text-lg font-bold mb-6 italic tracking-tight">Activité Mensuelle</h3>
           <div className="h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
@@ -184,7 +208,7 @@ export default function Dashboard() {
         <div className="space-y-8">
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold flex items-center gap-2">
+              <h3 className="font-bold flex items-center gap-2 italic">
                 <Clock className="text-blue-400" size={20} /> SLA Monitor
               </h3>
               <span className="text-[10px] bg-white/10 px-2 py-1 rounded tracking-wider font-bold">
@@ -197,7 +221,7 @@ export default function Dashboard() {
                   <span className="text-slate-400 italic">
                     Délai Traitement Moyen
                   </span>
-                  <span className="font-bold text-blue-400">14 Jours</span>
+                  <span className="font-bold text-blue-400 italic">14 Jours</span>
                 </div>
                 <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
                   <div className="bg-blue-500 h-full w-[65%]" />
@@ -212,7 +236,7 @@ export default function Dashboard() {
 
           <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold">Dernières Alertes</h3>
+              <h3 className="font-bold italic">Dernières Alertes</h3>
               <button className="text-primary text-xs font-bold hover:underline">
                 Tout voir
               </button>
@@ -253,11 +277,11 @@ export default function Dashboard() {
                     )}
                   />
                   <div>
-                    <p className="text-sm font-bold line-clamp-1">
+                    <p className="text-sm font-bold line-clamp-1 italic">
                       {alert.msg}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] bg-accent px-1.5 py-0.5 rounded font-mono text-muted-foreground">
+                      <span className="text-[10px] bg-accent px-1.5 py-0.5 rounded font-mono text-muted-foreground italic">
                         {alert.folder}
                       </span>
                       <span className="text-[10px] text-muted-foreground italic flex items-center gap-1">
@@ -275,7 +299,7 @@ export default function Dashboard() {
       {/* Distribution Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-card p-8 rounded-2xl border border-border shadow-sm">
-          <h3 className="text-lg font-bold mb-6">Répartition par État</h3>
+          <h3 className="text-lg font-bold mb-6 italic tracking-tight">Répartition par État</h3>
           <div className="flex items-center justify-between">
             <div className="h-[250px] w-1/2">
               <ResponsiveContainer width="100%" height="100%">
@@ -310,11 +334,11 @@ export default function Dashboard() {
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: COLORS[i] }}
                     />
-                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors italic">
                       {item.name}
                     </span>
                   </div>
-                  <span className="text-sm font-bold">{item.value}</span>
+                  <span className="text-sm font-bold tracking-tighter">{item.value}</span>
                 </div>
               ))}
             </div>
@@ -323,7 +347,7 @@ export default function Dashboard() {
 
         <div className="bg-card p-8 rounded-2xl border border-border shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold">Équipe de Gestion</h3>
+            <h3 className="text-lg font-bold italic tracking-tight">Équipe de Gestion</h3>
             <Users size={20} className="text-muted-foreground" />
           </div>
           <div className="space-y-6">
@@ -338,7 +362,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <p className="text-sm font-bold">{user}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground italic">
                       Gestionnaire Qualité N2
                     </p>
                   </div>
