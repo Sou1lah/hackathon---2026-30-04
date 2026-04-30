@@ -70,6 +70,65 @@ Once the backend is running, you can access the Swagger UI at:
 
 [![API docs](img/docs.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
+## Database Schema & Architecture
+
+The project uses a normalized **PostgreSQL 18** schema designed to support complex internship and mobility workflows.
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    USER ||--o{ INTERNSHIP_REQUEST : "submits"
+    USER ||--o{ CONVENTION : "manages"
+    USER ||--o{ MOBILITY_FILE : "manages"
+    USER ||--o{ ACTIVITY_LOG_ENTRY : "logs"
+    
+    INTERNSHIP_REQUEST ||--o{ CONVENTION : "has"
+    INTERNSHIP_REQUEST ||--o{ ACTIVITY_LOG_ENTRY : "has"
+
+    USER {
+        uuid id PK
+        varchar email UK
+        user_role role
+        timestamptz created_at
+    }
+
+    INTERNSHIP_REQUEST {
+        uuid id PK
+        varchar student_name
+        internship_status status
+        int progress
+        timestamptz updated_at
+    }
+
+    MOBILITY_FILE {
+        uuid id PK
+        varchar reference_code
+        mobility_type type
+        priority_level priority
+        varchar status
+    }
+```
+
+### Core Entities
+- **Users & Roles**: Multi-role system (Student, Professor, Admin) with institutional email validation (`@univ.dz`).
+- **Internships (PFE)**: Full lifecycle management from draft to completion, including verification and progress tracking.
+- **Conventions**: 8-step signature workflow for legal internship documents.
+- **Mobility**: National and international mobility file tracking with priority levels and approval status.
+
+### Applying Database Changes
+If you modify the models in `backend/app/models.py` or `models_mobility.py`, run the following to update the database:
+
+```bash
+# Generate a new migration
+docker compose exec backend alembic revision --autogenerate -m "Description of changes"
+
+# Apply migrations
+docker compose exec backend alembic upgrade head
+```
+
+The full DDL is available for reference in `backend/app/schema.sql`.
+
 ## How To Use It
 
 You can **just fork or clone** this repository and use it as is.

@@ -121,6 +121,19 @@ docker compose exec backend bash scripts/tests-start.sh -x
 
 When the tests are run, a file `htmlcov/index.html` is generated, you can open it in your browser to see the coverage of the tests.
 
+## Database Schema
+
+The backend implements a normalized schema for the Mobility Hub. Key entities include:
+
+- **InternshipRequest**: Student internship/PFE details and status.
+- **Convention**: Legal signature workflow tracking.
+- **MobilityFile**: National and international mobility tracking.
+- **ActivityLogEntry**: Detailed internship activity logging.
+- **User**: Extended user model with role-based access control.
+- **Item**: Generic owner-based items.
+
+A complete DDL reference is available in `app/schema.sql`.
+
 ## Migrations
 
 As during local development your app directory is mounted as a volume inside the container, you can also run the migrations with `alembic` commands inside the container and the migration code will be in your app directory (instead of being only inside the container). So you can add it to your git repository.
