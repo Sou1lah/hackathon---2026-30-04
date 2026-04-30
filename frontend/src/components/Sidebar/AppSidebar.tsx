@@ -28,7 +28,6 @@ const baseItems: Item[] = [
   { icon: Map, title: "Mobilité Nationale", path: "/mobilite", search: { type: "nationale" } },
   { icon: Globe, title: "Mobilité Internationale", path: "/mobilite", search: { type: "internationale" } },
   { icon: LayoutGrid, title: "Items", path: "/items" },
-  { icon: Settings, title: "User Settings", path: "/settings" },
   { icon: Home, title: "Dashboard", path: "/" },
 ]
 
