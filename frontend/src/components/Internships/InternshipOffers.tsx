@@ -224,7 +224,16 @@ export default function InternshipOffers() {
                     {/* ── Top Photo with Fade ── */}
                     <div className="relative w-full h-[240px] shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
                       <img
-                        src={`/flags/${offer.country_code?.toLowerCase() || "dz"}.png`}
+                        src={`/flags/${(() => {
+                          const emojiToCode: Record<string, string> = {
+                            "🇩🇿": "dz", "🇫🇷": "fr", "🇩🇪": "de", "🇺🇸": "us", "🇮🇩": "id",
+                            "🇪🇸": "es", "🇬🇧": "gb", "🇨🇦": "ca", "🇮🇹": "it", "🇨🇭": "ch",
+                            "🇧🇪": "be", "🇳🇱": "nl", "🇨🇳": "cn", "🇯🇵": "jp", "🇮🇳": "in",
+                            "🇹🇷": "tr", "🇧🇷": "br", "🇦🇺": "au", "🇸🇦": "sa", "🇦🇪": "ae",
+                            "🇲🇦": "ma", "🇹🇳": "tn", "🇪🇬": "eg", "🌎": "un"
+                          }
+                          return emojiToCode[offer.country_flag || ""] || offer.country_code?.toLowerCase() || "dz"
+                        })()}.png`}
                         alt={offer.country ?? "Flag"}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                       />

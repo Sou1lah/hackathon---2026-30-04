@@ -72,7 +72,16 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
             <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all shadow-md hover:shadow-xl group bg-white dark:bg-zinc-950 flex flex-col overflow-hidden rounded-[1.5rem]">
               <div className="relative w-full h-[180px] shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
                 <img
-                  src={`/flags/${rec.offer.country_code?.toLowerCase() || "dz"}.png`}
+                  src={`/flags/${(() => {
+                    const emojiToCode: Record<string, string> = {
+                      "🇩🇿": "dz", "🇫🇷": "fr", "🇩🇪": "de", "🇺🇸": "us", "🇮🇩": "id",
+                      "🇪🇸": "es", "🇬🇧": "gb", "🇨🇦": "ca", "🇮🇹": "it", "🇨🇭": "ch",
+                      "🇧🇪": "be", "🇳🇱": "nl", "🇨🇳": "cn", "🇯🇵": "jp", "🇮🇳": "in",
+                      "🇹🇷": "tr", "🇧🇷": "br", "🇦🇺": "au", "🇸🇦": "sa", "🇦🇪": "ae",
+                      "🇲🇦": "ma", "🇹🇳": "tn", "🇪🇬": "eg", "🌎": "un"
+                    }
+                    return emojiToCode[rec.offer.country_flag || ""] || rec.offer.country_code?.toLowerCase() || "dz"
+                  })()}.png`}
                   alt={rec.offer.country ?? "Flag"}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                 />
