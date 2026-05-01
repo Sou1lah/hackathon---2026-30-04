@@ -1,6 +1,7 @@
 from typing import Any
-from fastapi import APIRouter, HTTPException
-from sqlmodel import select, func
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from sqlmodel import select, func, Session
+from app.core.db import engine
 
 from app.models_scraper import InternshipOffer, InternshipOffersPublic, InternshipOfferPublic
 from app.services.sync_offers import sync_internship_offers_to_db
@@ -9,20 +10,27 @@ from app.api.deps import SessionDep, CurrentUser
 
 router = APIRouter(prefix="/internships", tags=["internships"])
 
+async def background_sync():
+    with Session(engine) as session:
+        try:
+            await sync_internship_offers_to_db(session)
+        except Exception as e:
+            print(f"Background sync failed: {e}")
+
 @router.get("/refresh", response_model=dict)
-async def refresh_offers(session: SessionDep) -> Any:
+async def refresh_offers(background_tasks: BackgroundTasks) -> Any:
     """
-    Triggers scraping and DB sync for internship offers.
+    Triggers scraping and DB sync for internship offers in the background.
     """
     try:
-        result = await sync_internship_offers_to_db(session)
+        background_tasks.add_task(background_sync)
         return {
             "status": "success",
-            "message": "Scraping and sync completed",
-            "data": result
+            "message": "Scraping and sync started in the background",
+            "data": None
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Sync failed to start: {str(e)}")
 
 @router.get("/", response_model=InternshipOffersPublic)
 def read_offers(

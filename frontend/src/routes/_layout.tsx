@@ -1,4 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import { useEffect } from "react"
+import { OpenAPI } from "@/client"
 
 import { Footer } from "@/components/Common/Footer"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
@@ -21,6 +23,11 @@ export const Route = createFileRoute("/_layout")({
 })
 
 function Layout() {
+  useEffect(() => {
+    // Run the scraping system every time we enter the site
+    fetch(`${OpenAPI.BASE}/api/v1/internships/refresh`).catch(console.error)
+  }, [])
+
   return (
     <SidebarProvider>
       <AppSidebar />
