@@ -1,16 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import AppearanceSettings from "@/components/UserSettings/AppearanceSettings"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
+import LogoutPanel from "@/components/UserSettings/LogoutPanel"
+import StayLoggedIn from "@/components/UserSettings/StayLoggedIn"
 import UserInformation from "@/components/UserSettings/UserInformation"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
-
-const tabsConfig = [
-  { value: "my-profile", title: "My profile", component: UserInformation },
-  { value: "password", title: "Password", component: ChangePassword },
-  { value: "danger-zone", title: "Danger zone", component: DeleteAccount },
-]
 
 export const Route = createFileRoute("/_layout/settings")({
   component: UserSettings,
@@ -25,16 +21,13 @@ export const Route = createFileRoute("/_layout/settings")({
 
 function UserSettings() {
   const { user: currentUser } = useAuth()
-  const finalTabs = currentUser?.is_superuser
-    ? tabsConfig.slice(0, 3)
-    : tabsConfig
 
   if (!currentUser) {
     return null
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8 pb-12 max-w-2xl">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">User Settings</h1>
         <p className="text-muted-foreground">
@@ -42,20 +35,45 @@ function UserSettings() {
         </p>
       </div>
 
-      <Tabs defaultValue="my-profile">
-        <TabsList>
-          {finalTabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.title}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        {finalTabs.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value}>
-            <tab.component />
-          </TabsContent>
-        ))}
-      </Tabs>
+      {/* Profile */}
+      <section>
+        <UserInformation />
+      </section>
+
+      <hr className="border-border" />
+
+      {/* Appearance */}
+      <section>
+        <AppearanceSettings />
+      </section>
+
+      <hr className="border-border" />
+
+      {/* Password */}
+      <section>
+        <ChangePassword />
+      </section>
+
+      <hr className="border-border" />
+
+      {/* Stay Logged In */}
+      <section>
+        <StayLoggedIn />
+      </section>
+
+      <hr className="border-border" />
+
+      {/* Logout */}
+      <section>
+        <LogoutPanel />
+      </section>
+
+      <hr className="border-border" />
+
+      {/* Danger Zone */}
+      <section>
+        <DeleteAccount />
+      </section>
     </div>
   )
 }

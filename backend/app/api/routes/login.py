@@ -16,6 +16,7 @@ from app.utils import (
     send_email,
     verify_password_reset_token,
 )
+from app.services.recommendation import build_user_profile
 
 router = APIRouter(tags=["login"])
 
@@ -35,6 +36,10 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    # Build/Update user profile on login
+    build_user_profile(session=session, user=user)
+    
     return Token(
         access_token=security.create_access_token(
             user.id, expires_delta=access_token_expires

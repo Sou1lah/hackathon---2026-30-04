@@ -3,12 +3,12 @@ from datetime import datetime, timezone
 
 from enum import Enum
 from pydantic import EmailStr, field_validator
-from sqlalchemy import DateTime
-from sqlmodel import Field, Relationship, SQLModel
-
-
-def get_datetime_utc() -> datetime:
-    return datetime.now(timezone.utc)
+from typing import Any
+from sqlalchemy import DateTime, JSON
+from sqlmodel import Column, Field, Relationship, SQLModel
+from app.models_scraper import InternshipOffer
+from app.models_recommendation import UserInteraction
+from app.utils import get_datetime_utc
 
 
 class UserRole(str, Enum):
@@ -82,6 +82,21 @@ class User(UserBase, table=True):
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
+    # Recommendation features (non-editable by user directly)
+    role_type: str | None = Field(default=None, max_length=50)
+    mobility_preference: str | None = Field(default="national", max_length=50)
+    interest_tags: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    recommendation_score_profile: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+
+    # Activity tracking
+    last_login_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    total_sessions: int = Field(default=0)
+    engagement_score: float = Field(default=0.0)
+    profile_locked: bool = Field(default=True)
+
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
@@ -89,6 +104,9 @@ class User(UserBase, table=True):
 class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
+    role_type: str | None = None
+    mobility_preference: str | None = None
+    interest_tags: list[str] = []
 
 
 class UsersPublic(SQLModel):

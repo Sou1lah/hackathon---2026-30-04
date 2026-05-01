@@ -62,6 +62,7 @@ export default function StudentHome() {
         {/* Mobility Card */}
         <Link
           to="/mobilite"
+          search={{ type: "nationale" }}
           className="group relative overflow-hidden bg-card p-8 rounded-2xl border border-border hover:border-primary/50 transition-all shadow-sm hover:shadow-xl"
         >
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">

@@ -1,3 +1,4 @@
+import { Link as RouterLink } from "@tanstack/react-router"
 import {
   ClipboardList,
   FilePlus,
@@ -8,6 +9,7 @@ import {
   Settings,
   Users,
   Home,
+  Briefcase,
 } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -17,12 +19,16 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
 import { type Item, Main } from "./Main"
 import { User } from "./User"
 
 const baseItems: Item[] = [
+  { icon: Briefcase, title: "Offres de Stage", path: "/internship-offers" },
   { icon: FilePlus, title: "Demande Stage", path: "/stages" },
   { icon: FileText, title: "Convention Stage", path: "/convention" },
   { icon: ClipboardList, title: "Suivi Stage", path: "/suivi" },
@@ -47,6 +53,16 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarAppearance />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="User Settings" asChild>
+              <RouterLink to="/settings">
+                <Settings className="size-4" />
+                <span>User Settings</span>
+              </RouterLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <User user={currentUser} />
       </SidebarFooter>
     </Sidebar>
@@ -54,3 +70,4 @@ export function AppSidebar() {
 }
 
 export default AppSidebar
+

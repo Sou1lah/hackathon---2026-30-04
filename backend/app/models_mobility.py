@@ -5,7 +5,8 @@ from enum import Enum
 from sqlalchemy import DateTime
 from sqlmodel import Column, Field, Relationship, SQLModel, String
 
-from app.models import User, get_datetime_utc
+from app.models import User
+from app.utils import get_datetime_utc
 
 
 # ---------- Enums ----------
@@ -44,6 +45,12 @@ class Priority(str, Enum):
     critical = "Critical"
 
 
+class AlertSeverity(str, Enum):
+    info = "info"
+    warning = "warning"
+    critical = "critical"
+
+
 # ---------- InternshipRequest ----------
 
 class InternshipRequestBase(SQLModel):
@@ -60,6 +67,7 @@ class InternshipRequestBase(SQLModel):
     status: InternshipStatus = InternshipStatus.draft
     verification_status: VerificationStatus = VerificationStatus.idle
     progress: int = Field(default=0, ge=0, le=100)
+    current_step: int = Field(default=1, ge=1, le=8)
 
 
 class InternshipRequestCreate(InternshipRequestBase):
@@ -80,6 +88,7 @@ class InternshipRequestUpdate(SQLModel):
     status: InternshipStatus | None = None
     verification_status: VerificationStatus | None = None
     progress: int | None = Field(default=None, ge=0, le=100)
+    current_step: int | None = Field(default=None, ge=1, le=8)
 
 
 class InternshipRequest(InternshipRequestBase, table=True):
@@ -90,6 +99,14 @@ class InternshipRequest(InternshipRequestBase, table=True):
     )
     updated_at: datetime | None = Field(
         default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    last_activity_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    completed_at: datetime | None = Field(
+        default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     owner_id: uuid.UUID = Field(
@@ -278,3 +295,34 @@ class DashboardStats(SQLModel):
     pending_requests: int = 0
     validated_this_month: int = 0
     critical_alerts: int = 0
+
+
+# ---------- Alert ----------
+
+class AlertBase(SQLModel):
+    type: str = Field(max_length=50)
+    severity: AlertSeverity = AlertSeverity.info
+    message: str = Field(max_length=500)
+    dossier_id: uuid.UUID | None = Field(default=None, foreign_key="internshiprequest.id", ondelete="CASCADE")
+
+
+class AlertCreate(AlertBase):
+    pass
+
+
+class Alert(AlertBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+
+
+class AlertPublic(AlertBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+
+
+class AlertsPublic(SQLModel):
+    data: list[AlertPublic]
+    count: int

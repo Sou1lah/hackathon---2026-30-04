@@ -1,32 +1,61 @@
-from fastapi import APIRouter
+from typing import List, Dict, Any
+import uuid
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from typing import List
+from app.api.deps import SessionDep, CurrentUser
+from app.core.db import engine
+from app.services.dashboard_service import DashboardService
 
 router = APIRouter(prefix="/overview", tags=["overview"])
 
-class ActivityItem(BaseModel):
-    id: str
-    description: str
-    date: str
+class InternshipSummary(BaseModel):
+    total_internships: int
+    latest_internships: List[Dict[str, Any]]
+    new_items_7d: int
 
-class OverviewStats(BaseModel):
-    total_users: int
-    total_requests: int
-    pending_items: int
-    recent_activity: List[ActivityItem]
+class DossierSummary(BaseModel):
+    total_dossiers: int
+    active_dossiers: int
+    completed_dossiers: int
+    pending_dossiers: int
 
-@router.get("/", response_model=OverviewStats)
-def get_overview_data():
+class SLASummary(BaseModel):
+    total_dossiers: int
+    on_time_count: int
+    breached_count: int
+    breach_rate: float
+
+class SignatureSummary(BaseModel):
+    average_progress: float
+    stalled_dossiers: int
+    completed_signatures: int
+
+class SystemHealthItem(BaseModel):
+    name: str
+    status: str
+    latency: str
+
+class AlertItem(BaseModel):
+    id: uuid.UUID
+    type: str
+    severity: str
+    message: str
+    dossier_id: uuid.UUID | None
+    created_at: Any
+
+class DashboardOverviewResponse(BaseModel):
+    internships: InternshipSummary
+    dossiers: DossierSummary
+    sla: SLASummary
+    signature: SignatureSummary
+    alerts: List[AlertItem]
+    system_health: List[SystemHealthItem]
+    timestamp: str
+
+@router.get("/", response_model=DashboardOverviewResponse)
+def get_overview_data(session: SessionDep, current_user: CurrentUser):
     """
-    Get simple overview statistics for the new dashboard.
+    Get detailed overview statistics for the dashboard using real data.
     """
-    return OverviewStats(
-        total_users=150,
-        total_requests=342,
-        pending_items=12,
-        recent_activity=[
-            ActivityItem(id="1", description="System initialization complete", date="2026-05-01"),
-            ActivityItem(id="2", description="New user registered", date="2026-05-01"),
-            ActivityItem(id="3", description="Routine maintenance check", date="2026-04-30"),
-        ]
-    )
+    service = DashboardService(session, engine)
+    return service.get_full_overview()

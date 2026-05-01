@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 
-import { useTheme } from "@/components/theme-provider"
+
 import { cn } from "@/lib/utils"
 import icon from "/assets/images/icon.png"
 import logo from "/assets/images/logo.png"

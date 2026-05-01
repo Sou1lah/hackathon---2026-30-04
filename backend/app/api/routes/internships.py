@@ -19,7 +19,7 @@ from app.models_mobility import (
     InternshipRequestUpdate,
 )
 
-router = APIRouter(prefix="/internships", tags=["internships"])
+router = APIRouter(prefix="/internship-requests", tags=["internships"])
 
 
 @router.get("/", response_model=InternshipRequestsPublic)

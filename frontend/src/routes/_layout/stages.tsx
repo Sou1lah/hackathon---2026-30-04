@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
-import DemandeStage from "@/components/Mobility/DemandeStage"
+import RecommendationForm from "@/components/Mobility/RecommendationForm"
 
 export const Route = createFileRoute("/_layout/stages")({
   component: StagesPage,
   head: () => ({
-    meta: [{ title: "Demande de Stage - Mobilité & Stages" }],
+    meta: [{ title: "Système de Recommandation - Mobilité & Stages" }],
   }),
 })
 
 function StagesPage() {
-  return <DemandeStage />
+  return <RecommendationForm />
 }

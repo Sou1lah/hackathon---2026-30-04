@@ -77,6 +77,10 @@ export type UserPublic = {
     full_name?: (string | null);
     id: string;
     created_at?: (string | null);
+    role?: string;
+    role_type?: (string | null);
+    mobility_preference?: (string | null);
+    interest_tags?: Array<string>;
 };
 
 export type UserRegister = {
