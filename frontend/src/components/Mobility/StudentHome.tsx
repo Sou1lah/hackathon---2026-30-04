@@ -1,18 +1,18 @@
+import { Link } from "@tanstack/react-router"
 import { motion } from "framer-motion"
 import {
-  FileText,
-  Clock,
-  CheckCircle,
   ArrowRight,
+  CheckCircle,
+  Clock,
+  FileText,
   GraduationCap,
   Plane,
 } from "lucide-react"
-import { Link } from "@tanstack/react-router"
 import useAuth from "@/hooks/useAuth"
 
 export default function StudentHome() {
   const { user } = useAuth()
-  
+
   // Safe display name logic
   const getFirstName = () => {
     if (!user?.full_name) return "Etudiant"
@@ -34,7 +34,8 @@ export default function StudentHome() {
           Bienvenue, {getFirstName()}
         </h1>
         <p className="text-muted-foreground text-lg italic">
-          Pret pour votre prochaine etape academique ? Gerez vos stages et mobilites en toute simplicite.
+          Pret pour votre prochaine etape academique ? Gerez vos stages et
+          mobilites en toute simplicite.
         </p>
       </div>
 
@@ -52,10 +53,15 @@ export default function StudentHome() {
           </div>
           <h3 className="text-xl font-bold mb-2">Stages & PFE</h3>
           <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-            Deposez vos demandes de stage, genere de vos conventions et suivez vos validations.
+            Deposez vos demandes de stage, genere de vos conventions et suivez
+            vos validations.
           </p>
           <div className="flex items-center gap-2 text-primary font-bold text-sm">
-            Gerer mes stages <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            Gerer mes stages{" "}
+            <ArrowRight
+              size={16}
+              className="group-hover:translate-x-1 transition-transform"
+            />
           </div>
         </Link>
 
@@ -76,7 +82,11 @@ export default function StudentHome() {
             Explorez les opportunites de mobilite nationale et internationale.
           </p>
           <div className="flex items-center gap-2 text-primary font-bold text-sm">
-            Voir les opportunites <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            Voir les opportunites{" "}
+            <ArrowRight
+              size={16}
+              className="group-hover:translate-x-1 transition-transform"
+            />
           </div>
         </Link>
 
@@ -89,11 +99,15 @@ export default function StudentHome() {
             <div className="space-y-4 mt-6">
               <div className="flex items-center gap-3">
                 <CheckCircle className="text-green-400" size={18} />
-                <span className="text-sm text-slate-300 italic">Dossier academique verifie</span>
+                <span className="text-sm text-slate-300 italic">
+                  Dossier academique verifie
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <Clock className="text-amber-400" size={18} />
-                <span className="text-sm text-slate-300 italic">Convention en attente</span>
+                <span className="text-sm text-slate-300 italic">
+                  Convention en attente
+                </span>
               </div>
             </div>
           </div>

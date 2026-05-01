@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
 import { ShieldCheck } from "lucide-react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 const STORAGE_KEY = "stay_logged_in"
@@ -24,14 +24,16 @@ const StayLoggedIn = () => {
       <div
         className={cn(
           "flex items-center justify-between rounded-xl border-2 p-4 transition-all duration-200",
-          stayLoggedIn ? "border-primary/50 bg-primary/5" : "border-border"
+          stayLoggedIn ? "border-primary/50 bg-primary/5" : "border-border",
         )}
       >
         <div className="flex items-center gap-3">
           <div
             className={cn(
               "rounded-full p-2.5 transition-colors",
-              stayLoggedIn ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              stayLoggedIn
+                ? "bg-primary/10 text-primary"
+                : "bg-muted text-muted-foreground",
             )}
           >
             <ShieldCheck className="h-5 w-5" />
@@ -50,13 +52,13 @@ const StayLoggedIn = () => {
           onClick={() => setStayLoggedIn(!stayLoggedIn)}
           className={cn(
             "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            stayLoggedIn ? "bg-primary" : "bg-input"
+            stayLoggedIn ? "bg-primary" : "bg-input",
           )}
         >
           <span
             className={cn(
               "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition duration-200 ease-in-out",
-              stayLoggedIn ? "translate-x-5" : "translate-x-0"
+              stayLoggedIn ? "translate-x-5" : "translate-x-0",
             )}
           />
         </button>

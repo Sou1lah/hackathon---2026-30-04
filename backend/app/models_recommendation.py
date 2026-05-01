@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 from datetime import datetime
 from sqlalchemy import DateTime, JSON
 from sqlmodel import Column, Field, SQLModel
@@ -22,7 +23,6 @@ class UserInteractionPublic(UserInteractionBase):
 # ---------- StageRequest ----------
 
 class StageRequestBase(SQLModel):
-    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
     selected_mobility_type: str = Field(max_length=50) # national, international, both
     selected_interests: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     duration_preference: str | None = Field(default=None, max_length=100)
@@ -30,17 +30,24 @@ class StageRequestBase(SQLModel):
     level: str | None = Field(default=None, max_length=100)
     language: str | None = Field(default=None, max_length=255)
     gpa: float | None = Field(default=None)
+
+class StageRequestCreate(StageRequestBase):
+    pass
+
+class StageRequest(StageRequestBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
     submitted_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),
     )
     processed: bool = Field(default=False)
 
-class StageRequest(StageRequestBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-
 class StageRequestPublic(StageRequestBase):
     id: uuid.UUID
+    user_id: uuid.UUID
+    submitted_at: datetime | None
+    processed: bool
 
 # ---------- Recommendation ----------
 
@@ -58,3 +65,18 @@ class Recommendation(RecommendationBase, table=True):
 
 class RecommendationPublic(RecommendationBase):
     id: uuid.UUID
+
+from app.models_scraper import InternshipOfferPublic
+
+# ---------- API Responses ----------
+
+class RecommendationResultItem(SQLModel):
+    offer: InternshipOfferPublic
+    score: float
+    breakdown: dict[str, float] | None = None
+    warnings: list[str] | None = None
+
+class RecommendationResponse(SQLModel):
+    results: list[RecommendationResultItem]
+    is_fallback: bool
+    message: str | None

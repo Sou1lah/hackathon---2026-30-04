@@ -4,11 +4,11 @@ import {
   FilePlus,
   FileText,
   Globe,
+  Home,
   LayoutGrid,
   Map,
   Settings,
   Users,
-  Home,
 } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -30,8 +30,18 @@ const baseItems: Item[] = [
   { icon: FilePlus, title: "Demande Stage", path: "/stages" },
   { icon: FileText, title: "Convention Stage", path: "/convention" },
   { icon: ClipboardList, title: "Suivi Stage", path: "/suivi" },
-  { icon: Map, title: "Mobilité Nationale", path: "/mobilite", search: { type: "nationale" } },
-  { icon: Globe, title: "Mobilité Internationale", path: "/mobilite", search: { type: "internationale" } },
+  {
+    icon: Map,
+    title: "Mobilité Nationale",
+    path: "/mobilite",
+    search: { type: "nationale" },
+  },
+  {
+    icon: Globe,
+    title: "Mobilité Internationale",
+    path: "/mobilite",
+    search: { type: "internationale" },
+  },
   { icon: LayoutGrid, title: "Items", path: "/items" },
   { icon: Users, title: "Utilisateurs", path: "/users" },
   { icon: Home, title: "Dashboard", path: "/dashboard" },
@@ -68,4 +78,3 @@ export function AppSidebar() {
 }
 
 export default AppSidebar
-

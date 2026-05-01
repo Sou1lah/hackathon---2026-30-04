@@ -43,9 +43,15 @@ const formSchema = z
     email: z
       .string()
       .email({ message: "Invalid email address" })
-      .refine((val) => val.endsWith(".univ.dz") || val === "admin@example.com" || val === "test@example.com", {
-        message: "Only university emails (.univ.dz) are allowed",
-      }),
+      .refine(
+        (val) =>
+          val.endsWith(".univ.dz") ||
+          val === "admin@example.com" ||
+          val === "test@example.com",
+        {
+          message: "Only university emails (.univ.dz) are allowed",
+        },
+      ),
     full_name: z.string().optional(),
     role: z.enum([
       "student_national",

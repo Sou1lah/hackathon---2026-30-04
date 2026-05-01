@@ -1,11 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router"
 import { useSuspenseQuery } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
 import { Suspense } from "react"
 
-import { UsersService, type UserPublic } from "@/client"
-import { DataTable } from "@/components/Common/DataTable"
-import { columns, type UserTableData } from "@/components/Admin/columns"
+import { type UserPublic, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
+import { columns, type UserTableData } from "@/components/Admin/columns"
+import { DataTable } from "@/components/Common/DataTable"
 import PendingUsers from "@/components/Pending/PendingUsers"
 import useAuth from "@/hooks/useAuth"
 
@@ -40,8 +40,12 @@ function UsersPage() {
     <div className="space-y-8 p-2 animate-in fade-in duration-700">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-black italic tracking-tighter text-primary">Gestion des Utilisateurs</h1>
-          <p className="text-muted-foreground italic font-medium">Administration des comptes et des rôles.</p>
+          <h1 className="text-3xl font-black italic tracking-tighter text-primary">
+            Gestion des Utilisateurs
+          </h1>
+          <p className="text-muted-foreground italic font-medium">
+            Administration des comptes et des rôles.
+          </p>
         </div>
         <div className="flex gap-3">
           <AddUser />

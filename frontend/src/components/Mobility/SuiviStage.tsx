@@ -1,22 +1,38 @@
-import { useState } from "react"
 import {
-  History,
-  Plus,
-  MoreVertical,
-  Clock,
-  FileCheck,
-  Upload,
-  Star,
-  MessageSquare,
   AlertCircle,
   CheckCircle,
+  Clock,
+  FileCheck,
+  History,
+  MessageSquare,
+  MoreVertical,
+  Plus,
+  Star,
+  Upload,
 } from "lucide-react"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 const MOCK_ENTRIES = [
-  { id: "1", date: "2024-04-29", content: "Initialisation de l'environnement de développement Cloud.", hours: 7 },
-  { id: "2", date: "2024-04-28", content: "Analyse des besoins et rédaction du cahier des charges technique.", hours: 8 },
-  { id: "3", date: "2024-04-27", content: "Réunion d'équipe sur l'architecture micro-services.", hours: 6 },
+  {
+    id: "1",
+    date: "2024-04-29",
+    content: "Initialisation de l'environnement de développement Cloud.",
+    hours: 7,
+  },
+  {
+    id: "2",
+    date: "2024-04-28",
+    content:
+      "Analyse des besoins et rédaction du cahier des charges technique.",
+    hours: 8,
+  },
+  {
+    id: "3",
+    date: "2024-04-27",
+    content: "Réunion d'équipe sur l'architecture micro-services.",
+    hours: 6,
+  },
 ]
 
 export default function SuiviStage() {
@@ -27,16 +43,22 @@ export default function SuiviStage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Suivi de Stage</h1>
-          <p className="text-muted-foreground">Journal d'activité et évaluation de performance.</p>
+          <p className="text-muted-foreground">
+            Journal d'activité et évaluation de performance.
+          </p>
         </div>
         <div className="flex items-center gap-4 bg-card px-6 py-3 rounded-2xl border border-border shadow-sm">
           <div className="flex flex-col items-center border-r border-border pr-6 mr-1">
             <span className="text-2xl font-bold text-primary">142</span>
-            <span className="text-[10px] text-muted-foreground font-bold uppercase">Heures Validées</span>
+            <span className="text-[10px] text-muted-foreground font-bold uppercase">
+              Heures Validées
+            </span>
           </div>
           <div className="flex flex-col items-center">
             <span className="text-2xl font-bold text-green-500">82%</span>
-            <span className="text-[10px] text-muted-foreground font-bold uppercase">Progression Stage</span>
+            <span className="text-[10px] text-muted-foreground font-bold uppercase">
+              Progression Stage
+            </span>
           </div>
         </div>
       </div>
@@ -55,26 +77,39 @@ export default function SuiviStage() {
             </div>
             <div className="divide-y divide-border">
               {entries.map((entry) => (
-                <div key={entry.id} className="p-6 hover:bg-accent/50 transition-colors group">
+                <div
+                  key={entry.id}
+                  className="p-6 hover:bg-accent/50 transition-colors group"
+                >
                   <div className="flex gap-6">
                     <div className="flex flex-col items-center gap-2">
                       <div className="bg-primary/10 text-primary w-12 h-12 rounded-xl flex flex-col items-center justify-center border border-primary/20 shrink-0">
-                        <span className="text-xs font-bold leading-none">{entry.date.split("-")[2]}</span>
-                        <span className="text-[10px] uppercase font-black opacity-60">AVR.</span>
+                        <span className="text-xs font-bold leading-none">
+                          {entry.date.split("-")[2]}
+                        </span>
+                        <span className="text-[10px] uppercase font-black opacity-60">
+                          AVR.
+                        </span>
                       </div>
                       <div className="flex flex-col items-center text-muted-foreground">
                         <Clock size={12} />
-                        <span className="text-[10px] font-bold">{entry.hours}h</span>
+                        <span className="text-[10px] font-bold">
+                          {entry.hours}h
+                        </span>
                       </div>
                     </div>
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Activité Technique</span>
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                          Activité Technique
+                        </span>
                         <button className="text-muted-foreground/30 hover:text-muted-foreground transition-colors opacity-0 group-hover:opacity-100">
                           <MoreVertical size={18} />
                         </button>
                       </div>
-                      <p className="leading-relaxed font-medium">{entry.content}</p>
+                      <p className="leading-relaxed font-medium">
+                        {entry.content}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -94,22 +129,48 @@ export default function SuiviStage() {
             </h3>
             <div className="space-y-4">
               {[
-                { label: "Rapport d'Escale 1", status: "validated", date: "Valide le 15/04" },
-                { label: "Rapport d'Escale 2", status: "pending", date: "Échéance le 30/04" },
-                { label: "Mémoire de Stage", status: "locked", date: "Déblocage le 15/06" },
+                {
+                  label: "Rapport d'Escale 1",
+                  status: "validated",
+                  date: "Valide le 15/04",
+                },
+                {
+                  label: "Rapport d'Escale 2",
+                  status: "pending",
+                  date: "Échéance le 30/04",
+                },
+                {
+                  label: "Mémoire de Stage",
+                  status: "locked",
+                  date: "Déblocage le 15/06",
+                },
               ].map((doc, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-accent/50 border border-border rounded-xl group hover:border-primary/30 transition-all">
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-4 bg-accent/50 border border-border rounded-xl group hover:border-primary/30 transition-all"
+                >
                   <div className="flex gap-4 items-center">
-                    <div className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center transition-all",
-                      doc.status === "validated" ? "bg-green-500/10 text-green-500" :
-                      doc.status === "pending" ? "bg-amber-500/10 text-amber-500" : "bg-accent text-muted-foreground",
-                    )}>
-                      {doc.status === "validated" ? <CheckCircle size={20} /> : <Upload size={20} />}
+                    <div
+                      className={cn(
+                        "w-10 h-10 rounded-lg flex items-center justify-center transition-all",
+                        doc.status === "validated"
+                          ? "bg-green-500/10 text-green-500"
+                          : doc.status === "pending"
+                            ? "bg-amber-500/10 text-amber-500"
+                            : "bg-accent text-muted-foreground",
+                      )}
+                    >
+                      {doc.status === "validated" ? (
+                        <CheckCircle size={20} />
+                      ) : (
+                        <Upload size={20} />
+                      )}
                     </div>
                     <div>
                       <p className="text-sm font-bold">{doc.label}</p>
-                      <p className="text-[10px] font-bold text-muted-foreground italic uppercase">{doc.date}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground italic uppercase">
+                        {doc.date}
+                      </p>
                     </div>
                   </div>
                   {doc.status === "pending" && (
@@ -126,27 +187,43 @@ export default function SuiviStage() {
           <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-6 rounded-2xl shadow-sm space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="font-bold flex items-center gap-2">
-                <Star size={20} className="text-amber-400 fill-amber-400" /> Évaluation Tuteur
+                <Star size={20} className="text-amber-400 fill-amber-400" />{" "}
+                Évaluation Tuteur
               </h3>
-              <span className="text-[10px] bg-white/10 px-2 py-1 rounded font-bold uppercase italic">V1.0</span>
+              <span className="text-[10px] bg-white/10 px-2 py-1 rounded font-bold uppercase italic">
+                V1.0
+              </span>
             </div>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full border-2 border-amber-400 p-0.5">
-                  <div className="w-full h-full bg-slate-800 rounded-full flex items-center justify-center font-bold text-xs uppercase">TS</div>
+                  <div className="w-full h-full bg-slate-800 rounded-full flex items-center justify-center font-bold text-xs uppercase">
+                    TS
+                  </div>
                 </div>
                 <div>
                   <p className="text-sm font-bold">Thomas Shelby</p>
-                  <p className="text-[10px] text-slate-400 italic">Chef de Projet IT @ Shelby Co.</p>
+                  <p className="text-[10px] text-slate-400 italic">
+                    Chef de Projet IT @ Shelby Co.
+                  </p>
                 </div>
               </div>
               <div className="p-4 bg-white/5 rounded-xl border border-white/10 italic text-sm text-slate-300 leading-relaxed">
-                "Étudiant très proactif. Capacité d'adaptation impressionnante et autonomie technique confirmée."
+                "Étudiant très proactif. Capacité d'adaptation impressionnante
+                et autonomie technique confirmée."
               </div>
               <div className="flex justify-between items-center pt-2">
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} size={14} className={i <= 4 ? "text-amber-400 fill-amber-400" : "text-white/20"} />
+                    <Star
+                      key={i}
+                      size={14}
+                      className={
+                        i <= 4
+                          ? "text-amber-400 fill-amber-400"
+                          : "text-white/20"
+                      }
+                    />
                   ))}
                 </div>
                 <button className="text-[10px] font-bold text-indigo-300 hover:text-white flex items-center gap-1 uppercase tracking-widest">
@@ -158,7 +235,10 @@ export default function SuiviStage() {
 
           <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex gap-3 text-amber-500 text-sm">
             <AlertCircle size={20} className="shrink-0" />
-            <p className="italic">Prochaine visite de tuteur académique prévue pour le <b>12 Mai 2024</b> à 14h00.</p>
+            <p className="italic">
+              Prochaine visite de tuteur académique prévue pour le{" "}
+              <b>12 Mai 2024</b> à 14h00.
+            </p>
           </div>
         </div>
       </div>

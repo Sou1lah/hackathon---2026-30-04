@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import Session
 from app.api.deps import SessionDep, CurrentUser
 from app.models import UserPublic
-from app.models_recommendation import StageRequest, StageRequestPublic, StageRequestBase
+from app.models_recommendation import StageRequest, StageRequestPublic, StageRequestCreate, RecommendationResponse
 from app.services.recommendation import get_recommendations
 from app.utils import get_datetime_utc
 
@@ -16,12 +16,13 @@ def read_user_profile(current_user: CurrentUser) -> Any:
     """
     return current_user
 
-@router.post("/stage-request", response_model=list[dict[str, Any]])
+@router.post("/stage-request", response_model=RecommendationResponse)
 def submit_stage_request(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    request_in: StageRequestBase
+    request_in: StageRequestCreate,
+    debug: bool = False
 ) -> Any:
     """
     Submit a stage request and get ranked internship recommendations.
@@ -35,8 +36,7 @@ def submit_stage_request(
     session.refresh(db_request)
     
     # 2. Trigger recommendation engine
-    recommendations = get_recommendations(session=session, user=current_user, request=db_request)
+    recommendations = get_recommendations(session=session, user=current_user, request=db_request, debug=debug)
     
     # 3. Format and return results
-    # We return the list of {offer, score}
     return recommendations

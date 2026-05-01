@@ -42,8 +42,8 @@ export function Main({ items }: MainProps) {
             // Match both pathname and, if item has search params, the search string
             const pathMatch = currentPath === item.path
             const searchMatch = item.search
-              ? Object.entries(item.search).every(([k, v]) =>
-                  new URLSearchParams(currentSearch).get(k) === v,
+              ? Object.entries(item.search).every(
+                  ([k, v]) => new URLSearchParams(currentSearch).get(k) === v,
                 )
               : true
             const isActive = pathMatch && searchMatch

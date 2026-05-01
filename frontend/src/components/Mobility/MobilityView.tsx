@@ -1,35 +1,78 @@
 import {
-  Search,
+  Building2,
+  ChevronRight,
+  CreditCard,
+  ExternalLink,
   Filter,
   Globe,
-  Map as MapIcon,
-  Building2,
-  Plane,
-  CreditCard,
   Handshake,
-  ChevronRight,
-  MoreHorizontal,
   Mail,
-  ExternalLink,
+  Map as MapIcon,
+  MoreHorizontal,
+  Plane,
+  Search,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { motion } from "motion/react"
+import { cn } from "@/lib/utils"
 
 interface MobilityViewProps {
   type: "nationale" | "internationale"
 }
 
 const MOCK_FILES = [
-  { id: "F-2401", student: "Amine Kerroum", dest: "Univ. Science Tech (USTHB)", status: "N2", priority: "High", tags: ["Bourse", "Dortoir"] },
-  { id: "F-2405", student: "Kenzy Ben", dest: "Ecole Polytechnique (ENP)", status: "N1", priority: "Medium", tags: ["Convention"] },
-  { id: "I-8821", student: "Sofia Red", dest: "Sorbonne University, FR", status: "N3", priority: "High", tags: ["Visa", "Erasmus+"] },
-  { id: "I-9012", student: "Malik Sahli", dest: "MIT, USA", status: "N2", priority: "Critical", tags: ["Visa Support", "Partenariat"] },
+  {
+    id: "F-2401",
+    student: "Amine Kerroum",
+    dest: "Univ. Science Tech (USTHB)",
+    status: "N2",
+    priority: "High",
+    tags: ["Bourse", "Dortoir"],
+  },
+  {
+    id: "F-2405",
+    student: "Kenzy Ben",
+    dest: "Ecole Polytechnique (ENP)",
+    status: "N1",
+    priority: "Medium",
+    tags: ["Convention"],
+  },
+  {
+    id: "I-8821",
+    student: "Sofia Red",
+    dest: "Sorbonne University, FR",
+    status: "N3",
+    priority: "High",
+    tags: ["Visa", "Erasmus+"],
+  },
+  {
+    id: "I-9012",
+    student: "Malik Sahli",
+    dest: "MIT, USA",
+    status: "N2",
+    priority: "Critical",
+    tags: ["Visa Support", "Partenariat"],
+  },
 ]
 
 const APPROVAL_LEVELS = [
-  { id: "N1", label: "Département / Faculté", desc: "Validation académique & pédagogique", color: "bg-indigo-500" },
-  { id: "N2", label: "Relations Extérieures", desc: "Conformité partenariats & logistique", color: "bg-blue-500" },
-  { id: "N3", label: "Rectorat / Ministère", desc: "Homologation finale & visas de sortie", color: "bg-green-500" },
+  {
+    id: "N1",
+    label: "Département / Faculté",
+    desc: "Validation académique & pédagogique",
+    color: "bg-indigo-500",
+  },
+  {
+    id: "N2",
+    label: "Relations Extérieures",
+    desc: "Conformité partenariats & logistique",
+    color: "bg-blue-500",
+  },
+  {
+    id: "N3",
+    label: "Rectorat / Ministère",
+    desc: "Homologation finale & visas de sortie",
+    color: "bg-green-500",
+  },
 ]
 
 export default function MobilityView({ type }: MobilityViewProps) {
@@ -70,18 +113,30 @@ export default function MobilityView({ type }: MobilityViewProps) {
           <h3 className="font-bold flex items-center gap-2 uppercase tracking-widest text-xs text-muted-foreground">
             Flux d'Approbation Administratif
           </h3>
-          <span className="text-[10px] bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">MODE TEMPORISÉ</span>
+          <span className="text-[10px] bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">
+            MODE TEMPORISÉ
+          </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           <div className="absolute top-1/2 left-0 w-full h-px bg-border -translate-y-1/2 hidden md:block" />
           {APPROVAL_LEVELS.map((level) => (
-            <div key={level.id} className="relative z-10 flex flex-col items-center text-center space-y-4">
-              <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg ring-8 ring-card", level.color)}>
+            <div
+              key={level.id}
+              className="relative z-10 flex flex-col items-center text-center space-y-4"
+            >
+              <div
+                className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg ring-8 ring-card",
+                  level.color,
+                )}
+              >
                 {level.id}
               </div>
               <div>
                 <h4 className="font-bold">{level.label}</h4>
-                <p className="text-[11px] text-muted-foreground leading-tight mt-1">{level.desc}</p>
+                <p className="text-[11px] text-muted-foreground leading-tight mt-1">
+                  {level.desc}
+                </p>
               </div>
             </div>
           ))}
@@ -93,7 +148,10 @@ export default function MobilityView({ type }: MobilityViewProps) {
         <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                size={16}
+              />
               <input
                 type="text"
                 placeholder="Référence ou Étudiant..."
@@ -143,44 +201,64 @@ export default function MobilityView({ type }: MobilityViewProps) {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center font-bold text-[10px] border border-border">
-                        {file.student.split(" ").map((n) => n[0]).join("")}
+                        {file.student
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </div>
                       <div>
                         <p className="text-xs font-bold">{file.student}</p>
-                        <p className="text-[10px] text-muted-foreground">MI-M2 SIC</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          MI-M2 SIC
+                        </p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                      <Building2 size={12} className="text-muted-foreground" /> {file.dest}
+                      <Building2 size={12} className="text-muted-foreground" />{" "}
+                      {file.dest}
                     </p>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "px-2 py-1 rounded-md text-[10px] font-black uppercase shadow-sm",
-                        file.status === "N1" ? "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20" :
-                        file.status === "N2" ? "bg-blue-500/10 text-blue-500 border border-blue-500/20" :
-                        "bg-green-500/10 text-green-500 border border-green-500/20",
-                      )}>
+                      <div
+                        className={cn(
+                          "px-2 py-1 rounded-md text-[10px] font-black uppercase shadow-sm",
+                          file.status === "N1"
+                            ? "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
+                            : file.status === "N2"
+                              ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
+                              : "bg-green-500/10 text-green-500 border border-green-500/20",
+                        )}
+                      >
                         Phase {file.status}
                       </div>
-                      <ChevronRight size={14} className="text-muted-foreground" />
+                      <ChevronRight
+                        size={14}
+                        className="text-muted-foreground"
+                      />
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
                       {file.tags.map((tag) => (
-                        <span key={tag} className={cn(
-                          "px-2 py-0.5 rounded text-[9px] font-bold flex items-center gap-1 border",
-                          tag.includes("Visa") ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
-                          tag.includes("Bourse") ? "bg-green-500/10 text-green-600 border-green-500/20" :
-                          "bg-accent text-muted-foreground border-border",
-                        )}>
+                        <span
+                          key={tag}
+                          className={cn(
+                            "px-2 py-0.5 rounded text-[9px] font-bold flex items-center gap-1 border",
+                            tag.includes("Visa")
+                              ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                              : tag.includes("Bourse")
+                                ? "bg-green-500/10 text-green-600 border-green-500/20"
+                                : "bg-accent text-muted-foreground border-border",
+                          )}
+                        >
                           {tag.includes("Visa") && <Plane size={10} />}
                           {tag.includes("Bourse") && <CreditCard size={10} />}
-                          {tag.includes("Partenariat") && <Handshake size={10} />}
+                          {tag.includes("Partenariat") && (
+                            <Handshake size={10} />
+                          )}
                           {tag}
                         </span>
                       ))}
@@ -207,8 +285,15 @@ export default function MobilityView({ type }: MobilityViewProps) {
             Affichage de {filteredFiles.length} dossiers • Mis à jour il y a 2m
           </p>
           <div className="flex gap-2">
-            <button className="p-2 bg-card border border-border rounded-lg text-muted-foreground disabled:opacity-30" disabled>1</button>
-            <button className="p-2 hover:bg-card hover:border-border rounded-lg text-muted-foreground font-bold transition-all text-xs">Page Suivante</button>
+            <button
+              className="p-2 bg-card border border-border rounded-lg text-muted-foreground disabled:opacity-30"
+              disabled
+            >
+              1
+            </button>
+            <button className="p-2 hover:bg-card hover:border-border rounded-lg text-muted-foreground font-bold transition-all text-xs">
+              Page Suivante
+            </button>
           </div>
         </div>
       </div>

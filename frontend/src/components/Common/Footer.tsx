@@ -1,5 +1,3 @@
-
-
 const socialLinks: { icon: any; href: string; label: string }[] = []
 
 export function Footer() {

@@ -1,6 +1,6 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router"
-import MobilityView from "@/components/Mobility/MobilityView"
 import { z } from "zod"
+import MobilityView from "@/components/Mobility/MobilityView"
 
 const mobiliteSearchSchema = z.object({
   type: z.enum(["nationale", "internationale"]).catch("nationale"),

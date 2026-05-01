@@ -2,10 +2,30 @@ import { Monitor, Moon, Sun } from "lucide-react"
 import { type Theme, useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
-const themes: { value: Theme; label: string; icon: React.ElementType; description: string }[] = [
-  { value: "light", label: "Light", icon: Sun, description: "A clean and bright experience" },
-  { value: "dark", label: "Dark", icon: Moon, description: "Easy on the eyes in low light" },
-  { value: "system", label: "System", icon: Monitor, description: "Follows your device settings" },
+const themes: {
+  value: Theme
+  label: string
+  icon: React.ElementType
+  description: string
+}[] = [
+  {
+    value: "light",
+    label: "Light",
+    icon: Sun,
+    description: "A clean and bright experience",
+  },
+  {
+    value: "dark",
+    label: "Dark",
+    icon: Moon,
+    description: "Easy on the eyes in low light",
+  },
+  {
+    value: "system",
+    label: "System",
+    icon: Monitor,
+    description: "Follows your device settings",
+  },
 ]
 
 const AppearanceSettings = () => {
@@ -32,18 +52,25 @@ const AppearanceSettings = () => {
                 "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md cursor-pointer",
                 isActive
                   ? "border-primary bg-primary/5 shadow-sm"
-                  : "border-border hover:border-muted-foreground/30"
+                  : "border-border hover:border-muted-foreground/30",
               )}
             >
               <div
                 className={cn(
                   "rounded-full p-3 transition-colors",
-                  isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground",
                 )}
               >
                 <Icon className="h-5 w-5" />
               </div>
-              <span className={cn("text-sm font-semibold", isActive && "text-primary")}>
+              <span
+                className={cn(
+                  "text-sm font-semibold",
+                  isActive && "text-primary",
+                )}
+              >
                 {t.label}
               </span>
               <span className="text-[11px] text-muted-foreground text-center leading-tight">

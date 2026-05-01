@@ -17,6 +17,11 @@ class InternshipOfferBase(SQLModel):
     target_audience: str | None = Field(default="both", max_length=50) # student, teacher, both
     mobility_type: str | None = Field(default="national", max_length=50) # national, international
     keywords: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    translated_description: str | None = Field(default=None)
+    specialty: str | None = Field(default=None, max_length=100)
+    required_level: str | None = Field(default=None, max_length=50)
+    required_language: str | None = Field(default=None, max_length=50)
+    gpa_requirement: float | None = Field(default=None)
 
 
 class InternshipOffer(InternshipOfferBase, table=True):
