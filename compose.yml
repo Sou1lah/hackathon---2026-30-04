@@ -2,7 +2,7 @@ services:
 
   db:
     image: postgres:18
-    restart: always
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -21,7 +21,7 @@ services:
 
   adminer:
     image: adminer
-    restart: always
+    restart: unless-stopped
     networks:
       - traefik-public
       - default
@@ -44,6 +44,7 @@ services:
 
   prestart:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    restart: on-failure
     build:
       context: .
       dockerfile: backend/Dockerfile
@@ -78,7 +79,7 @@ services:
 
   backend:
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
-    restart: always
+    restart: unless-stopped
     ports:
       - "8000:8000"
     networks:
@@ -128,7 +129,7 @@ services:
 
   frontend:
     image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
-    restart: always
+    restart: unless-stopped
     networks:
       - traefik-public
       - default
