@@ -21,16 +21,16 @@ import {
 import useAuth from "@/hooks/useAuth"
 
 const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   },
 }
 
 const stagger = {
-  visible: { transition: { staggerChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.05 } },
 }
 
 export default function StudentHome() {
@@ -53,49 +53,50 @@ export default function StudentHome() {
       initial="hidden"
       animate="visible"
       variants={stagger}
-      className="space-y-16 p-6 max-w-6xl mx-auto"
+      className="space-y-20 p-8 md:p-12 max-w-6xl mx-auto"
     >
-      {/* Hero Section */}
-      <motion.div variants={fadeInUp} className="flex flex-col gap-4">
-        <div className="flex items-center gap-3 mb-2">
-          <Badge variant="section" className="px-4 py-1.5 text-[10px]">
-            <span className="flex h-1.5 w-1.5 rounded-full bg-accent animate-pulse mr-2" />
+      {/* Claude-style Hero Section */}
+      <motion.div variants={fadeInUp} className="flex flex-col gap-6 border-b border-zinc-100 dark:border-zinc-900 pb-16">
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="px-4 py-1 text-[10px] font-medium tracking-widest uppercase border-zinc-200 dark:border-zinc-800">
             Student Portal
           </Badge>
         </div>
-        <h1 className="text-5xl md:text-6xl font-serif tracking-tight text-foreground leading-[1.1]">
-          Welcome, <span className="gradient-text">{getFirstName()}</span>
-        </h1>
-        <p className="text-muted-foreground text-xl max-w-2xl leading-relaxed">
-          Ready for your next academic step? Manage your internships and
-          mobilities with modern precision.
-        </p>
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-6xl font-serif tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
+            Welcome, <span className="italic text-zinc-400">{getFirstName()}</span>
+          </h1>
+          <p className="text-zinc-500 text-xl max-w-2xl font-light leading-relaxed">
+            Synthesize your academic journey. Manage internships and mobility opportunities with refined precision.
+          </p>
+        </div>
       </motion.div>
 
       {/* Main Actions Grid */}
       <motion.div
         variants={stagger}
-        className="grid grid-cols-1 md:grid-cols-12 gap-8"
+        className="grid grid-cols-1 md:grid-cols-12 gap-10"
       >
         {/* Stages Card */}
         <motion.div variants={fadeInUp} className="md:col-span-4">
           <Link to="/stages" className="group block h-full">
-            <Card className="h-full overflow-hidden border-border/50">
-              <CardHeader className="relative z-10">
-                <div className="bg-accent/10 w-fit p-3 rounded-2xl text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300">
+            <Card className="h-full border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-950 transition-all hover:shadow-md overflow-hidden">
+              <CardHeader className="p-8 space-y-6">
+                <div className="text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors">
                   <FileText size={24} />
                 </div>
-                <CardTitle className="text-2xl mt-6">
-                  Internships & PFE
-                </CardTitle>
-                <CardDescription className="text-base mt-2">
-                  Submit your requests, generate your conventions and track your
-                  validations in real-time.
-                </CardDescription>
+                <div className="space-y-2">
+                  <CardTitle className="text-2xl font-serif">
+                    Internships & PFE
+                  </CardTitle>
+                  <CardDescription className="text-sm font-light leading-relaxed">
+                    Initiate administrative workflows, generate conventions, and monitor validation progress.
+                  </CardDescription>
+                </div>
               </CardHeader>
-              <CardFooter className="mt-auto">
-                <div className="flex items-center text-accent font-medium gap-2 group-hover:translate-x-2 transition-transform duration-300">
-                  Explore offers <ArrowRight size={18} />
+              <CardFooter className="px-8 pb-8 mt-auto">
+                <div className="flex items-center text-xs font-bold uppercase tracking-widest text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-all gap-2">
+                  Explore offers <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </div>
               </CardFooter>
             </Card>
@@ -109,67 +110,59 @@ export default function StudentHome() {
             search={{ type: "nationale" }}
             className="group block h-full"
           >
-            <Card className="h-full overflow-hidden border-border/50">
-              <CardHeader className="relative z-10">
-                <div className="bg-accent/10 w-fit p-3 rounded-2xl text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300">
+            <Card className="h-full border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-950 transition-all hover:shadow-md overflow-hidden">
+              <CardHeader className="p-8 space-y-6">
+                <div className="text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors">
                   <Plane size={24} />
                 </div>
-                <CardTitle className="text-2xl mt-6">Mobility</CardTitle>
-                <CardDescription className="text-base mt-2">
-                  Explore national and international mobility opportunities to
-                  enrich your journey.
-                </CardDescription>
+                <div className="space-y-2">
+                  <CardTitle className="text-2xl font-serif">Mobility</CardTitle>
+                  <CardDescription className="text-sm font-light leading-relaxed">
+                    Identify national and international opportunities to expand your academic horizon.
+                  </CardDescription>
+                </div>
               </CardHeader>
-              <CardFooter className="mt-auto">
-                <div className="flex items-center text-accent font-medium gap-2 group-hover:translate-x-2 transition-transform duration-300">
-                  View destinations <ArrowRight size={18} />
+              <CardFooter className="px-8 pb-8 mt-auto">
+                <div className="flex items-center text-xs font-bold uppercase tracking-widest text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-all gap-2">
+                  View destinations <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </div>
               </CardFooter>
             </Card>
           </Link>
         </motion.div>
 
-        {/* Status Card (Inverted/Bold) */}
+        {/* Status Card */}
         <motion.div variants={fadeInUp} className="md:col-span-4">
-          <Card className="bg-foreground text-background border-none h-full relative overflow-hidden">
-            <div className="absolute inset-0 dot-pattern opacity-[0.03]" />
-            <CardHeader className="relative z-10">
+          <Card className="h-full border-none shadow-sm bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900 overflow-hidden relative">
+            <div className="absolute inset-0 dot-pattern opacity-10" />
+            <CardHeader className="p-8 space-y-6 relative z-10">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="text-accent-secondary" size={20} />
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Dossier Status
-                  </span>
-                </div>
-                <div className="size-2 rounded-full bg-accent-secondary animate-pulse" />
+                 <Badge variant="outline" className="rounded-full px-3 py-0.5 text-[9px] font-bold tracking-widest border-zinc-700 text-zinc-400">
+                   Active Status
+                 </Badge>
+                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               </div>
-              <CardTitle className="text-2xl text-white mt-4">
-                Current Tracking
-              </CardTitle>
+              <CardTitle className="text-2xl font-serif">Current Tracking</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 relative z-10">
+            <CardContent className="px-8 space-y-4 relative z-10">
               <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="text-emerald-400" size={18} />
-                  <span className="text-sm font-medium">Academic dossier</span>
+                  <CheckCircle className="text-emerald-400" size={14} />
+                  <span className="text-xs font-medium">Academic Dossier</span>
                 </div>
-                <Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 text-[9px] px-2 py-0">
-                  VALID
-                </Badge>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-400">Verified</span>
               </div>
               <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
                 <div className="flex items-center gap-3">
-                  <Clock className="text-amber-400" size={18} />
-                  <span className="text-sm font-medium">Convention</span>
+                  <Clock className="text-zinc-400" size={14} />
+                  <span className="text-xs font-medium">Convention</span>
                 </div>
-                <Badge className="bg-amber-400/10 text-amber-400 border-amber-400/20 text-[9px] px-2 py-0">
-                  IN PROGRESS
-                </Badge>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">In Progress</span>
               </div>
             </CardContent>
-            <CardFooter className="relative z-10">
-              <Button variant="default" size="lg" className="w-full">
-                View details
+            <CardFooter className="p-8 mt-auto relative z-10">
+              <Button variant="outline" className="w-full border-zinc-700 text-zinc-400 hover:bg-white hover:text-zinc-900 transition-all text-[10px] font-bold uppercase tracking-widest h-10">
+                View Full Tracking
               </Button>
             </CardFooter>
           </Card>
@@ -177,33 +170,25 @@ export default function StudentHome() {
       </motion.div>
 
       {/* News Feed */}
-      <motion.div variants={fadeInUp} className="space-y-6">
+      <motion.div variants={fadeInUp} className="space-y-10">
         <div className="flex items-center gap-4">
-          <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">
-            News & Reminders
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400">
+            Announcements
           </h3>
-          <div className="h-px flex-1 bg-border/50" />
+          <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-900" />
         </div>
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-6">
           {newsItems.map((news, i) => (
             <motion.div variants={fadeInUp} key={i}>
-              <Card className="hover:bg-white dark:hover:bg-card/80 transition-all border-border/40">
-                <CardContent className="py-5 flex items-center gap-6">
-                  <div className="bg-accent/10 p-2.5 rounded-xl text-accent">
-                    <Sparkles size={18} />
-                  </div>
-                  <p className="text-base text-foreground font-medium flex-1">
-                    {news}
-                  </p>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="rounded-full"
-                  >
-                    <ArrowRight size={16} />
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="flex items-center gap-8 p-6 group cursor-pointer hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 rounded-2xl transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-900">
+                <div className="bg-zinc-100 dark:bg-zinc-900 p-3 rounded-full text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors">
+                  <Sparkles size={16} />
+                </div>
+                <p className="text-base text-zinc-600 dark:text-zinc-400 font-light flex-1 leading-relaxed">
+                  {news}
+                </p>
+                <ArrowRight size={16} className="text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 group-hover:translate-x-1 transition-all" />
+              </div>
             </motion.div>
           ))}
         </div>

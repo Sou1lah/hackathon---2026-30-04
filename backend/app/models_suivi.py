@@ -17,11 +17,25 @@ class ActivityLogBase(SQLModel):
 class ActivityLogCreate(ActivityLogBase):
     internship_id: uuid.UUID
 
+class TutorFeedbackBase(SQLModel):
+    comment: str = Field(max_length=2000)
+    rating: Optional[int] = Field(default=None, ge=1, le=5)
+
+class TutorFeedbackCreate(TutorFeedbackBase):
+    log_id: uuid.UUID
+
+class TutorFeedbackPublic(TutorFeedbackBase):
+    id: uuid.UUID
+    log_id: uuid.UUID
+    owner_id: uuid.UUID
+    created_at: datetime.datetime
+
 class ActivityLogPublic(ActivityLogBase):
     id: uuid.UUID
     internship_id: uuid.UUID
     owner_id: uuid.UUID
     created_at: datetime.datetime
+    feedback: List[TutorFeedbackPublic] = []
 
 class ActivityLogsPublic(SQLModel):
     data: List[ActivityLogPublic]
@@ -44,19 +58,6 @@ class ActivityLog(ActivityLogBase, table=True):
     feedback: List["TutorFeedback"] = Relationship(back_populates="log", cascade_delete=True)
 
 # ---------- TutorFeedback ----------
-
-class TutorFeedbackBase(SQLModel):
-    comment: str = Field(max_length=2000)
-    rating: Optional[int] = Field(default=None, ge=1, le=5)
-
-class TutorFeedbackCreate(TutorFeedbackBase):
-    log_id: uuid.UUID
-
-class TutorFeedbackPublic(TutorFeedbackBase):
-    id: uuid.UUID
-    log_id: uuid.UUID
-    owner_id: uuid.UUID
-    created_at: datetime.datetime
 
 class TutorFeedback(TutorFeedbackBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)

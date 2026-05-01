@@ -28,14 +28,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -306,74 +298,22 @@ export function ConventionManagement() {
                           Details
                         </span>
                       </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 rounded-xl border border-border/20 group-hover:border-border/40"
-                          >
-                            <MoreHorizontal size={18} />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="w-56 p-2 rounded-xl shadow-2xl border-border/40"
-                        >
-                          <DropdownMenuLabel className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                            Actions Administrateur
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => approveMutation.mutate(conv.id)}
-                            className="rounded-lg px-3 py-2.5 focus:bg-emerald-50 dark:focus:bg-emerald-500/10 focus:text-emerald-600 dark:focus:text-emerald-400 cursor-pointer"
-                          >
-                            <CheckCircle2 className="mr-3 size-4" />
-                            <span className="font-bold text-xs uppercase tracking-widest">
-                              Approve
-                            </span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="rounded-lg px-3 py-2.5 focus:bg-zinc-100 dark:focus:bg-zinc-800 cursor-pointer">
-                            <Forward className="mr-3 size-4" />
-                            <span className="font-bold text-xs uppercase tracking-widest">
-                              Transfer
-                            </span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() =>
-                              rejectMutation.mutate({
-                                id: conv.id,
-                                reason: "Non conforme",
-                              })
-                            }
-                            className="rounded-lg px-3 py-2.5 focus:bg-destructive/10 focus:text-destructive cursor-pointer"
-                          >
-                            <XCircle className="mr-3 size-4" />
-                            <span className="font-bold text-xs uppercase tracking-widest">
-                              Reject
-                            </span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => {
-                              if (
-                                confirm(
-                                  "Are you sure you want to delete this application?",
-                                )
-                              ) {
-                                deleteMutation.mutate(conv.id)
-                              }
-                            }}
-                            className="rounded-lg px-3 py-2.5 focus:bg-destructive/10 focus:text-destructive cursor-pointer"
-                          >
-                            <Trash2 className="mr-3 size-4" />
-                            <span className="font-bold text-xs uppercase tracking-widest text-destructive">
-                              Delete
-                            </span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (
+                            confirm(
+                              "Are you sure you want to delete this application?",
+                            )
+                          ) {
+                            deleteMutation.mutate(conv.id)
+                          }
+                        }}
+                        className="h-9 w-9 rounded-xl border border-border/20 hover:bg-destructive/10 hover:border-destructive/30 hover:text-destructive group-hover:border-border/40 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>

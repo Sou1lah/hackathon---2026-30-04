@@ -1,6 +1,7 @@
 import uuid
 from typing import List, Tuple
 from sqlmodel import Session, select, func, col
+from sqlalchemy.orm import selectinload
 from app.models_suivi import (
     ActivityLog, 
     ActivityLogCreate, 
@@ -30,6 +31,7 @@ def get_activity_logs(
     count = session.exec(count_statement).one()
     statement = (
         select(ActivityLog)
+        .options(selectinload(ActivityLog.feedback))
         .where(ActivityLog.internship_id == internship_id)
         .order_by(col(ActivityLog.date).desc())
         .offset(skip)
@@ -45,6 +47,7 @@ def get_all_activity_logs(
     count = session.exec(count_statement).one()
     statement = (
         select(ActivityLog)
+        .options(selectinload(ActivityLog.feedback))
         .order_by(col(ActivityLog.created_at).desc())
         .offset(skip)
         .limit(limit)
@@ -63,6 +66,7 @@ def get_user_activity_logs(
     count = session.exec(count_statement).one()
     statement = (
         select(ActivityLog)
+        .options(selectinload(ActivityLog.feedback))
         .where(ActivityLog.owner_id == owner_id)
         .order_by(col(ActivityLog.date).desc())
         .offset(skip)

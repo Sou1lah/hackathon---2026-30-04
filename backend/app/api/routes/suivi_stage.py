@@ -18,7 +18,8 @@ from app.models_suivi import (
     TutorFeedbackPublic
 )
 from app.models_mobility import InternshipRequest
-from sqlmodel import select
+from sqlmodel import select, col
+from app.crud_mobility import get_internship_summary_data
 
 router = APIRouter(prefix="/suivi-stage", tags=["suivi-stage"])
 
@@ -119,6 +120,25 @@ def read_user_logs(
     return ActivityLogsPublic(
         data=[ActivityLogPublic.model_validate(i) for i in items], count=count
     )
+
+@router.get("/admin/users/{user_id}/internship-summary", response_model=dict[str, Any])
+def read_user_internship_summary(
+    user_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Retrieve internship summary data for a specific user (Admin only).
+    """
+    if not current_user.is_superuser and not current_user.can_review_applications:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    
+    statement = select(InternshipRequest).where(InternshipRequest.owner_id == user_id).order_by(col(InternshipRequest.created_at).desc()).limit(1)
+    internship = session.exec(statement).first()
+    if not internship:
+        raise HTTPException(status_code=404, detail="No active internship found for this user")
+        
+    return get_internship_summary_data(session=session, internship_request_id=internship.id)
 
 @router.post("/admin/feedback", response_model=TutorFeedbackPublic)
 def create_feedback(

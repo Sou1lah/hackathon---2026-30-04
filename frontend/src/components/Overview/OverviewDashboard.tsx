@@ -2,7 +2,6 @@ import {
   AlertTriangle,
   Archive,
   ArrowUpRight,
-  BarChart3,
   CheckSquare,
   Clock,
   CreditCard,
@@ -75,16 +74,16 @@ interface OverviewStats {
 }
 
 const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   },
 }
 
 const stagger = {
-  visible: { transition: { staggerChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.05 } },
 }
 
 export default function OverviewDashboard() {
@@ -124,7 +123,7 @@ export default function OverviewDashboard() {
   if (isLoading) {
     return (
       <div className="flex h-[500px] w-full items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-accent" />
+        <Loader2 className="h-10 w-10 animate-spin text-zinc-300" />
       </div>
     )
   }
@@ -132,21 +131,21 @@ export default function OverviewDashboard() {
   if (error || !data) {
     return (
       <div className="flex h-[500px] w-full flex-col items-center justify-center gap-6 p-8">
-        <div className="p-4 bg-destructive/10 rounded-full text-destructive">
-          <AlertTriangle className="h-12 w-12" />
+        <div className="p-4 bg-zinc-100 dark:bg-zinc-900 rounded-full text-zinc-400">
+          <AlertTriangle className="h-10 w-10" />
         </div>
-        <div className="text-center">
-          <h2 className="text-2xl font-serif text-foreground mb-2">
-            System Error
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+            System Unavailable
           </h2>
-          <p className="text-muted-foreground">{error || "Data unavailable"}</p>
+          <p className="text-zinc-500 max-w-xs mx-auto text-sm">{error || "The system is currently unable to retrieve analytics."}</p>
         </div>
         <Button
           onClick={() => window.location.reload()}
-          variant="destructive"
-          size="lg"
+          variant="outline"
+          className="rounded-full px-8"
         >
-          Retry
+          Retry Connection
         </Button>
       </div>
     )
@@ -156,133 +155,137 @@ export default function OverviewDashboard() {
     { name: "On Time", value: data.sla.on_time_count },
     { name: "Breached", value: data.sla.breached_count },
   ]
-  const COLORS = ["#0052FF", "#EF4444"]
+  const COLORS = ["#18181b", "#71717a"] // Zinc-900 and Zinc-500 for a clean Claude look
 
   return (
     <motion.div
       initial="hidden"
       animate="visible"
       variants={stagger}
-      className="space-y-12 p-6 max-w-7xl mx-auto"
+      className="space-y-16 p-8 md:p-12 max-w-7xl mx-auto"
     >
-      {/* Header */}
+      {/* Claude-style Header */}
       <motion.div
         variants={fadeInUp}
-        className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+        className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-100 dark:border-zinc-900 pb-12"
       >
-        <div className="space-y-4">
-          <Badge variant="section">Overview</Badge>
-          <h1 className="text-5xl md:text-6xl font-serif tracking-tight text-foreground">
-            Decision <span className="gradient-text">Engine</span>
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-xl">
-            Real-time system metrics and key performance indicators.
-          </p>
+        <div className="space-y-6">
+          <Badge variant="outline" className="rounded-full px-4 py-1 text-[10px] font-medium tracking-widest uppercase border-zinc-200 dark:border-zinc-800">
+            System Overview
+          </Badge>
+          <div className="space-y-2">
+            <h1 className="text-4xl md:text-5xl font-serif tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
+              Administrative <span className="italic text-zinc-400">Intelligence</span>
+            </h1>
+            <p className="text-zinc-500 text-lg max-w-2xl font-light leading-relaxed">
+              Synthesized insights into university internship workflows and system performance.
+            </p>
+          </div>
         </div>
-        <div className="text-left md:text-right">
-          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">
-            Last updated
+        <div className="flex flex-col items-start md:items-end gap-1">
+          <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">
+            Sync Status
           </p>
-          <p className="font-mono text-sm text-foreground">
-            {new Date(data.timestamp).toLocaleString()}
+          <p className="font-medium text-sm text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            {new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
       </motion.div>
 
-      {/* Primary Stats Grid */}
+      {/* Simplified High-Level Metrics */}
       <motion.div
         variants={stagger}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-3 gap-10"
       >
         <StatCard
-          icon={<FileText size={24} />}
-          label="Total Files"
+          icon={<FileText size={20} />}
+          label="Total Dossiers"
           value={data.dossiers.total_dossiers}
-          subtext={`${data.dossiers.active_dossiers} active`}
-          accent="blue"
+          subtext={`${data.dossiers.active_dossiers} currently active`}
         />
         <StatCard
-          icon={<ShieldAlert size={24} />}
-          label="Breach Rate"
-          value={`${data.sla.breach_rate}%`}
-          subtext={`${data.sla.breached_count} overdue`}
-          accent="red"
-          alert={data.sla.breach_rate > 10}
+          icon={<ShieldAlert size={20} />}
+          label="Compliance Rate"
+          value={`${100 - data.sla.breach_rate}%`}
+          subtext={`${data.sla.breached_count} files flagged`}
+          isWarning={data.sla.breach_rate > 10}
         />
         <StatCard
-          icon={<CheckSquare size={24} />}
-          label="Detected Internships"
+          icon={<CheckSquare size={20} />}
+          label="Internships"
           value={data.internships.total_internships}
-          subtext={`+${data.internships.new_items_7d} (7d)`}
-          accent="blue"
+          subtext={`${data.internships.new_items_7d} new this week`}
         />
       </motion.div>
 
-      {/* Student Tracking Section (Admin Only) */}
+      {/* Active Workflows (Claude-style cards) */}
       {(currentUser?.can_review_applications || currentUser?.is_superuser) && (
-        <motion.div variants={fadeInUp}>
+        <motion.div variants={fadeInUp} className="space-y-6">
+          <div className="flex items-center gap-4">
+             <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-400">Active Workflows</h2>
+             <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-900" />
+          </div>
           <AdminSuiviStage compact />
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column */}
-        <div className="lg:col-span-2 space-y-8">
-
-
-          {/* Critical Alerts */}
-          <motion.div variants={fadeInUp}>
-            <Card className="border-border/50 overflow-hidden">
-              <CardHeader className="p-6 border-b border-border/40 bg-destructive/[0.02] flex flex-row items-center justify-between">
-                <h3 className="font-serif text-2xl flex items-center gap-3">
-                  <AlertTriangle className="text-destructive" size={24} />
-                  Priority Alerts
-                </h3>
-                <Badge variant="destructive" className="font-mono px-3">
-                  {data.alerts.length} ALERTS
-                </Badge>
-              </CardHeader>
-              <div className="divide-y divide-border/40">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        {/* Main Feed */}
+        <div className="lg:col-span-8 space-y-12">
+          {/* Priority Alerts Feed */}
+          <motion.div variants={fadeInUp} className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-2xl text-zinc-900 dark:text-zinc-50">Priority Alerts</h3>
+              <span className="text-[10px] font-bold text-zinc-400 tracking-widest uppercase">
+                {data.alerts.length} Action Items
+              </span>
+            </div>
+            
+            <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden bg-white dark:bg-zinc-950">
+              <div className="divide-y divide-zinc-100 dark:divide-zinc-900">
                 {data.alerts.length === 0 ? (
-                  <div className="p-16 text-center text-muted-foreground font-medium">
-                    No critical alerts detected. System nominal.
+                  <div className="p-20 text-center space-y-4">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-300">
+                      <Archive size={20} />
+                    </div>
+                    <p className="text-zinc-400 font-light italic">No urgent notifications at this time.</p>
                   </div>
                 ) : (
                   data.alerts.map((alert) => (
                     <div
                       key={alert.id}
-                      className="p-6 flex items-start gap-5 hover:bg-muted/30 transition-all group"
+                      className="p-8 flex items-start gap-8 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-all group"
                     >
                       <div
                         className={cn(
-                          "p-3 rounded-2xl shrink-0 transition-transform group-hover:scale-110",
+                          "p-3 rounded-full shrink-0 transition-all",
                           alert.severity === "critical"
-                            ? "bg-destructive/10 text-destructive"
-                            : "bg-amber-500/10 text-amber-500",
+                            ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+                            : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800",
                         )}
                       >
-                        <ShieldAlert size={20} />
+                        <ShieldAlert size={16} />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-[10px] uppercase tracking-[0.2em] text-zinc-400">
                             {alert.type}
                           </span>
-                          <span className="text-[10px] font-mono text-muted-foreground">
-                            {new Date(alert.created_at).toLocaleString()}
+                          <span className="text-[10px] text-zinc-400 font-light">
+                            {new Date(alert.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="font-medium text-base text-foreground leading-relaxed">
+                        <p className="font-medium text-base text-zinc-900 dark:text-zinc-50 leading-relaxed max-w-lg">
                           {alert.message}
                         </p>
                         {alert.dossier_id && (
-                          <Button
-                            variant="link"
-                            className="px-0 h-auto mt-2 text-xs"
-                          >
-                            View file{" "}
-                            <ArrowUpRight size={14} className="ml-1" />
-                          </Button>
+                          <button className="flex items-center gap-1.5 text-xs font-semibold text-zinc-900 dark:text-zinc-50 hover:opacity-70 transition-opacity pt-2">
+                            Review dossier <ArrowUpRight size={14} />
+                          </button>
                         )}
                       </div>
                     </div>
@@ -292,31 +295,28 @@ export default function OverviewDashboard() {
             </Card>
           </motion.div>
 
-          {/* User Management Section */}
+          {/* User Directory Management */}
           <motion.div variants={fadeInUp}>
             <UserManagement />
           </motion.div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-8">
-          {/* SLA Stats */}
-          <motion.div variants={fadeInUp}>
-            <Card className="p-8 border-border/50">
-              <h3 className="font-serif text-xl mb-8 flex items-center gap-3">
-                <Clock className="text-accent" size={20} />
-                SLA Compliance
-              </h3>
-              <div className="h-56 w-full relative">
+        {/* Sidebar Analytics */}
+        <div className="lg:col-span-4 space-y-12">
+          {/* SLA Distribution */}
+          <motion.div variants={fadeInUp} className="space-y-6">
+            <h3 className="font-serif text-xl text-zinc-900 dark:text-zinc-50">SLA Distribution</h3>
+            <Card className="p-10 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
+              <div className="h-48 w-full relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={slaData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={65}
-                      outerRadius={85}
-                      paddingAngle={8}
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={4}
                       dataKey="value"
                       stroke="none"
                     >
@@ -331,117 +331,68 @@ export default function OverviewDashboard() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-3xl font-serif text-foreground">
-                    {data.sla.on_time_count + data.sla.breached_count}
+                  <span className="text-2xl font-serif text-zinc-900 dark:text-zinc-50">
+                    {Math.round((data.sla.on_time_count / (data.sla.on_time_count + data.sla.breached_count)) * 100)}%
                   </span>
-                  <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                    Total
+                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                    On Time
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 mt-8">
-                <div className="bg-muted/30 p-4 rounded-2xl text-center">
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">
-                    On Time
-                  </p>
-                  <p className="text-2xl font-serif text-accent">
-                    {data.sla.on_time_count}
-                  </p>
-                </div>
-                <div className="bg-muted/30 p-4 rounded-2xl text-center">
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">
-                    Breached
-                  </p>
-                  <p className="text-2xl font-serif text-destructive">
-                    {data.sla.breached_count}
-                  </p>
-                </div>
+              <div className="space-y-4 mt-8">
+                 <div className="flex items-center justify-between text-xs border-b border-zinc-50 dark:border-zinc-900 pb-3">
+                   <span className="text-zinc-500">Compliant Files</span>
+                   <span className="font-semibold text-zinc-900 dark:text-zinc-50">{data.sla.on_time_count}</span>
+                 </div>
+                 <div className="flex items-center justify-between text-xs">
+                   <span className="text-zinc-500">Breached SLA</span>
+                   <span className="font-semibold text-zinc-900 dark:text-zinc-50">{data.sla.breached_count}</span>
+                 </div>
               </div>
             </Card>
           </motion.div>
 
-          {/* Latest Internships */}
-          <motion.div variants={fadeInUp}>
-            <Card className="border-border/50 overflow-hidden">
-              <CardHeader className="p-6 border-b border-border/40 bg-muted/20">
-                <CardTitle className="text-lg font-serif">
-                  New Internships
-                </CardTitle>
-              </CardHeader>
-              <div className="p-4 space-y-2">
-                {data.internships.latest_internships.map((offer) => (
+          {/* New Registrations Feed */}
+          <motion.div variants={fadeInUp} className="space-y-6">
+            <h3 className="font-serif text-xl text-zinc-900 dark:text-zinc-50">Recent Offers</h3>
+            <Card className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10 shadow-none">
+              <div className="p-2 space-y-1">
+                {data.internships.latest_internships.slice(0, 4).map((offer) => (
                   <div
                     key={offer.id}
-                    className="p-4 hover:bg-muted/40 rounded-xl transition-all group flex items-start gap-4"
+                    className="p-4 hover:bg-white dark:hover:bg-zinc-900 rounded-xl transition-all group flex flex-col gap-1"
                   >
-                    <div className="bg-accent/10 p-2 rounded-lg text-accent mt-1 shrink-0">
-                      <Sparkles size={14} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-foreground group-hover:text-accent transition-colors line-clamp-1">
-                        {offer.title}
-                      </p>
-                      <p className="text-[10px] font-mono text-muted-foreground mt-1">
-                        {new Date(offer.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
+                    <p className="font-semibold text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-zinc-500 transition-colors line-clamp-1">
+                      {offer.title}
+                    </p>
+                    <p className="text-[10px] font-medium text-zinc-400">
+                      Detected {new Date(offer.created_at).toLocaleDateString()}
+                    </p>
                   </div>
                 ))}
               </div>
-              <CardFooter className="p-4 bg-muted/20 border-t border-border/40">
-                <Button variant="ghost" className="w-full text-xs font-mono">
-                  View all <ArrowUpRight size={14} className="ml-2" />
+              <CardFooter className="p-4 border-t border-zinc-100 dark:border-zinc-900">
+                <Button variant="ghost" className="w-full text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors">
+                  Full Registry
                 </Button>
               </CardFooter>
             </Card>
           </motion.div>
 
-          {/* System Health */}
-          <motion.div variants={fadeInUp}>
-            <Card className="p-8 border-border/50">
-              <h3 className="font-serif text-xl mb-8 flex items-center gap-3">
-                <Server className="text-accent" size={20} />
-                System Health
-              </h3>
-              <div className="space-y-6">
+          {/* System Integrity */}
+          <motion.div variants={fadeInUp} className="space-y-6">
+             <h3 className="font-serif text-xl text-zinc-900 dark:text-zinc-50">Integrity</h3>
+             <div className="space-y-4">
                 {data.system_health.map((sys) => (
-                  <div
-                    key={sys.name}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="bg-muted p-2 rounded-lg text-muted-foreground">
-                        {sys.name.includes("Payment") ? (
-                          <CreditCard size={16} />
-                        ) : sys.name.includes("Archive") ? (
-                          <Archive size={16} />
-                        ) : (
-                          <Server size={16} />
-                        )}
-                      </div>
-                      <span className="text-sm font-bold text-foreground">
-                        {sys.name}
-                      </span>
+                  <div key={sys.name} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-900 bg-white dark:bg-zinc-950">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" />
+                      <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-50">{sys.name}</span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-[10px] font-mono text-muted-foreground">
-                        {sys.latency}
-                      </span>
-                      <div
-                        className={cn(
-                          "size-2.5 rounded-full",
-                          sys.status === "ok"
-                            ? "bg-accent shadow-[0_0_8px_rgba(0,82,255,0.4)]"
-                            : sys.status === "degraded"
-                              ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
-                              : "bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.4)]",
-                        )}
-                      />
-                    </div>
+                    <span className="text-[10px] font-mono text-zinc-400">{sys.latency}</span>
                   </div>
                 ))}
-              </div>
-            </Card>
+             </div>
           </motion.div>
         </div>
       </div>
@@ -454,45 +405,35 @@ function StatCard({
   label,
   value,
   subtext,
-  accent,
-  alert = false,
+  isWarning = false,
 }: {
   icon: React.ReactNode
   label: string
   value: string | number
   subtext: string
-  accent: "blue" | "red"
-  alert?: boolean
+  isWarning?: boolean
 }) {
   return (
     <Card
       className={cn(
-        "p-6 relative overflow-hidden group border-border/50",
-        alert && "border-destructive/30 bg-destructive/[0.02]",
+        "p-8 relative overflow-hidden group border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-950 transition-all hover:shadow-md",
+        isWarning && "border-zinc-900/10 dark:border-zinc-50/10 bg-zinc-50/50 dark:bg-zinc-900/50",
       )}
     >
-      <div
-        className={cn(
-          "p-4 w-fit rounded-2xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
-          accent === "blue"
-            ? "bg-accent/10 text-accent"
-            : "bg-destructive/10 text-destructive",
-        )}
-      >
-        {icon}
+      <div className="space-y-6">
+        <div className="text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors">
+          {icon}
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+            {label}
+          </p>
+          <p className="text-4xl font-serif text-zinc-900 dark:text-zinc-50 tracking-tighter">{value}</p>
+          <p className="text-[11px] font-medium text-zinc-500 pt-2 border-t border-zinc-50 dark:border-zinc-900 inline-block">
+            {subtext}
+          </p>
+        </div>
       </div>
-      <div>
-        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1.5">
-          {label}
-        </p>
-        <p className="text-3xl font-serif text-foreground">{value}</p>
-        <p className="text-xs font-medium text-muted-foreground mt-2">
-          {subtext}
-        </p>
-      </div>
-      {alert && (
-        <div className="absolute top-4 right-4 size-2 rounded-full bg-destructive animate-ping" />
-      )}
     </Card>
   )
 }

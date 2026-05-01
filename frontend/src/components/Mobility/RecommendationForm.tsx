@@ -1,9 +1,23 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { ArrowRight, Globe, Lock, Mail, Sparkles, Tag } from "lucide-react"
+import {
+  ArrowRight,
+  BookOpen,
+  Check,
+  Clock,
+  FileText,
+  Globe,
+  Info,
+  Lock,
+  Mail,
+  Sparkles,
+  Tag,
+  Upload,
+  X,
+} from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import type React from "react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { OpenAPI } from "@/client/core/OpenAPI"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -16,12 +30,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import useAuth from "@/hooks/useAuth"
+import { useApplyInternship } from "@/hooks/useApplyInternship"
 import { cn } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
-interface InternshipOffer {
+const STORAGE_KEY = "rec_form_prefs"
+
+export interface InternshipOffer {
   id: string
   title: string
   description: string
@@ -31,14 +64,14 @@ interface InternshipOffer {
   keywords: string[]
 }
 
-interface RecommendationResult {
+export interface RecommendationResult {
   offer: InternshipOffer
   score: number
   breakdown?: Record<string, number>
   warnings?: string[]
 }
 
-interface RecommendationResponse {
+export interface RecommendationResponse {
   results: RecommendationResult[]
   is_fallback: boolean
   message: string | null
@@ -55,20 +88,122 @@ const INTEREST_OPTIONS = [
   "UI/UX",
 ]
 
-export default function RecommendationForm() {
+interface RecommendationFormProps {
+  onResults?: (data: RecommendationResponse) => void
+}
+
+export default function RecommendationForm({ onResults }: RecommendationFormProps = {}) {
   const { user } = useAuth()
-  const [mobility, setMobility] = useState<string>("both")
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([])
-  const [duration, setDuration] = useState<string>("")
-  const [specialty, setSpecialty] = useState<string>("")
-  const [level, setLevel] = useState<string>("")
-  const [language, setLanguage] = useState<string>("")
-  const [gpa, setGpa] = useState<string>("")
+
+  // ── Load saved preferences ──────────────────────────────────────────────
+  const saved = (() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") } catch { return null }
+  })()
+
+  const [mobility, setMobility] = useState<string>(saved?.mobility ?? user?.mobility_preference ?? "both")
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(() => {
+    if (saved?.selectedInterests) return saved.selectedInterests
+    if (user?.interest_tags) {
+      return user.interest_tags.filter(tag => INTEREST_OPTIONS.includes(tag))
+    }
+    return []
+  })
+  const [duration, setDuration] = useState<string>(saved?.duration ?? "")
+  const [specialty, setSpecialty] = useState<string>(saved?.specialty ?? user?.specialty ?? "")
+  const [level, setLevel] = useState<string>(saved?.level ?? user?.level ?? "")
+  const [language, setLanguage] = useState<string>(saved?.language ?? user?.language ?? "")
+  const [gpa, setGpa] = useState<string>(saved?.gpa ?? (user?.gpa ? String(user.gpa) : ""))
+  const [rememberMe, setRememberMe] = useState<boolean>(!!saved)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [isDragging, setIsDragging] = useState(false)
+  const [isExtracting, setIsExtracting] = useState(false)
+  const [autoFilled, setAutoFilled] = useState<string[]>([])
+  const [pendingExtraction, setPendingExtraction] = useState<Record<string, any> | null>(null)
+  const [showExtractionModal, setShowExtractionModal] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [recommendations, setRecommendations] =
     useState<RecommendationResponse | null>(null)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [debugMode, setDebugMode] = useState(false)
   const [isFakingLoading, setIsFakingLoading] = useState(false)
+
+  // ── File helpers ────────────────────────────────────────────────────────
+  const addFiles = async (files: FileList | null) => {
+    if (!files) return
+    const pdfs = Array.from(files).filter(f => f.type === "application/pdf")
+    if (!pdfs.length) return
+
+    setUploadedFiles(prev => {
+      const existing = new Set(prev.map(f => f.name))
+      return [...prev, ...pdfs.filter(f => !existing.has(f.name))]
+    })
+
+    // ── Auto-extract from PDFs ──────────────────────────────────────────
+    setIsExtracting(true)
+    try {
+      const form = new FormData()
+      pdfs.forEach(f => form.append("files", f))
+      const resp = await fetch(
+        `${OpenAPI.BASE}/api/v1/pdf/extract`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+          body: form,
+        },
+      )
+      if (resp.ok) {
+        const { extracted } = await resp.json() as { extracted: Record<string, any> }
+        if (Object.keys(extracted).length > 0) {
+          setPendingExtraction(extracted)
+          setShowExtractionModal(true)
+        }
+      }
+    } catch (e) {
+      // silent — extraction is best-effort
+    } finally {
+      setIsExtracting(false)
+    }
+  }
+
+  const confirmExtraction = () => {
+    if (!pendingExtraction) return
+    const filled: string[] = []
+
+    if (pendingExtraction.specialty) {
+      setSpecialty(pendingExtraction.specialty); filled.push("Specialty")
+    }
+    if (pendingExtraction.level) {
+      setLevel(pendingExtraction.level); filled.push("Level")
+    }
+    if (pendingExtraction.language) {
+      setLanguage(pendingExtraction.language); filled.push("Language")
+    }
+    if (pendingExtraction.gpa) {
+      setGpa(String(pendingExtraction.gpa)); filled.push("GPA")
+    }
+    if (pendingExtraction.mobility_preference) {
+      setMobility(pendingExtraction.mobility_preference); filled.push("Mobility")
+    }
+    if (pendingExtraction.selected_interests?.length) {
+      setSelectedInterests(prev => {
+        const merged = new Set([...prev, ...pendingExtraction.selected_interests])
+        return [...merged]
+      })
+      filled.push("Interests")
+    }
+    setAutoFilled(filled)
+    setShowExtractionModal(false)
+    setPendingExtraction(null)
+  }
+  const removeFile = (name: string) =>
+    setUploadedFiles(prev => prev.filter(f => f.name !== name))
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    addFiles(e.dataTransfer.files)
+  }
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -93,68 +228,24 @@ export default function RecommendationForm() {
     },
   })
 
-  const applyMutation = useMutation({
-    mutationFn: async (offer: InternshipOffer) => {
-      const token = localStorage.getItem("access_token")
-
-      // 1. Create Internship Request
-      const irResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/internship-requests/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            student_name: user?.full_name || "Etudiant",
-            registration_number: "AUTO-GEN",
-            mission_title: offer.title,
-            mission_description: offer.description,
-            status: "pending_signature",
-            verification_status: "verified",
-            progress: 25,
-            current_step: 1,
-          }),
-        },
-      )
-      if (!irResponse.ok) throw new Error("Failed to create internship request")
-      const ir = await irResponse.json()
-
-      // 2. Create Convention
-      const convResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/conventions/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            document_name: `Convention_${offer.title.replace(/\s+/g, "_")}.pdf`,
-            internship_request_id: ir.id,
-            status: "pending",
-          }),
-        },
-      )
-      if (!convResponse.ok) throw new Error("Failed to create convention")
-      return await convResponse.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-conventions"] })
-      navigate({ to: "/convention" })
-    },
-  })
+  const applyMutation = useApplyInternship()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Hide old results immediately
+    // Persist preferences if "Remember Me" is checked
+    if (rememberMe) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        mobility, selectedInterests, duration, specialty, level, language, gpa
+      }))
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+
     setRecommendations(null)
     setIsSubmitted(false)
     setIsFakingLoading(true)
 
-    // Simulate minimum 2 seconds loading
     const startTime = Date.now()
 
     submitMutation.mutate(
@@ -168,18 +259,19 @@ export default function RecommendationForm() {
         gpa: gpa ? parseFloat(gpa) : undefined,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           const elapsedTime = Date.now() - startTime
           const remainingTime = Math.max(0, 2000 - elapsedTime)
-
           setTimeout(() => {
             setIsFakingLoading(false)
-            setIsSubmitted(true)
+            if (onResults) {
+              onResults(data)
+            } else {
+              setIsSubmitted(true)
+            }
           }, remainingTime)
         },
-        onError: () => {
-          setIsFakingLoading(false)
-        },
+        onError: () => { setIsFakingLoading(false) },
       },
     )
   }
@@ -265,93 +357,14 @@ export default function RecommendationForm() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Step 1: Read-Only Profile */}
-        <div className="lg:col-span-4">
-          <Card className="border-zinc-200 dark:border-zinc-800 shadow-none sticky top-8">
-            <CardHeader className="relative">
-              <div className="absolute top-4 right-4">
-                <Lock className="text-zinc-300 dark:text-zinc-700" size={16} />
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                  <AvatarFallback className="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 font-bold text-xl">
-                    {user.full_name
-                      ?.split(" ")
-                      .map((n) => n[0])
-                      .join("") || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-xl">{user.full_name}</CardTitle>
-                  <CardDescription className="font-mono text-[10px] uppercase tracking-widest mt-1">
-                    {user.role?.replace("_", " ")}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-900">
-                <div className="space-y-1">
-                  <Label className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest">
-                    Academic Email
-                  </Label>
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-                    <Mail size={14} className="text-zinc-400" /> {user.email}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest">
-                    System Preference
-                  </Label>
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50 flex items-center gap-2 uppercase">
-                    <Globe size={14} className="text-zinc-400" />{" "}
-                    {user.mobility_preference || "National"}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase text-zinc-400 tracking-widest">
-                    Inferred Interests
-                  </Label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {user.interest_tags?.length ? (
-                      user.interest_tags.map((tag: string) => (
-                        <Badge
-                          key={tag}
-                          variant="secondary"
-                          className="bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-none text-[9px] font-bold"
-                        >
-                          {tag}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="text-xs italic text-zinc-400">
-                        No tags detected
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-lg">
-                <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">
-                  Note: The data above is extracted from your authentication
-                  session and cannot be changed manually.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
+      <div className="max-w-4xl mx-auto">
         {/* Step 2: Request Form */}
-        <div className="lg:col-span-8">
+        <div className="w-full">
           <form onSubmit={handleSubmit} className="space-y-8">
             <Card className="border-zinc-200 dark:border-zinc-800 shadow-none">
               <CardHeader>
-                <CardTitle className="text-2xl flex items-center gap-3">
-                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-sm font-mono font-bold">
-                    01
-                  </span>
-                  Customize my search
+                <CardTitle className="text-2xl">
+                  Tailor my results
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-8">
@@ -360,6 +373,7 @@ export default function RecommendationForm() {
                     <Label className="text-sm font-bold flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
                       <Globe size={16} className="text-zinc-400" /> Desired
                       Mobility Type
+                      <Info size={12} className="text-zinc-300 dark:text-zinc-700 cursor-help" />
                     </Label>
                     <div className="flex flex-col gap-2">
                       {["national", "international", "both"].map((m) => (
@@ -384,6 +398,7 @@ export default function RecommendationForm() {
                     <Label className="text-sm font-bold flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
                       <Tag size={16} className="text-zinc-400" /> Areas of
                       Interest
+                      <Info size={12} className="text-zinc-300 dark:text-zinc-700 cursor-help" />
                     </Label>
                     <div className="flex flex-wrap gap-2">
                       {INTEREST_OPTIONS.map((interest) => (
@@ -404,6 +419,7 @@ export default function RecommendationForm() {
                     </div>
                   </div>
                 </div>
+
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-zinc-100 dark:border-zinc-900">
                   <div className="space-y-2">
@@ -518,26 +534,156 @@ export default function RecommendationForm() {
                   </select>
                 </div>
               </CardContent>
-              <CardFooter className="pt-6">
-                <Button
-                  type="submit"
-                  disabled={isFakingLoading}
-                  className="w-full bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:opacity-90 py-6 rounded-xl text-md font-bold transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
-                >
-                  {isFakingLoading
-                    ? "Calculating scores..."
-                    : "Generate my Recommendations"}
-                  {!isFakingLoading && (
-                    <ArrowRight size={18} className="ml-2" />
-                  )}
-                </Button>
-              </CardFooter>
             </Card>
+
+            {/* ── PDF Upload Card ───────────────────────────────────────── */}
+            <Card className="border-zinc-200 dark:border-zinc-800 shadow-none">
+              <CardHeader>
+                <CardTitle className="text-2xl">
+                  Supporting Documents
+                </CardTitle>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Attach your CV and certificates (PDF only) to improve match accuracy.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Drop zone */}
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "relative flex flex-col items-center justify-center gap-3 p-8 rounded-xl border-2 border-dashed cursor-pointer transition-all select-none",
+                    isDragging
+                      ? "border-zinc-900 dark:border-zinc-50 bg-zinc-50 dark:bg-zinc-900"
+                      : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600",
+                    isExtracting && "opacity-60 cursor-wait pointer-events-none"
+                  )}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => addFiles(e.target.files)}
+                  />
+                  <div className="size-12 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+                    {isExtracting ? (
+                      <Clock className="h-5 w-5 text-zinc-400 animate-spin" />
+                    ) : (
+                      <Upload className="h-5 w-5 text-zinc-400" />
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                      {isExtracting ? "Analyzing documents..." : isDragging ? "Drop files here" : "Click or drag & drop"}
+                    </p>
+                    <p className="text-[10px] font-mono text-zinc-400 mt-0.5 uppercase tracking-wider">
+                      {isExtracting ? "Extracting profile data..." : "PDF files only · CV, Certificates, Transcripts"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Auto-filled status badge */}
+                <AnimatePresence>
+                  {autoFilled.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 rounded-xl flex items-center gap-3"
+                    >
+                      <div className="size-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                        <Sparkles size={12} className="text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">
+                          AI Auto-fill Active
+                        </p>
+                        <p className="text-xs text-emerald-600/80 dark:text-emerald-500/80">
+                          Detected: {autoFilled.join(", ")}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* File list */}
+                {uploadedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    {uploadedFiles.map((file) => {
+                      const isCV = file.name.toLowerCase().includes("cv")
+                      return (
+                        <div
+                          key={file.name}
+                          className="flex items-center gap-3 p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl"
+                        >
+                          <div className="size-8 rounded-lg bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                            {isCV ? <BookOpen size={14} className="text-zinc-500" /> : <FileText size={14} className="text-zinc-500" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-zinc-900 dark:text-zinc-50 truncate">{file.name}</p>
+                            <p className="text-[9px] font-mono text-zinc-400">
+                              {(file.size / 1024).toFixed(1)} KB · {isCV ? "CV" : "Certificate"}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeFile(file.name)}
+                            className="size-6 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-all"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* ── Footer: Remember Me + Submit ─────────────────────────── */}
+            <div className="space-y-4">
+              {/* Remember Me toggle */}
+              <label className="flex items-center gap-3 cursor-pointer group select-none">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={rememberMe}
+                    onChange={() => {
+                      if (rememberMe) localStorage.removeItem(STORAGE_KEY)
+                      setRememberMe(!rememberMe)
+                    }}
+                  />
+                  <div className="w-10 h-6 bg-zinc-200 dark:bg-zinc-800 rounded-full peer peer-checked:bg-zinc-900 dark:peer-checked:bg-zinc-50 transition-colors" />
+                  <div className="absolute top-1 left-1 w-4 h-4 bg-white dark:bg-zinc-900 rounded-full shadow peer-checked:translate-x-4 transition-transform" />
+                </div>
+                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">
+                  Remember my preferences
+                </span>
+                {saved && (
+                  <span className="text-[9px] font-mono text-emerald-500 uppercase tracking-wider">● Saved</span>
+                )}
+              </label>
+
+              <Button
+                type="submit"
+                disabled={isFakingLoading}
+                className="w-full bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:opacity-90 py-6 rounded-xl text-md font-bold transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
+              >
+                {isFakingLoading ? "Calculating scores..." : "Generate my Recommendations"}
+                {!isFakingLoading && <ArrowRight size={18} className="ml-2" />}
+              </Button>
+            </div>
           </form>
         </div>
       </div>
 
-      {/* Dedicated Results Area - Full Width */}
+      {/* Dedicated Results Area - only shown when no onResults callback (standalone mode) */}
+      {!onResults && (
       <AnimatePresence mode="wait">
         {isFakingLoading ? (
           <motion.div
@@ -737,6 +883,117 @@ export default function RecommendationForm() {
           </motion.div>
         ) : null}
       </AnimatePresence>
+      )}
+
+      <Dialog open={showExtractionModal} onOpenChange={setShowExtractionModal}>
+        <DialogContent className="max-w-2xl bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+              <Sparkles className="text-emerald-500" />
+              AI Data Extraction
+            </DialogTitle>
+            <DialogDescription className="text-zinc-500 dark:text-zinc-400">
+              We've analyzed your documents. Please review the extracted information before applying it to the form.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="rounded-xl border border-zinc-100 dark:border-zinc-900 overflow-hidden">
+              <Table>
+                <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50">
+                  <TableRow>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-widest">Field</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-widest">Extracted Value</TableHead>
+                    <TableHead className="w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingExtraction && (
+                    <>
+                      {pendingExtraction.full_name && (
+                        <TableRow>
+                          <TableCell className="text-xs font-medium text-zinc-500">Full Name</TableCell>
+                          <TableCell className="text-sm font-bold">{pendingExtraction.full_name}</TableCell>
+                          <TableCell><Check size={14} className="text-emerald-500" /></TableCell>
+                        </TableRow>
+                      )}
+                      {pendingExtraction.specialty && (
+                        <TableRow>
+                          <TableCell className="text-xs font-medium text-zinc-500">Specialty</TableCell>
+                          <TableCell className="text-sm font-bold">{pendingExtraction.specialty}</TableCell>
+                          <TableCell><Check size={14} className="text-emerald-500" /></TableCell>
+                        </TableRow>
+                      )}
+                      {pendingExtraction.level && (
+                        <TableRow>
+                          <TableCell className="text-xs font-medium text-zinc-500">Level</TableCell>
+                          <TableCell className="text-sm font-bold">{pendingExtraction.level}</TableCell>
+                          <TableCell><Check size={14} className="text-emerald-500" /></TableCell>
+                        </TableRow>
+                      )}
+                      {pendingExtraction.language && (
+                        <TableRow>
+                          <TableCell className="text-xs font-medium text-zinc-500">Language</TableCell>
+                          <TableCell className="text-sm font-bold">{pendingExtraction.language}</TableCell>
+                          <TableCell><Check size={14} className="text-emerald-500" /></TableCell>
+                        </TableRow>
+                      )}
+                      {pendingExtraction.gpa && (
+                        <TableRow>
+                          <TableCell className="text-xs font-medium text-zinc-500">GPA / Average</TableCell>
+                          <TableCell className="text-sm font-bold">{pendingExtraction.gpa}</TableCell>
+                          <TableCell><Check size={14} className="text-emerald-500" /></TableCell>
+                        </TableRow>
+                      )}
+                      {pendingExtraction.mobility_preference && (
+                        <TableRow>
+                          <TableCell className="text-xs font-medium text-zinc-500">Mobility</TableCell>
+                          <TableCell className="text-sm font-bold capitalize">{pendingExtraction.mobility_preference}</TableCell>
+                          <TableCell><Check size={14} className="text-emerald-500" /></TableCell>
+                        </TableRow>
+                      )}
+                      {pendingExtraction.selected_interests?.length > 0 && (
+                        <TableRow>
+                          <TableCell className="text-xs font-medium text-zinc-500">Interests</TableCell>
+                          <TableCell className="text-sm font-bold">
+                            <div className="flex flex-wrap gap-1">
+                              {pendingExtraction.selected_interests.map((it: string) => (
+                                <Badge key={it} variant="outline" className="text-[9px] border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400">
+                                  {it}
+                                </Badge>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell><Check size={14} className="text-emerald-500" /></TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowExtractionModal(false)
+                setPendingExtraction(null)
+              }}
+              className="rounded-xl border-zinc-200 dark:border-zinc-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmExtraction}
+              className="rounded-xl bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:opacity-90"
+            >
+              Apply to Form
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

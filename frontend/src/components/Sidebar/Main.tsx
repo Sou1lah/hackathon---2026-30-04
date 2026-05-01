@@ -61,8 +61,8 @@ function CollapsibleSidebarItem({
             isActive={isActive}
             className="transition-all duration-200 hover:pl-3 data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
           >
-            <item.icon className="size-[18px] transition-colors group-hover/menu-item:text-primary" />
-            <span className="font-medium">{item.title}</span>
+            <item.icon className="size-5 transition-colors group-hover/menu-item:text-primary" />
+            <span className="font-semibold text-base">{item.title}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -160,8 +160,8 @@ export function Main({ items }: MainProps) {
                     search={item.search as any}
                     onClick={handleMenuClick}
                   >
-                    <item.icon className="size-[18px] transition-colors group-hover/menu-item:text-primary" />
-                    <span className="font-medium">{item.title}</span>
+                    <item.icon className="size-5 transition-colors group-hover/menu-item:text-primary" />
+                    <span className="font-semibold text-base">{item.title}</span>
                   </RouterLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>

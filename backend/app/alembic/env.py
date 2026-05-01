@@ -23,6 +23,7 @@ from app.models import SQLModel  # noqa
 from app.models_mobility import InternshipRequest, Convention, MobilityFile, ActivityLogEntry, InternshipReport, TutorEvaluation  # noqa
 from app.models_suivi import ActivityLog, TutorFeedback  # noqa
 from app.models_recommendation import UserInteraction  # noqa
+from app.models_partnership import Partnership  # noqa
 from app.models_scraper import InternshipOffer  # noqa
 from app.core.config import settings # noqa
 

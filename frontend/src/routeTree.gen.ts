@@ -19,6 +19,7 @@ import { Route as LayoutSuiviStageRouteImport } from './routes/_layout/suivi-sta
 import { Route as LayoutSuiviRouteImport } from './routes/_layout/suivi'
 import { Route as LayoutStagesRouteImport } from './routes/_layout/stages'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutPartnershipsRouteImport } from './routes/_layout/partnerships'
 import { Route as LayoutMobiliteRouteImport } from './routes/_layout/mobilite'
 import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 import { Route as LayoutConventionRouteImport } from './routes/_layout/convention'
@@ -75,6 +76,11 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutPartnershipsRoute = LayoutPartnershipsRouteImport.update({
+  id: '/partnerships',
+  path: '/partnerships',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutMobiliteRoute = LayoutMobiliteRouteImport.update({
   id: '/mobilite',
   path: '/mobilite',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/convention': typeof LayoutConventionRoute
   '/dashboard': typeof LayoutDashboardRoute
   '/mobilite': typeof LayoutMobiliteRoute
+  '/partnerships': typeof LayoutPartnershipsRoute
   '/settings': typeof LayoutSettingsRoute
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/convention': typeof LayoutConventionRoute
   '/dashboard': typeof LayoutDashboardRoute
   '/mobilite': typeof LayoutMobiliteRoute
+  '/partnerships': typeof LayoutPartnershipsRoute
   '/settings': typeof LayoutSettingsRoute
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/_layout/convention': typeof LayoutConventionRoute
   '/_layout/dashboard': typeof LayoutDashboardRoute
   '/_layout/mobilite': typeof LayoutMobiliteRoute
+  '/_layout/partnerships': typeof LayoutPartnershipsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/stages': typeof LayoutStagesRoute
   '/_layout/suivi': typeof LayoutSuiviRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/convention'
     | '/dashboard'
     | '/mobilite'
+    | '/partnerships'
     | '/settings'
     | '/stages'
     | '/suivi'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/convention'
     | '/dashboard'
     | '/mobilite'
+    | '/partnerships'
     | '/settings'
     | '/stages'
     | '/suivi'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/_layout/convention'
     | '/_layout/dashboard'
     | '/_layout/mobilite'
+    | '/_layout/partnerships'
     | '/_layout/settings'
     | '/_layout/stages'
     | '/_layout/suivi'
@@ -294,6 +306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/partnerships': {
+      id: '/_layout/partnerships'
+      path: '/partnerships'
+      fullPath: '/partnerships'
+      preLoaderRoute: typeof LayoutPartnershipsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/mobilite': {
       id: '/_layout/mobilite'
       path: '/mobilite'
@@ -358,6 +377,7 @@ interface LayoutRouteChildren {
   LayoutConventionRoute: typeof LayoutConventionRoute
   LayoutDashboardRoute: typeof LayoutDashboardRoute
   LayoutMobiliteRoute: typeof LayoutMobiliteRoute
+  LayoutPartnershipsRoute: typeof LayoutPartnershipsRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutStagesRoute: typeof LayoutStagesRoute
   LayoutSuiviRoute: typeof LayoutSuiviRoute
@@ -370,6 +390,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutConventionRoute: LayoutConventionRoute,
   LayoutDashboardRoute: LayoutDashboardRoute,
   LayoutMobiliteRoute: LayoutMobiliteRoute,
+  LayoutPartnershipsRoute: LayoutPartnershipsRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutStagesRoute: LayoutStagesRoute,
   LayoutSuiviRoute: LayoutSuiviRoute,

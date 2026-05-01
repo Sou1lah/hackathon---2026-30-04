@@ -1,3 +1,5 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 import {
   AlertCircle,
   Building2,
@@ -6,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  Loader2,
   ShieldCheck,
   Upload,
   User,
@@ -17,6 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import useAuth from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
 
 const STEPS = [
@@ -27,19 +31,97 @@ const STEPS = [
 ]
 
 export default function DemandeStage() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [currentStep, setCurrentStep] = useState(0)
   const [verificationStatus, setVerificationStatus] = useState<
     "idle" | "checking" | "verified" | "failed"
   >("idle")
 
-  const handleVerify = () => {
-    setVerificationStatus("checking")
-    setTimeout(() => setVerificationStatus("verified"), 2000)
+  const [formData, setFormData] = useState({
+    student_name: user?.full_name || "",
+    registration_number: "",
+    host_organization: "",
+    organization_address: "",
+    mission_title: "",
+    mission_description: "",
+    start_date: "",
+    end_date: "",
+  })
+
+  const updateForm = (key: keyof typeof formData, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }))
   }
 
-  const nextStep = () =>
-    setCurrentStep((p) => Math.min(p + 1, STEPS.length - 1))
+  const handleVerify = () => {
+    setVerificationStatus("checking")
+    setTimeout(() => {
+      setVerificationStatus("verified")
+      updateForm("registration_number", "21/340051") // Mock auto-fill
+    }, 1500)
+  }
+
+  const nextStep = () => {
+    if (currentStep === STEPS.length - 1) {
+      handleSubmit()
+    } else {
+      setCurrentStep((p) => Math.min(p + 1, STEPS.length - 1))
+    }
+  }
   const prevStep = () => setCurrentStep((p) => Math.max(p - 1, 0))
+
+  const mutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const token = localStorage.getItem("access_token")
+      const apiUrl = import.meta.env.VITE_API_URL || ""
+      
+      // 1. Create Internship Request
+      const irRes = await fetch(`${apiUrl}/api/v1/internship-requests/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          student_name: data.student_name,
+          registration_number: data.registration_number,
+          mission_title: data.mission_title,
+          mission_description: data.mission_description,
+          status: "pending_verification",
+          progress: 10,
+          current_step: 1,
+        }),
+      })
+      if (!irRes.ok) throw new Error("Failed to create request")
+      const ir = await irRes.json()
+
+      // 2. Create Convention (Initial)
+      const convRes = await fetch(`${apiUrl}/api/v1/conventions/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          document_name: `Convention_${data.mission_title.replace(/\s+/g, "_")}.pdf`,
+          internship_request_id: ir.id,
+          status: "pending",
+        }),
+      })
+      if (!convRes.ok) throw new Error("Failed to create convention")
+      
+      return ir
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["internship-requests"] })
+      navigate({ to: "/convention" })
+    },
+  })
+
+  const handleSubmit = () => {
+    mutation.mutate(formData)
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-20 p-2">
@@ -49,7 +131,7 @@ export default function DemandeStage() {
             New Internship Request
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-1">
-            Multi-sector internship submission form.
+            Fill out the form below to initiate your internship administrative workflow.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -87,19 +169,19 @@ export default function DemandeStage() {
               onClick={handleVerify}
               className="h-8 rounded-full font-bold text-[10px] tracking-wider uppercase bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900"
             >
-              Start
+              Verify Identity
             </Button>
           )}
         </div>
       </div>
 
-      {/* Stepper - Geist Aesthetic */}
+      {/* Stepper */}
       <div className="grid grid-cols-4 gap-4">
         {STEPS.map((step, i) => (
           <div key={step.id} className="relative">
             <div
               className={cn(
-                "flex flex-col gap-2 p-4 rounded-xl border transition-all",
+                "flex flex-col gap-2 p-4 rounded-xl border transition-all cursor-default",
                 currentStep === i
                   ? "bg-zinc-50 dark:bg-zinc-900 border-zinc-900 dark:border-zinc-50 shadow-sm"
                   : currentStep > i
@@ -146,7 +228,7 @@ export default function DemandeStage() {
       </div>
 
       {/* Form Content */}
-      <Card className="border-zinc-200 dark:border-zinc-800 shadow-none min-h-[500px] flex flex-col">
+      <Card className="border-zinc-200 dark:border-zinc-800 shadow-none min-h-[500px] flex flex-col overflow-hidden bg-white dark:bg-zinc-950">
         <CardContent className="p-10 flex-1">
           <AnimatePresence mode="wait">
             {currentStep === 0 && (
@@ -165,8 +247,9 @@ export default function DemandeStage() {
                     <Input
                       type="text"
                       placeholder="Ex: John Doe"
+                      value={formData.student_name}
+                      onChange={(e) => updateForm("student_name", e.target.value)}
                       className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/30"
-                      defaultValue="John Doe"
                     />
                   </div>
                   <div className="space-y-2">
@@ -175,36 +258,113 @@ export default function DemandeStage() {
                     </Label>
                     <Input
                       type="text"
-                      placeholder="Ex: 20/00123"
-                      className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 font-mono"
-                      defaultValue="21/340051"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-                      Date of Birth
-                    </Label>
-                    <Input
-                      type="date"
-                      className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/30"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-                      Academic Email
-                    </Label>
-                    <Input
-                      type="email"
-                      placeholder="k.elbouni@institution.dz"
-                      className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/30"
+                      placeholder="Verify to auto-fill"
+                      readOnly
+                      value={formData.registration_number}
+                      className="border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 font-mono"
                     />
                   </div>
                 </div>
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900 rounded-xl flex gap-3 text-zinc-500 text-sm">
-                  <AlertCircle size={18} className="shrink-0 text-zinc-400" />
-                  <p className="italic">
-                    Student information is synchronized with your PROGRES file.
+                <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl flex gap-3 text-emerald-700 dark:text-emerald-400 text-sm">
+                  <ShieldCheck size={18} className="shrink-0" />
+                  <p>
+                    Once verified, your academic record is securely linked to this request.
                   </p>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-8"
+              >
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                      Host Organization / Company Name
+                    </Label>
+                    <Input
+                      placeholder="Ex: Sonatrach, Ooredoo, etc."
+                      value={formData.host_organization}
+                      onChange={(e) => updateForm("host_organization", e.target.value)}
+                      className="border-zinc-200 dark:border-zinc-800"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                      Organization Address
+                    </Label>
+                    <Input
+                      placeholder="Full legal address of the host entity"
+                      value={formData.organization_address}
+                      onChange={(e) => updateForm("organization_address", e.target.value)}
+                      className="border-zinc-200 dark:border-zinc-800"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-8"
+              >
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                      Internship Title / Mission
+                    </Label>
+                    <Input
+                      placeholder="Ex: Web Application Development Internship"
+                      value={formData.mission_title}
+                      onChange={(e) => updateForm("mission_title", e.target.value)}
+                      className="border-zinc-200 dark:border-zinc-800"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                      Mission Description
+                    </Label>
+                    <textarea
+                      rows={4}
+                      placeholder="Briefly describe your main tasks and objectives…"
+                      value={formData.mission_description}
+                      onChange={(e) => updateForm("mission_description", e.target.value)}
+                      className="flex w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-zinc-900/20 dark:focus-visible:ring-zinc-50/20 resize-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                        Start Date
+                      </Label>
+                      <Input
+                        type="date"
+                        value={formData.start_date}
+                        onChange={(e) => updateForm("start_date", e.target.value)}
+                        className="border-zinc-200 dark:border-zinc-800"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                        End Date
+                      </Label>
+                      <Input
+                        type="date"
+                        value={formData.end_date}
+                        onChange={(e) => updateForm("end_date", e.target.value)}
+                        className="border-zinc-200 dark:border-zinc-800"
+                      />
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -237,7 +397,7 @@ export default function DemandeStage() {
                             {doc}
                           </p>
                           <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">
-                            PDF, JPG (Max 5MB)
+                            PDF (Max 5MB)
                           </p>
                         </div>
                       </div>
@@ -246,49 +406,17 @@ export default function DemandeStage() {
                         size="sm"
                         className="h-8 text-[10px] font-bold uppercase tracking-widest px-4 border-zinc-200 dark:border-zinc-800"
                       >
-                        Choose
+                        Upload
                       </Button>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-12 border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/30 rounded-2xl flex flex-col items-center text-center space-y-4">
-                  <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-900 text-zinc-400 rounded-full flex items-center justify-center">
-                    <Upload size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-zinc-900 dark:text-zinc-50">
-                      Global Drop Zone
-                    </h3>
-                    <p className="text-zinc-500 text-sm">
-                      Drag and drop your documents here.
-                    </p>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    className="rounded-full px-8 bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:opacity-90 transition-all"
-                  >
-                    Browse
-                  </Button>
+                <div className="p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 text-center">
+                  <p className="text-sm text-zinc-500">
+                    Submit your request to begin the validation workflow.
+                  </p>
                 </div>
-              </motion.div>
-            )}
-
-            {currentStep !== 0 && currentStep !== 3 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center h-full text-zinc-400"
-              >
-                <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-950 rounded-full border border-zinc-100 dark:border-zinc-900 flex items-center justify-center mb-4">
-                  {React.createElement(STEPS[currentStep].icon, {
-                    size: 32,
-                    className: "text-zinc-300",
-                  })}
-                </div>
-                <p className="font-mono text-xs uppercase tracking-widest italic">
-                  Configuring "{STEPS[currentStep].label}"...
-                </p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -308,14 +436,8 @@ export default function DemandeStage() {
 
           <div className="flex items-center gap-4">
             <Button
-              variant="link"
-              className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest hover:text-zinc-900 dark:hover:text-zinc-50"
-            >
-              Save draft
-            </Button>
-            <Button
               onClick={nextStep}
-              disabled={verificationStatus !== "verified"}
+              disabled={verificationStatus !== "verified" || mutation.isPending}
               className={cn(
                 "gap-2 px-8 font-bold text-xs uppercase tracking-widest transition-all",
                 verificationStatus === "verified"
@@ -323,12 +445,25 @@ export default function DemandeStage() {
                   : "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 cursor-not-allowed",
               )}
             >
-              {currentStep === STEPS.length - 1 ? "Submit" : "Continue"}
-              <ChevronRight size={16} />
+              {mutation.isPending ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : currentStep === STEPS.length - 1 ? (
+                "Submit Request"
+              ) : (
+                "Continue"
+              )}
+              {mutation.isPending ? null : <ChevronRight size={16} />}
             </Button>
           </div>
         </CardFooter>
       </Card>
+      
+      {mutation.error && (
+        <p className="text-center text-red-500 text-xs font-mono uppercase tracking-widest">
+          Error: {mutation.error.message}
+        </p>
+      )}
     </div>
   )
 }
+

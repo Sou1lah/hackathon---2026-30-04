@@ -13,6 +13,7 @@ import { toast } from "sonner"
 import { OpenAPI } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -60,6 +61,13 @@ export default function UserDetailModal({
     queryKey: ["admin-user-logs", user?.id],
     queryFn: () =>
       fetchWithAuth(`/api/v1/suivi-stage/admin/users/${user.id}/logs`),
+    enabled: !!user?.id && isOpen,
+  })
+
+  const { data: summaryData, isLoading: isLoadingSummary } = useQuery({
+    queryKey: ["admin-user-internship", user?.id],
+    queryFn: () =>
+      fetchWithAuth(`/api/v1/suivi-stage/admin/users/${user.id}/internship-summary`),
     enabled: !!user?.id && isOpen,
   })
 
@@ -114,6 +122,28 @@ export default function UserDetailModal({
         </div>
 
         <div className="p-10 space-y-10">
+          {summaryData && !isLoadingSummary && !summaryData.detail && (
+            <Card className="p-6 border-border/50 bg-muted/20">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Progress Overview</span>
+                  <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest border-border/60">
+                    {summaryData.status}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-mono">
+                    <span>Step {summaryData.current_step} of 8</span>
+                    <span>{summaryData.progress}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-border/50 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: `${summaryData.progress}%` }} className="h-full bg-accent" />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
           <div className="space-y-6">
             <div className="flex items-center gap-4">
               <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
@@ -174,6 +204,33 @@ export default function UserDetailModal({
                       <p className="text-muted-foreground leading-relaxed">
                         {log.content}
                       </p>
+
+                      {log.feedback && log.feedback.length > 0 && (
+                        <div className="mt-4 p-5 bg-accent/5 border border-accent/20 rounded-2xl space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-2">
+                              <CheckCircle2 size={14} /> Pedagogical Feedback
+                            </span>
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  size={14}
+                                  className={cn(
+                                    "transition-all",
+                                    i < log.feedback[0].rating
+                                      ? "fill-amber-400 text-amber-400"
+                                      : "text-border",
+                                  )}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-sm text-foreground/90 italic border-l-2 border-accent/40 pl-3 py-1">
+                            "{log.feedback[0].comment}"
+                          </p>
+                        </div>
+                      )}
 
                       <div className="pt-6 border-t border-border/40">
                         <AnimatePresence mode="wait">

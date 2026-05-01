@@ -57,7 +57,7 @@ def create_offer(
     """
     Manually create an internship offer (admin only).
     """
-    if not (current_user.is_superuser or current_user.can_review_applications):
+    if not (current_user.is_superuser or current_user.can_review_applications or current_user.role.startswith("prof_")):
         raise HTTPException(status_code=403, detail="Not authorized")
 
     # source_url must be unique – generate a synthetic one if blank
@@ -108,7 +108,7 @@ def update_offer(
     """
     Update an internship offer (admin only).
     """
-    if not (current_user.is_superuser or current_user.can_review_applications):
+    if not (current_user.is_superuser or current_user.can_review_applications or current_user.role.startswith("prof_")):
         raise HTTPException(status_code=403, detail="Not authorized")
     offer = session.get(InternshipOffer, id)
     if not offer:
@@ -136,7 +136,7 @@ def delete_offer(
     """
     Delete an internship offer (admin only).
     """
-    if not (current_user.is_superuser or current_user.can_review_applications):
+    if not (current_user.is_superuser or current_user.can_review_applications or current_user.role.startswith("prof_")):
         raise HTTPException(status_code=403, detail="Not authorized")
     offer = session.get(InternshipOffer, id)
     if not offer:

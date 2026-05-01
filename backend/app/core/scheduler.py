@@ -14,12 +14,11 @@ async def scheduled_sync():
     Job that runs the sync process.
     """
     logger.info("Running scheduled internship offers sync")
-    with Session(engine) as session:
-        try:
-            await sync_internship_offers_to_db(session)
-            logger.info("Scheduled sync completed successfully")
-        except Exception as e:
-            logger.error(f"Scheduled sync failed: {e}")
+    try:
+        await sync_internship_offers_to_db()
+        logger.info("Scheduled sync completed successfully")
+    except Exception as e:
+        logger.error(f"Scheduled sync failed: {e}")
 
 def start_scheduler():
     """
