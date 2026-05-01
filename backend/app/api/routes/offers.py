@@ -5,7 +5,7 @@ from app.core.db import engine
 
 from app.models_scraper import InternshipOffer, InternshipOffersPublic, InternshipOfferPublic
 from app.services.sync_offers import sync_internship_offers_to_db
-from app.services.recommendation import track_interaction
+from app.services.recommendation import track_interaction, get_recommendations
 from app.api.deps import SessionDep, CurrentUser
 
 router = APIRouter(prefix="/internships", tags=["internships"])
@@ -46,6 +46,18 @@ def read_offers(
     offers = session.exec(statement).all()
     
     return InternshipOffersPublic(data=offers, count=count)
+    
+@router.get("/recommended", response_model=list[dict[str, Any]])
+def read_recommended_offers(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    limit: int = 20
+) -> Any:
+    """
+    Retrieve recommended internship offers for the current user.
+    """
+    return get_recommendations(session=session, user=current_user, limit=limit)
 
 @router.get("/{id}", response_model=InternshipOfferPublic)
 def read_offer(session: SessionDep, id: str) -> Any:

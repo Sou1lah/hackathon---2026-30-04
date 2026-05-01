@@ -26,6 +26,10 @@ class UserBase(SQLModel):
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
     role: UserRole = Field(default=UserRole.student_national)
+    specialty: str | None = Field(default=None, max_length=255)
+    level: str | None = Field(default=None, max_length=100)
+    language: str | None = Field(default=None, max_length=255)
+    gpa: float | None = Field(default=None)
 
     @field_validator("email")
     @classmethod
@@ -107,6 +111,10 @@ class UserPublic(UserBase):
     role_type: str | None = None
     mobility_preference: str | None = None
     interest_tags: list[str] = []
+    specialty: str | None = None
+    level: str | None = None
+    language: str | None = None
+    gpa: float | None = None
 
 
 class UsersPublic(SQLModel):

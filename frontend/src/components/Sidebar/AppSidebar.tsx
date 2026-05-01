@@ -9,7 +9,6 @@ import {
   Settings,
   Users,
   Home,
-  Briefcase,
 } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -28,7 +27,6 @@ import { type Item, Main } from "./Main"
 import { User } from "./User"
 
 const baseItems: Item[] = [
-  { icon: Briefcase, title: "Offres de Stage", path: "/internship-offers" },
   { icon: FilePlus, title: "Demande Stage", path: "/stages" },
   { icon: FileText, title: "Convention Stage", path: "/convention" },
   { icon: ClipboardList, title: "Suivi Stage", path: "/suivi" },

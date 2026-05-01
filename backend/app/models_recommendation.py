@@ -26,6 +26,10 @@ class StageRequestBase(SQLModel):
     selected_mobility_type: str = Field(max_length=50) # national, international, both
     selected_interests: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     duration_preference: str | None = Field(default=None, max_length=100)
+    specialty: str | None = Field(default=None, max_length=255)
+    level: str | None = Field(default=None, max_length=100)
+    language: str | None = Field(default=None, max_length=255)
+    gpa: float | None = Field(default=None)
     submitted_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),

@@ -47,42 +47,54 @@ def match_internship_to_user(user: User, internship: InternshipOffer, request: S
     """
     score = 0.0
     
-    # 1. Role match (Weight: 30)
-    # Target audience can be "student", "teacher", or "both"
+    # 1. Specialty Match (Weight: 40)
+    # Prioritize specialty from request, then fallback to user profile
+    target_specialty = (request.specialty if request and request.specialty else user.specialty)
+    if target_specialty:
+        specialty = target_specialty.lower()
+        search_text = f"{internship.title} {internship.description or ''} {' '.join(internship.keywords or [])}".lower()
+        if specialty in search_text:
+            score += 40
+        else:
+            # Partial match for multi-word specialties
+            words = specialty.split()
+            matches = sum(1 for word in words if len(word) > 3 and word in search_text)
+            if matches:
+                score += min(matches * 10, 30)
+
+    # 2. Level Match (Weight: 15)
+    target_level = (request.level if request and request.level else user.level)
+    if target_level:
+        level = target_level.lower()
+        search_text = f"{internship.title} {internship.description or ''} {' '.join(internship.keywords or [])}".lower()
+        if level in search_text:
+            score += 15
+
+    # 3. Language Match (Weight: 15)
+    target_language = (request.language if request and request.language else user.language)
+    if target_language:
+        language = target_language.lower()
+        search_text = f"{internship.title} {internship.description or ''} {' '.join(internship.keywords or [])}".lower()
+        if language in search_text:
+            score += 15
+
+    # 4. Role match (Weight: 15)
     if internship.target_audience == "both":
-        score += 30
+        score += 15
     elif user.role_type == internship.target_audience:
-        score += 30
+        score += 15
         
-    # 2. Mobility match (Weight: 30)
-    # Prioritize StageRequest if available
+    # 5. Mobility match (Weight: 15)
     target_mobility = request.selected_mobility_type if request else user.mobility_preference
-    
     if target_mobility == "both":
-        score += 30
+        score += 15
     elif target_mobility == internship.mobility_type:
-        score += 30
-    elif not target_mobility and user.mobility_preference == internship.mobility_type:
-        score += 30
+        score += 15
         
-    # 3. Keyword/Tag overlap (Weight: 30)
-    # Combine User interests and Request interests
-    user_tags = set(t.lower() for t in (user.interest_tags or []))
-    if request and request.selected_interests:
-        user_tags.update(set(i.lower() for i in request.selected_interests))
-        
-    if user_tags and internship.keywords:
-        internship_keywords = set(k.lower() for k in internship.keywords)
-        overlap = user_tags.intersection(internship_keywords)
-        if overlap:
-            # Scale score based on number of matches, cap at 30
-            score += min(len(overlap) * 10, 30)
-            
-    # 4. Interaction history boost (Weight: 10)
-    # This could be more complex, but for now we use engagement_score as a minor signal
-    # or check if user has interacted with similar keywords before.
-    if user.engagement_score > 0:
-        score += min(user.engagement_score / 10, 10)
+    # 6. GPA Boost (Weight: 5)
+    target_gpa = (request.gpa if request and request.gpa is not None else user.gpa)
+    if target_gpa and target_gpa > 10: # Assuming 0-20 scale or similar
+        score += min((target_gpa - 10) * 0.5, 5)
             
     return min(score, 100.0)
 

@@ -81,10 +81,10 @@ export default function RecommendationForm() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            Système de Recommandation de Stage
+            Demande de Stage & Recommandations
           </h1>
           <p className="text-muted-foreground mt-2 text-lg">
-            Connectez votre profil académique aux meilleures opportunités de mobilité.
+            Soumettez votre demande pour obtenir des opportunités personnalisées.
           </p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary font-bold animate-pulse">

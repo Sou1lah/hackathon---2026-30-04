@@ -21,7 +21,6 @@ import { Route as LayoutStagesRouteImport } from './routes/_layout/stages'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutMobiliteRouteImport } from './routes/_layout/mobilite'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
-import { Route as LayoutInternshipOffersRouteImport } from './routes/_layout/internship-offers'
 import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 import { Route as LayoutConventionRouteImport } from './routes/_layout/convention'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
@@ -85,11 +84,6 @@ const LayoutItemsRoute = LayoutItemsRouteImport.update({
   path: '/items',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutInternshipOffersRoute = LayoutInternshipOffersRouteImport.update({
-  id: '/internship-offers',
-  path: '/internship-offers',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutDashboardRoute = LayoutDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -115,7 +109,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof LayoutAdminRoute
   '/convention': typeof LayoutConventionRoute
   '/dashboard': typeof LayoutDashboardRoute
-  '/internship-offers': typeof LayoutInternshipOffersRoute
   '/items': typeof LayoutItemsRoute
   '/mobilite': typeof LayoutMobiliteRoute
   '/settings': typeof LayoutSettingsRoute
@@ -131,7 +124,6 @@ export interface FileRoutesByTo {
   '/admin': typeof LayoutAdminRoute
   '/convention': typeof LayoutConventionRoute
   '/dashboard': typeof LayoutDashboardRoute
-  '/internship-offers': typeof LayoutInternshipOffersRoute
   '/items': typeof LayoutItemsRoute
   '/mobilite': typeof LayoutMobiliteRoute
   '/settings': typeof LayoutSettingsRoute
@@ -150,7 +142,6 @@ export interface FileRoutesById {
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/convention': typeof LayoutConventionRoute
   '/_layout/dashboard': typeof LayoutDashboardRoute
-  '/_layout/internship-offers': typeof LayoutInternshipOffersRoute
   '/_layout/items': typeof LayoutItemsRoute
   '/_layout/mobilite': typeof LayoutMobiliteRoute
   '/_layout/settings': typeof LayoutSettingsRoute
@@ -170,7 +161,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/convention'
     | '/dashboard'
-    | '/internship-offers'
     | '/items'
     | '/mobilite'
     | '/settings'
@@ -186,7 +176,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/convention'
     | '/dashboard'
-    | '/internship-offers'
     | '/items'
     | '/mobilite'
     | '/settings'
@@ -204,7 +193,6 @@ export interface FileRouteTypes {
     | '/_layout/admin'
     | '/_layout/convention'
     | '/_layout/dashboard'
-    | '/_layout/internship-offers'
     | '/_layout/items'
     | '/_layout/mobilite'
     | '/_layout/settings'
@@ -308,13 +296,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutItemsRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/internship-offers': {
-      id: '/_layout/internship-offers'
-      path: '/internship-offers'
-      fullPath: '/internship-offers'
-      preLoaderRoute: typeof LayoutInternshipOffersRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/dashboard': {
       id: '/_layout/dashboard'
       path: '/dashboard'
@@ -343,7 +324,6 @@ interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutConventionRoute: typeof LayoutConventionRoute
   LayoutDashboardRoute: typeof LayoutDashboardRoute
-  LayoutInternshipOffersRoute: typeof LayoutInternshipOffersRoute
   LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutMobiliteRoute: typeof LayoutMobiliteRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
@@ -357,7 +337,6 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutConventionRoute: LayoutConventionRoute,
   LayoutDashboardRoute: LayoutDashboardRoute,
-  LayoutInternshipOffersRoute: LayoutInternshipOffersRoute,
   LayoutItemsRoute: LayoutItemsRoute,
   LayoutMobiliteRoute: LayoutMobiliteRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
