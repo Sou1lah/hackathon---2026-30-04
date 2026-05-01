@@ -1,13 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import OverviewDashboard from "@/components/Overview/OverviewDashboard"
-import StudentHome from "@/components/Mobility/StudentHome"
-import useAuth from "@/hooks/useAuth"
+import { createFileRoute } from "@tanstack/react-router"
 import AccessDenied from "@/components/Common/AccessDenied"
+import StudentHome from "@/components/Mobility/StudentHome"
+import OverviewDashboard from "@/components/Overview/OverviewDashboard"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/dashboard")({
   component: DashboardPage,
   head: () => ({
-    meta: [{ title: "Dashboard - E-Learning" }],
+    meta: [{ title: "Dashboard - UBMA" }],
   }),
 })
 

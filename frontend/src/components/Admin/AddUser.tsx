@@ -259,8 +259,10 @@ const AddUser = () => {
               />
 
               <div className="space-y-4 pt-4 border-t border-border mt-2">
-                <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Permissions</h4>
-                
+                <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                  Permissions
+                </h4>
+
                 <div className="grid grid-cols-1 gap-4">
                   <FormField
                     control={form.control}
@@ -273,7 +275,9 @@ const AddUser = () => {
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">Access Dashboard</FormLabel>
+                        <FormLabel className="font-normal cursor-pointer">
+                          Access Dashboard
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
@@ -289,7 +293,9 @@ const AddUser = () => {
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">Apply for Internships</FormLabel>
+                        <FormLabel className="font-normal cursor-pointer">
+                          Apply for Internships
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
@@ -305,7 +311,9 @@ const AddUser = () => {
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">View Conventions</FormLabel>
+                        <FormLabel className="font-normal cursor-pointer">
+                          View Conventions
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
@@ -321,7 +329,9 @@ const AddUser = () => {
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">View Internship Tracking</FormLabel>
+                        <FormLabel className="font-normal cursor-pointer">
+                          View Internship Tracking
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
@@ -337,7 +347,9 @@ const AddUser = () => {
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">Review Applications (Reviewer/Admin)</FormLabel>
+                        <FormLabel className="font-normal cursor-pointer">
+                          Review Applications (Reviewer/Admin)
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
@@ -356,7 +368,9 @@ const AddUser = () => {
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <FormLabel className="font-normal font-bold text-destructive">Is superuser?</FormLabel>
+                      <FormLabel className="font-normal font-bold text-destructive">
+                        Is superuser?
+                      </FormLabel>
                     </FormItem>
                   )}
                 />

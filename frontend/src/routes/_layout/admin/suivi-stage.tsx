@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 import AdminSuiviStage from "@/components/Admin/AdminSuiviStage"
-import useAuth from "@/hooks/useAuth"
 import AccessDenied from "@/components/Common/AccessDenied"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/admin/suivi-stage")({
   component: AdminSuiviStagePage,
   head: () => ({
-    meta: [{ title: "Administration Suivi - E-Learning" }],
+    meta: [{ title: "Tracking Administration - UBMA" }],
   }),
 })
 

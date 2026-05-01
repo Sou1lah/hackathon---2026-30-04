@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_layout/mobilite")({
   validateSearch: mobiliteSearchSchema,
   component: MobilitePage,
   head: () => ({
-    meta: [{ title: "Mobilité - Mobilité & Stages" }],
+    meta: [{ title: "Mobility - UBMA" }],
   }),
 })
 

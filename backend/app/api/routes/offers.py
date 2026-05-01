@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from sqlmodel import select, func, Session
 from app.core.db import engine
 
-from app.models_scraper import InternshipOffer, InternshipOffersPublic, InternshipOfferPublic
+from app.models_scraper import InternshipOffer, InternshipOfferBase, InternshipOffersPublic, InternshipOfferPublic
 from app.services.sync_offers import sync_internship_offers_to_db
 from app.services.recommendation import track_interaction, get_recommendations
 from app.api.deps import SessionDep, CurrentUser
@@ -46,7 +46,35 @@ def read_offers(
     offers = session.exec(statement).all()
     
     return InternshipOffersPublic(data=offers, count=count)
-    
+
+@router.post("/", response_model=InternshipOfferPublic)
+def create_offer(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    offer_in: InternshipOfferBase,
+) -> Any:
+    """
+    Manually create an internship offer (admin only).
+    """
+    if not (current_user.is_superuser or current_user.can_review_applications):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # source_url must be unique – generate a synthetic one if blank
+    if not offer_in.source_url:
+        raise HTTPException(status_code=422, detail="source_url is required")
+
+    offer = InternshipOffer.model_validate(offer_in)
+    session.add(offer)
+    try:
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=409, detail="An offer with this source URL already exists.")
+    session.refresh(offer)
+    return offer
+
+
 @router.get("/recommended", response_model=list[dict[str, Any]])
 def read_recommended_offers(
     *,
@@ -68,6 +96,55 @@ def read_offer(session: SessionDep, id: str) -> Any:
     if not offer:
         raise HTTPException(status_code=404, detail="Offer not found")
     return offer
+
+@router.put("/{id}", response_model=InternshipOfferPublic)
+def update_offer(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: str,
+    offer_in: InternshipOfferBase,
+) -> Any:
+    """
+    Update an internship offer (admin only).
+    """
+    if not (current_user.is_superuser or current_user.can_review_applications):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    offer = session.get(InternshipOffer, id)
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    update_data = offer_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(offer, key, value)
+    session.add(offer)
+    try:
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=409, detail="Update failed — possible duplicate source URL.")
+    session.refresh(offer)
+    return offer
+
+
+@router.delete("/{id}", response_model=dict)
+def delete_offer(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: str,
+) -> Any:
+    """
+    Delete an internship offer (admin only).
+    """
+    if not (current_user.is_superuser or current_user.can_review_applications):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    offer = session.get(InternshipOffer, id)
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    session.delete(offer)
+    session.commit()
+    return {"status": "deleted", "id": id}
+
 
 @router.post("/{id}/track", response_model=dict)
 def log_interaction(

@@ -33,10 +33,10 @@ export function UserManagement() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-black italic tracking-tighter text-primary">
-            Gestion des Utilisateurs
+            User Management
           </h1>
           <p className="text-muted-foreground italic font-medium">
-            Administration des comptes et des rôles.
+            Account and role administration.
           </p>
         </div>
         <div className="flex gap-3">
@@ -44,7 +44,7 @@ export function UserManagement() {
         </div>
       </div>
 
-      <div className="bg-card p-8 rounded-3xl border border-border shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border/50 overflow-hidden">
         <Suspense fallback={<PendingUsers />}>
           <UsersTableContent />
         </Suspense>

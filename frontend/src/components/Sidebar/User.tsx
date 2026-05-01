@@ -27,8 +27,8 @@ interface UserInfoProps {
 function UserInfo({ fullName, email }: UserInfoProps) {
   return (
     <div className="flex items-center gap-2.5 w-full min-w-0">
-      <Avatar className="size-8">
-        <AvatarFallback className="bg-zinc-600 text-white">
+      <Avatar className="size-8 border-2 border-primary/20 transition-all duration-300 group-hover:scale-105">
+        <AvatarFallback className="bg-gradient-to-br from-primary to-accent-secondary text-white text-[10px] font-bold">
           {getInitials(fullName || "User")}
         </AvatarFallback>
       </Avatar>
@@ -62,11 +62,11 @@ export function User({ user }: { user: any }) {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group hover:bg-primary/5 transition-colors duration-200"
               data-testid="user-menu"
             >
               <UserInfo fullName={user?.full_name} email={user?.email} />
-              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
+              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

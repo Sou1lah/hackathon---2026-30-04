@@ -1,12 +1,13 @@
 import { Link as RouterLink } from "@tanstack/react-router"
 import {
-  ClipboardList,
-  FilePlus,
-  FileText,
-  Globe,
-  Home,
-  Layout,
-  Map,
+  Activity,
+  Compass,
+  FilePlus2,
+  FileSignature,
+  LayoutDashboard,
+  ListChecks,
+  MapPinned,
+  Plane,
   Settings,
 } from "lucide-react"
 
@@ -33,40 +34,69 @@ export function AppSidebar() {
   const items: Item[] = []
 
   if (currentUser?.can_access_dashboard || currentUser?.is_superuser) {
-    items.push({ icon: Home, title: "Dashboard", path: "/dashboard" })
-  }
-
-  if (currentUser?.can_apply_internship || currentUser?.is_superuser) {
-    items.push({ icon: FilePlus, title: "Demande Stage", path: "/stages" })
-  }
-
-  if (currentUser?.can_view_convention || currentUser?.is_superuser) {
-    items.push({ icon: FileText, title: "Convention Stage", path: "/convention" })
-  }
-
-  if (currentUser?.can_view_tracking || currentUser?.is_superuser) {
-    items.push({ icon: ClipboardList, title: "Suivi Stage", path: "/suivi-stage" })
+    items.push({
+      icon: LayoutDashboard,
+      title: "Dashboard",
+      path: "/dashboard",
+    })
   }
 
   if (currentUser?.is_superuser || currentUser?.can_review_applications) {
-    items.push({ icon: Layout, title: "Suivi (Admin)", path: "/admin/suivi-stage" })
+    items.push({
+      icon: FilePlus2,
+      title: "Add Internship",
+      path: "/stages",
+    })
+  } else if (currentUser?.can_apply_internship) {
+    items.push({
+      icon: FilePlus2,
+      title: "Internship Request",
+      path: "/stages",
+    })
+  }
+
+  if (currentUser?.can_view_convention || currentUser?.is_superuser) {
+    items.push({
+      icon: FileSignature,
+      title:
+        currentUser?.is_superuser || currentUser?.can_review_applications
+          ? "Application Management"
+          : "Internship Convention",
+      path: "/convention",
+    })
+  }
+
+  if (currentUser?.can_view_tracking || currentUser?.is_superuser) {
+    items.push({
+      icon: Activity,
+      title: "Internship Tracking",
+      path: "/suivi-stage",
+    })
+  }
+
+  if (currentUser?.is_superuser || currentUser?.can_review_applications) {
+    items.push({
+      icon: ListChecks,
+      title: "All Internships",
+      path: "/admin/internships",
+    })
   }
 
   // Mobility browsing is available to all authenticated users (no specific flag required)
   items.push({
-    icon: Globe,
-    title: "Mobilité",
+    icon: Compass,
+    title: "Mobility",
     path: "/mobilite",
     subItems: [
       {
-        icon: Map,
-        title: "Mobilité Nationale",
+        icon: MapPinned,
+        title: "National Mobility",
         path: "/mobilite",
         search: { type: "nationale" },
       },
       {
-        icon: Globe,
-        title: "Mobilité Internationale",
+        icon: Plane,
+        title: "International Mobility",
         path: "/mobilite",
         search: { type: "internationale" },
       },

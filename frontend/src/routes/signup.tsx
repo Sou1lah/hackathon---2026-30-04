@@ -70,7 +70,7 @@ export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
       {
-        title: "Sign Up - E-Learning",
+        title: "Sign Up - UBMA",
       },
     ],
   }),

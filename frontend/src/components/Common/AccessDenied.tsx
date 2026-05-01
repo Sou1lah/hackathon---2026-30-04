@@ -16,21 +16,21 @@ export default function AccessDenied({ page }: AccessDeniedProps) {
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight">Accès refusé</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Access Denied</h1>
         {page && (
           <p className="text-muted-foreground text-sm">
-            Vous n'avez pas la permission d'accéder à{" "}
+            You do not have permission to access{" "}
             <span className="font-medium text-foreground">{page}</span>.
           </p>
         )}
         <p className="text-muted-foreground text-sm">
-          Contactez votre administrateur pour obtenir l'accès nécessaire.
+          Contact your administrator to obtain the necessary access.
         </p>
       </div>
 
       <div className="rounded-lg border bg-muted/40 px-6 py-3 text-xs text-muted-foreground max-w-sm">
-        Les droits d'accès sont gérés par votre compte dans la base de données.
-        Aucun rôle n'est codé en dur.
+        Access rights are managed by your account in the database. No roles are
+        hardcoded.
       </div>
     </div>
   )

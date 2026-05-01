@@ -1,44 +1,48 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   CheckCircle2,
+  Clock,
   FileText,
   History,
   Layout,
-  Plus,
-  Star,
-  User as UserIcon,
   MessageSquare,
   Paperclip,
-  Clock,
+  Plus,
+  Star,
   TrendingUp,
+  User as UserIcon,
 } from "lucide-react"
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion } from "motion/react"
+import { useState } from "react"
+import { toast } from "sonner"
 import { OpenAPI } from "@/client"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
 }
 
 const stagger = {
-  visible: { transition: { staggerChildren: 0.1 } }
+  visible: { transition: { staggerChildren: 0.1 } },
 }
 
 // Custom Fetch Wrapper
@@ -59,7 +63,11 @@ const fetchWithAuth = async (path: string, options: RequestInit = {}) => {
 export default function SuiviStageFeature() {
   const queryClient = useQueryClient()
   const [isLogOpen, setIsLogOpen] = useState(false)
-  const [newLog, setNewLog] = useState({ title: "", content: "", attachment_url: "" })
+  const [newLog, setNewLog] = useState({
+    title: "",
+    content: "",
+    attachment_url: "",
+  })
 
   const { data: logsData, isLoading: logsLoading } = useQuery({
     queryKey: ["suivi-logs"],
@@ -79,16 +87,16 @@ export default function SuiviStageFeature() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suivi-logs"] })
-      toast.success("Journal de bord mis à jour")
+      toast.success("Logbook updated")
       setIsLogOpen(false)
       setNewLog({ title: "", content: "", attachment_url: "" })
     },
-    onError: () => toast.error("Erreur lors de la création du log"),
+    onError: () => toast.error("Error creating log entry"),
   })
 
   const handleCreateLog = () => {
     if (!newLog.title || !newLog.content) {
-      toast.error("Veuillez remplir tous les champs")
+      toast.error("Please fill in all fields")
       return
     }
     createLogMutation.mutate({
@@ -102,73 +110,108 @@ export default function SuiviStageFeature() {
   }
 
   return (
-    <motion.div 
-      initial="hidden" 
-      animate="visible" 
-      variants={stagger as any} 
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={stagger as any}
       className="container max-w-6xl py-12 space-y-12"
     >
       {/* Header Section */}
-      <motion.div variants={fadeInUp as any} className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <motion.div
+        variants={fadeInUp as any}
+        className="flex flex-col md:flex-row md:items-end justify-between gap-8"
+      >
         <div className="space-y-4">
           <Badge variant="section" className="px-4 py-1.5 text-[10px]">
             <span className="flex h-1.5 w-1.5 rounded-full bg-accent animate-pulse mr-2" />
-            Suivi Opérationnel
+            Operational Tracking
           </Badge>
           <h1 className="text-5xl md:text-6xl font-serif tracking-tight text-foreground leading-[1.1]">
-            Journal de <span className="gradient-text">Stage</span>
+            Internship <span className="gradient-text">Log</span>
           </h1>
           <p className="text-muted-foreground text-xl max-w-2xl leading-relaxed">
-            Consignez vos activités quotidiennes et maintenez une communication fluide avec votre tuteur pédagogique.
+            Record your daily activities and maintain fluid communication with
+            your academic tutor.
           </p>
         </div>
-        
+
         <Dialog open={isLogOpen} onOpenChange={setIsLogOpen}>
           <DialogTrigger asChild>
-            <Button size="lg" className="rounded-full px-8 gap-3 bg-accent hover:bg-accent/90 text-white shadow-xl shadow-accent/20 transition-all hover:scale-105 active:scale-95">
+            <Button
+              size="lg"
+              className="rounded-full px-8 gap-3 bg-accent hover:bg-accent/90 text-white shadow-xl shadow-accent/20 transition-all hover:scale-105 active:scale-95"
+            >
               <Plus size={20} />
-              <span className="font-bold uppercase tracking-widest text-[10px]">Nouvelle Activité</span>
+              <span className="font-bold uppercase tracking-widest text-[10px]">
+                New Activity
+              </span>
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px] border-border/50 rounded-3xl overflow-hidden p-0">
             <div className="bg-foreground text-background p-8 relative overflow-hidden">
-               <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
-               <DialogHeader className="relative z-10">
-                 <DialogTitle className="text-2xl font-serif text-white">Consigner une activité</DialogTitle>
-               </DialogHeader>
+              <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
+              <DialogHeader className="relative z-10">
+                <DialogTitle className="text-2xl font-serif text-white">
+                  Record an activity
+                </DialogTitle>
+              </DialogHeader>
             </div>
             <div className="space-y-6 p-8">
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Titre de la mission</Label>
+                <Label
+                  htmlFor="title"
+                  className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                >
+                  Mission Title
+                </Label>
                 <Input
                   id="title"
-                  placeholder="Ex: Analyse des flux de données"
+                  placeholder="Ex: Data flow analysis"
                   className="rounded-xl border-border focus:ring-accent"
                   value={newLog.title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewLog({ ...newLog, title: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewLog({ ...newLog, title: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="content" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Description détaillée</Label>
+                <Label
+                  htmlFor="content"
+                  className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                >
+                  Detailed Description
+                </Label>
                 <Textarea
                   id="content"
-                  placeholder="Qu'avez-vous accompli aujourd'hui ?"
+                  placeholder="What did you accomplish today?"
                   className="rounded-xl min-h-[120px] border-border focus:ring-accent"
                   value={newLog.content}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewLog({ ...newLog, content: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setNewLog({ ...newLog, content: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="attachment" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Lien Documentaire (Optionnel)</Label>
+                <Label
+                  htmlFor="attachment"
+                  className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                >
+                  Document Link (Optional)
+                </Label>
                 <div className="relative">
                   <Input
                     id="attachment"
                     placeholder="https://docs.google.com/..."
                     className="rounded-xl pl-10 border-border"
                     value={newLog.attachment_url}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewLog({ ...newLog, attachment_url: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewLog({ ...newLog, attachment_url: e.target.value })
+                    }
                   />
-                  <Paperclip className="absolute left-3 top-2.5 text-muted-foreground" size={16} />
+                  <Paperclip
+                    className="absolute left-3 top-2.5 text-muted-foreground"
+                    size={16}
+                  />
                 </div>
               </div>
             </div>
@@ -178,7 +221,9 @@ export default function SuiviStageFeature() {
                 onClick={handleCreateLog}
                 disabled={createLogMutation.isPending}
               >
-                {createLogMutation.isPending ? "Traitement..." : "Confirmer l'entrée"}
+                {createLogMutation.isPending
+                  ? "Processing..."
+                  : "Confirm Entry"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -186,15 +231,22 @@ export default function SuiviStageFeature() {
       </motion.div>
 
       {/* Stats Quick Look */}
-      <motion.div variants={fadeInUp as any} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <motion.div
+        variants={fadeInUp as any}
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+      >
         <Card className="p-6 border-border/50 bg-muted/20">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-accent/10 rounded-2xl text-accent">
               <History size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Activités</p>
-              <p className="text-2xl font-serif text-foreground">{logsData?.count || 0}</p>
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                Activities
+              </p>
+              <p className="text-2xl font-serif text-foreground">
+                {logsData?.count || 0}
+              </p>
             </div>
           </div>
         </Card>
@@ -204,8 +256,12 @@ export default function SuiviStageFeature() {
               <TrendingUp size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Feedback</p>
-              <p className="text-2xl font-serif text-foreground">{feedbacks?.length || 0}</p>
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                Feedback
+              </p>
+              <p className="text-2xl font-serif text-foreground">
+                {feedbacks?.length || 0}
+              </p>
             </div>
           </div>
         </Card>
@@ -216,8 +272,10 @@ export default function SuiviStageFeature() {
               <Clock size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Progression</p>
-              <p className="text-2xl font-serif text-white">En cours</p>
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                Progress
+              </p>
+              <p className="text-2xl font-serif text-white">In Progress</p>
             </div>
           </div>
         </Card>
@@ -227,13 +285,17 @@ export default function SuiviStageFeature() {
         {/* Timeline Content */}
         <div className="lg:col-span-8 space-y-8">
           <div className="flex items-center gap-4">
-            <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">Chronologie des activités</h3>
+            <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">
+              Activity Timeline
+            </h3>
             <div className="h-px flex-1 bg-border/50" />
           </div>
 
           <div className="space-y-6">
             {logsLoading ? (
-              [1, 2, 3].map((i) => <Card key={i} className="h-32 animate-pulse border-border/40" />)
+              [1, 2, 3].map((i) => (
+                <Card key={i} className="h-32 animate-pulse border-border/40" />
+              ))
             ) : logsData?.data?.length > 0 ? (
               logsData.data.map((log: any) => {
                 const fb = getFeedbackForLog(log.id)
@@ -242,18 +304,31 @@ export default function SuiviStageFeature() {
                     <Card className="group hover:border-accent/30 transition-all duration-300 border-border/50 overflow-hidden">
                       <div className="flex flex-col md:flex-row">
                         <div className="md:w-32 bg-muted/30 p-6 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-border/40">
-                          <span className="text-3xl font-serif text-foreground">{new Date(log.date).getDate()}</span>
+                          <span className="text-3xl font-serif text-foreground">
+                            {new Date(log.date).getDate()}
+                          </span>
                           <span className="text-[10px] font-mono uppercase font-bold text-muted-foreground">
-                            {new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(new Date(log.date))}
+                            {new Intl.DateTimeFormat("en-US", {
+                              month: "short",
+                            }).format(new Date(log.date))}
                           </span>
                         </div>
                         <div className="flex-1 p-6 md:p-8 space-y-4">
                           <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-serif text-foreground group-hover:text-accent transition-colors">{log.title}</h3>
+                            <h3 className="text-xl font-serif text-foreground group-hover:text-accent transition-colors">
+                              {log.title}
+                            </h3>
                             {log.attachment_url && (
                               <Button variant="ghost" size="icon-sm" asChild>
-                                <a href={log.attachment_url} target="_blank" rel="noreferrer">
-                                  <Paperclip size={16} className="text-muted-foreground hover:text-accent" />
+                                <a
+                                  href={log.attachment_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  <Paperclip
+                                    size={16}
+                                    className="text-muted-foreground hover:text-accent"
+                                  />
                                 </a>
                               </Button>
                             )}
@@ -261,9 +336,9 @@ export default function SuiviStageFeature() {
                           <p className="text-muted-foreground leading-relaxed">
                             {log.content}
                           </p>
-                          
+
                           {fb && (
-                            <motion.div 
+                            <motion.div
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
                               className="mt-6 p-6 rounded-2xl bg-foreground text-background relative overflow-hidden shadow-2xl"
@@ -272,18 +347,33 @@ export default function SuiviStageFeature() {
                               <div className="relative z-10 space-y-4">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
-                                    <MessageSquare size={14} className="text-accent-secondary" />
-                                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-muted-foreground">Retour Tuteur</span>
+                                    <MessageSquare
+                                      size={14}
+                                      className="text-accent-secondary"
+                                    />
+                                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
+                                      Tutor Feedback
+                                    </span>
                                   </div>
                                   {fb.rating && (
                                     <div className="flex gap-1">
                                       {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={10} className={cn(i < fb.rating ? "fill-amber-400 text-amber-400" : "text-zinc-800")} />
+                                        <Star
+                                          key={i}
+                                          size={10}
+                                          className={cn(
+                                            i < fb.rating
+                                              ? "fill-amber-400 text-amber-400"
+                                              : "text-zinc-800",
+                                          )}
+                                        />
                                       ))}
                                     </div>
                                   )}
                                 </div>
-                                <p className="text-sm font-medium italic text-zinc-100">"{fb.comment}"</p>
+                                <p className="text-sm font-medium italic text-zinc-100">
+                                  "{fb.comment}"
+                                </p>
                               </div>
                             </motion.div>
                           )}
@@ -298,7 +388,9 @@ export default function SuiviStageFeature() {
                 <div className="bg-muted w-fit p-4 rounded-full mx-auto">
                   <Layout size={32} className="text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground font-serif text-lg">Aucun historique d'activité disponible.</p>
+                <p className="text-muted-foreground font-serif text-lg">
+                  No activity history available.
+                </p>
               </Card>
             )}
           </div>
@@ -306,42 +398,50 @@ export default function SuiviStageFeature() {
 
         {/* Sidebar Info */}
         <div className="lg:col-span-4 space-y-8">
-           <Card className="border-border/50 overflow-hidden shadow-sm">
-             <CardHeader className="bg-muted/30 border-b border-border/40">
-               <CardTitle className="text-xs font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                 <CheckCircle2 size={14} /> Information Stage
-               </CardTitle>
-             </CardHeader>
-             <CardContent className="p-6 space-y-6">
-               <div className="space-y-1">
-                 <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Structure d'accueil</p>
-                 <p className="text-lg font-serif">Equipe Pédagogique</p>
-               </div>
-               <div className="pt-6 border-t border-border/40 space-y-4">
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-accent/5 border border-accent/10">
-                    <UserIcon size={18} className="text-accent" />
-                    <div>
-                      <p className="text-[9px] font-mono font-bold text-accent uppercase tracking-widest">Tuteur Assigné</p>
-                      <p className="text-sm font-bold">Responsable National</p>
-                    </div>
+          <Card className="border-border/50 overflow-hidden shadow-sm">
+            <CardHeader className="bg-muted/30 border-b border-border/40">
+              <CardTitle className="text-xs font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <CheckCircle2 size={14} /> Internship Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="space-y-1">
+                <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                  Host Organization
+                </p>
+                <p className="text-lg font-serif">Academic Team</p>
+              </div>
+              <div className="pt-6 border-t border-border/40 space-y-4">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-accent/5 border border-accent/10">
+                  <UserIcon size={18} className="text-accent" />
+                  <div>
+                    <p className="text-[9px] font-mono font-bold text-accent uppercase tracking-widest">
+                      Assigned Tutor
+                    </p>
+                    <p className="text-sm font-bold">National Manager</p>
                   </div>
-               </div>
-             </CardContent>
-           </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-           <Card className="bg-accent text-white border-none p-8 space-y-6 shadow-2xl shadow-accent/20 relative overflow-hidden">
-             <div className="absolute inset-0 dot-pattern opacity-[0.1]" />
-             <div className="relative z-10 space-y-4">
-               <FileText size={32} className="text-white/80" />
-               <h3 className="text-2xl font-serif">Rapport de Stage</h3>
-               <p className="text-white/70 text-sm leading-relaxed">
-                 Une fois votre stage terminé, vous devrez soumettre votre rapport final pour validation par le jury.
-               </p>
-               <Button variant="secondary" className="w-full rounded-xl py-6 font-bold uppercase tracking-widest text-[10px] bg-white text-accent hover:bg-white/90">
-                 Bientôt disponible
-               </Button>
-             </div>
-           </Card>
+          <Card className="bg-accent text-white border-none p-8 space-y-6 shadow-2xl shadow-accent/20 relative overflow-hidden">
+            <div className="absolute inset-0 dot-pattern opacity-[0.1]" />
+            <div className="relative z-10 space-y-4">
+              <FileText size={32} className="text-white/80" />
+              <h3 className="text-2xl font-serif">Internship Report</h3>
+              <p className="text-white/70 text-sm leading-relaxed">
+                Once your internship is complete, you will need to submit your
+                final report for validation by the jury.
+              </p>
+              <Button
+                variant="secondary"
+                className="w-full rounded-xl py-6 font-bold uppercase tracking-widest text-[10px] bg-white text-accent hover:bg-white/90"
+              >
+                Coming Soon
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
     </motion.div>

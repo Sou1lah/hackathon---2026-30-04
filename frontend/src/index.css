@@ -9,7 +9,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -40,59 +40,81 @@
 
 :root {
   --radius: 0.75rem;
-  --background: #FAFAFA;
-  --foreground: #0F172A;
-  --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
-  --primary: #0052FF;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #0F172A;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --accent: #0052FF;
-  --accent-secondary: #4D7CFF;
-  --accent-foreground: #FFFFFF;
-  --destructive: #EF4444;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #0052FF;
+  --background: #fafafa;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #0052ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #0052ff;
+  --accent-secondary: #4d7cff;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0052ff;
+  --sidebar-background: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--secondary-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 .dark {
-  --background: #0F172A;
-  --foreground: #FAFAFA;
-  --card: #1E293B;
-  --card-foreground: #FAFAFA;
-  --popover: #1E293B;
-  --popover-foreground: #FAFAFA;
-  --primary: #0052FF;
-  --primary-foreground: #FFFFFF;
-  --secondary: #1E293B;
-  --secondary-foreground: #FAFAFA;
-  --muted: #1E293B;
-  --muted-foreground: #94A3B8;
-  --accent: #0052FF;
-  --accent-secondary: #4D7CFF;
-  --accent-foreground: #FFFFFF;
-  --destructive: #EF4444;
+  --background: #0f172a;
+  --foreground: #fafafa;
+  --card: #1e293b;
+  --card-foreground: #fafafa;
+  --popover: #1e293b;
+  --popover-foreground: #fafafa;
+  --primary: #0052ff;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #fafafa;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #0052ff;
+  --accent-secondary: #4d7cff;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.1);
-  --ring: #0052FF;
+  --ring: #0052ff;
+  --sidebar-background: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--secondary-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  html, body {
+  html,
+  body {
     @apply bg-background text-foreground font-sans;
-    overflow-x: hidden !important;
+    overflow-x: hidden;
     max-width: 100vw;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-serif;
   }
   button,
@@ -107,7 +129,11 @@
   }
 
   .dot-pattern {
-    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+    background-image: radial-gradient(
+      circle,
+      currentColor 1px,
+      transparent 1px
+    );
     background-size: 32px 32px;
   }
 

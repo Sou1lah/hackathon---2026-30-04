@@ -24,6 +24,7 @@ import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 import { Route as LayoutConventionRouteImport } from './routes/_layout/convention'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutAdminSuiviStageRouteImport } from './routes/_layout/admin/suivi-stage'
+import { Route as LayoutAdminInternshipsRouteImport } from './routes/_layout/admin/internships'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -99,6 +100,11 @@ const LayoutAdminSuiviStageRoute = LayoutAdminSuiviStageRouteImport.update({
   path: '/suivi-stage',
   getParentRoute: () => LayoutAdminRoute,
 } as any)
+const LayoutAdminInternshipsRoute = LayoutAdminInternshipsRouteImport.update({
+  id: '/internships',
+  path: '/internships',
+  getParentRoute: () => LayoutAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
   '/suivi-stage': typeof LayoutSuiviStageRoute
+  '/admin/internships': typeof LayoutAdminInternshipsRoute
   '/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
 }
 export interface FileRoutesByTo {
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/suivi': typeof LayoutSuiviRoute
   '/suivi-stage': typeof LayoutSuiviStageRoute
   '/': typeof LayoutIndexRoute
+  '/admin/internships': typeof LayoutAdminInternshipsRoute
   '/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
 }
 export interface FileRoutesById {
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/_layout/suivi': typeof LayoutSuiviRoute
   '/_layout/suivi-stage': typeof LayoutSuiviStageRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/admin/internships': typeof LayoutAdminInternshipsRoute
   '/_layout/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
 }
 export interface FileRouteTypes {
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/stages'
     | '/suivi'
     | '/suivi-stage'
+    | '/admin/internships'
     | '/admin/suivi-stage'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/suivi'
     | '/suivi-stage'
     | '/'
+    | '/admin/internships'
     | '/admin/suivi-stage'
   id:
     | '__root__'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/_layout/suivi'
     | '/_layout/suivi-stage'
     | '/_layout/'
+    | '/_layout/admin/internships'
     | '/_layout/admin/suivi-stage'
   fileRoutesById: FileRoutesById
 }
@@ -317,14 +329,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminSuiviStageRouteImport
       parentRoute: typeof LayoutAdminRoute
     }
+    '/_layout/admin/internships': {
+      id: '/_layout/admin/internships'
+      path: '/internships'
+      fullPath: '/admin/internships'
+      preLoaderRoute: typeof LayoutAdminInternshipsRouteImport
+      parentRoute: typeof LayoutAdminRoute
+    }
   }
 }
 
 interface LayoutAdminRouteChildren {
+  LayoutAdminInternshipsRoute: typeof LayoutAdminInternshipsRoute
   LayoutAdminSuiviStageRoute: typeof LayoutAdminSuiviStageRoute
 }
 
 const LayoutAdminRouteChildren: LayoutAdminRouteChildren = {
+  LayoutAdminInternshipsRoute: LayoutAdminInternshipsRoute,
   LayoutAdminSuiviStageRoute: LayoutAdminSuiviStageRoute,
 }
 

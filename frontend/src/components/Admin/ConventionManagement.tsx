@@ -1,29 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  CheckCircle2,
-  ChevronRight,
-  FileText,
-  Forward,
-  MoreHorizontal,
-  Search,
-  XCircle,
-  Clock,
-  Filter,
-  Trash2,
-  User,
   Building2,
   Calendar,
+  CheckCircle2,
+  Clock,
   ExternalLink,
-  ShieldCheck,
-  Mail,
+  FileText,
+  Filter,
+  Forward,
   GraduationCap,
+  Mail,
+  MoreHorizontal,
+  Search,
+  ShieldCheck,
+  Trash2,
   Trophy,
+  User,
+  XCircle,
 } from "lucide-react"
 import { useState } from "react"
-import { cn } from "@/lib/utils"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +37,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 import {
   Table,
   TableBody,
@@ -42,14 +48,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 export function ConventionManagement() {
   const queryClient = useQueryClient()
@@ -65,7 +69,7 @@ export function ConventionManagement() {
         `${import.meta.env.VITE_API_URL}/api/v1/conventions/admin/all`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       )
       if (!response.ok) throw new Error("Failed to fetch")
       return response.json()
@@ -80,7 +84,7 @@ export function ConventionManagement() {
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       )
       if (!response.ok) throw new Error("Failed to approve")
       return response.json()
@@ -98,7 +102,7 @@ export function ConventionManagement() {
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       )
       if (!response.ok) throw new Error("Failed to reject")
       return response.json()
@@ -116,7 +120,7 @@ export function ConventionManagement() {
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       )
       if (!response.ok) throw new Error("Failed to delete")
       return response.json()
@@ -126,9 +130,10 @@ export function ConventionManagement() {
     },
   })
 
-  const filteredData = data?.data?.filter((c: any) =>
-    c.document_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.owner?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = data?.data?.filter(
+    (c: any) =>
+      c.document_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.owner?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const handleViewDetails = (conv: any) => {
@@ -138,169 +143,245 @@ export function ConventionManagement() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-border/50 shadow-none overflow-hidden bg-white dark:bg-zinc-950/50">
-        <CardHeader className="p-8 border-b border-border/40 bg-zinc-50/50 dark:bg-zinc-950/50">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
-                  <ShieldCheck size={24} />
-                </div>
-                <div>
-                  <CardTitle className="text-2xl font-serif tracking-tight">Gestion des Conventions</CardTitle>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    Pipeline d'approbation hiérarchique et circuit de signature.
-                  </p>
-                </div>
-              </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
+              <ShieldCheck size={24} />
             </div>
-            <div className="flex items-center gap-3">
-               <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                  <Input 
-                    placeholder="Rechercher par document ou étudiant..." 
-                    className="pl-9 w-[320px] h-11 bg-background border-border/40 focus:ring-accent/20 transition-all rounded-xl shadow-sm"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-               </div>
-               <Button variant="outline" size="icon" className="h-11 w-11 border-border/40 hover:bg-muted rounded-xl">
-                  <Filter size={18} />
-               </Button>
+            <div>
+              <h2 className="text-2xl font-serif tracking-tight">
+                Application Management
+              </h2>
+              <p className="text-sm text-muted-foreground font-medium">
+                Hierarchical approval pipeline and signature circuit.
+              </p>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-muted/30">
-                <TableRow className="border-border/40 hover:bg-transparent">
-                  <TableHead className="w-[350px] font-mono text-[10px] uppercase tracking-widest py-6 px-8 text-muted-foreground">Document / Étudiant</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Approbation</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Statut</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Soumission</TableHead>
-                  <TableHead className="text-right px-8 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-64 text-center">
-                      <div className="flex items-center justify-center gap-3 text-muted-foreground font-medium">
-                         <Clock className="animate-spin size-5 text-accent" /> Chargement des dossiers...
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+            <Input
+              placeholder="Search by document or student..."
+              className="pl-9 w-[320px] h-11 bg-background border-border/40 focus:ring-accent/20 transition-all rounded-xl shadow-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-11 w-11 border-border/40 hover:bg-muted rounded-xl"
+          >
+            <Filter size={18} />
+          </Button>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow className="border-border/40 hover:bg-transparent">
+              <TableHead className="w-[350px] font-mono text-[10px] uppercase tracking-widest py-6 px-8 text-muted-foreground">
+                Document / Student
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Approval
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Status
+              </TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Submission
+              </TableHead>
+              <TableHead className="text-right px-8 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-64 text-center">
+                  <div className="flex items-center justify-center gap-3 text-muted-foreground font-medium">
+                    <Clock className="animate-spin size-5 text-accent" />{" "}
+                    Loading files...
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : filteredData?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-64 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <FileText className="size-10 text-muted-foreground/30" />
+                    <p className="text-muted-foreground font-medium">
+                      No files found.
+                    </p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredData?.map((conv: any) => (
+                <TableRow
+                  key={conv.id}
+                  className="border-border/40 group hover:bg-muted/20 transition-colors"
+                >
+                  <TableCell className="py-6 px-8">
+                    <div className="flex items-center gap-4">
+                      <div className="size-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:bg-accent/10 group-hover:text-accent transition-all shadow-sm">
+                        <FileText size={22} />
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ) : filteredData?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-64 text-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <FileText className="size-10 text-muted-foreground/30" />
-                        <p className="text-muted-foreground font-medium">Aucun dossier trouvé.</p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredData?.map((conv: any) => (
-                    <TableRow key={conv.id} className="border-border/40 group hover:bg-muted/20 transition-colors">
-                      <TableCell className="py-6 px-8">
-                        <div className="flex items-center gap-4">
-                          <div className="size-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:bg-accent/10 group-hover:text-accent transition-all shadow-sm">
-                            <FileText size={22} />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="font-bold text-sm text-foreground tracking-tight">{conv.document_name}</span>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs text-muted-foreground font-medium">{conv.owner?.full_name || "Étudiant Inconnu"}</span>
-                              <span className="text-[10px] text-muted-foreground/40 font-mono">•</span>
-                              <span className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest">ID: {conv.id.split('-')[0]}</span>
-                            </div>
-                          </div>
+                      <div className="flex flex-col max-w-[200px] sm:max-w-[300px]">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="font-bold text-sm text-foreground tracking-tight truncate text-left">
+                                {conv.document_name}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{conv.document_name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground font-medium truncate">
+                            {conv.owner?.full_name || "Unknown Student"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground/40 font-mono shrink-0">
+                            •
+                          </span>
+                          <span className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest shrink-0">
+                            ID: {conv.id.split("-")[0]}
+                          </span>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="px-3 py-1 font-mono text-[10px] border-accent/20 text-accent bg-accent/5 rounded-lg">
-                          Niveau {conv.approval_level}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={cn(
-                          "px-3 py-1 font-mono text-[10px] uppercase tracking-widest rounded-lg",
-                          conv.status === 'completed' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : 
-                          conv.status === 'rejected' ? "bg-destructive/10 text-destructive border-destructive/20" : 
-                          "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                        )} variant="outline">
-                          {conv.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {new Date(conv.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className="px-3 py-1 font-mono text-[10px] border-accent/20 text-accent bg-accent/5 rounded-lg"
+                    >
+                      Level {conv.approval_level}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={cn(
+                        "px-3 py-1 font-mono text-[10px] uppercase tracking-widest rounded-lg",
+                        conv.status === "completed"
+                          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                          : conv.status === "rejected"
+                            ? "bg-destructive/10 text-destructive border-destructive/20"
+                            : "bg-amber-500/10 text-amber-500 border-amber-500/20",
+                      )}
+                      variant="outline"
+                    >
+                      {conv.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {new Date(conv.created_at).toLocaleDateString("en-US", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right px-8">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewDetails(conv)}
+                        className="h-9 px-3 rounded-xl border border-transparent hover:border-border/40 hover:bg-white dark:hover:bg-zinc-900 group/btn shadow-sm transition-all"
+                      >
+                        <ExternalLink
+                          size={14}
+                          className="mr-2 text-muted-foreground group-hover/btn:text-accent"
+                        />
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover/btn:text-foreground">
+                          Details
                         </span>
-                      </TableCell>
-                      <TableCell className="text-right px-8">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleViewDetails(conv)}
-                            className="h-9 px-3 rounded-xl border border-transparent hover:border-border/40 hover:bg-white dark:hover:bg-zinc-900 group/btn shadow-sm transition-all"
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-xl border border-border/20 group-hover:border-border/40"
                           >
-                            <ExternalLink size={14} className="mr-2 text-muted-foreground group-hover/btn:text-accent" />
-                            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover/btn:text-foreground">Détails</span>
+                            <MoreHorizontal size={18} />
                           </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl border border-border/20 group-hover:border-border/40">
-                                <MoreHorizontal size={18} />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl shadow-2xl border-border/40">
-                              <DropdownMenuLabel className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Actions Administrateur</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => approveMutation.mutate(conv.id)}
-                                className="rounded-lg px-3 py-2.5 focus:bg-emerald-50 dark:focus:bg-emerald-500/10 focus:text-emerald-600 dark:focus:text-emerald-400 cursor-pointer"
-                              >
-                                <CheckCircle2 className="mr-3 size-4" /> 
-                                <span className="font-bold text-xs uppercase tracking-widest">Approuver</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="rounded-lg px-3 py-2.5 focus:bg-zinc-100 dark:focus:bg-zinc-800 cursor-pointer">
-                                <Forward className="mr-3 size-4" /> 
-                                <span className="font-bold text-xs uppercase tracking-widest">Transférer</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => rejectMutation.mutate({ id: conv.id, reason: "Non conforme" })}
-                                className="rounded-lg px-3 py-2.5 focus:bg-destructive/10 focus:text-destructive cursor-pointer"
-                              >
-                                <XCircle className="mr-3 size-4" /> 
-                                <span className="font-bold text-xs uppercase tracking-widest">Rejeter</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => {
-                                  if (confirm("Êtes-vous sûr de vouloir supprimer cette convention ?")) {
-                                    deleteMutation.mutate(conv.id)
-                                  }
-                                }}
-                                className="rounded-lg px-3 py-2.5 focus:bg-destructive/10 focus:text-destructive cursor-pointer"
-                              >
-                                <Trash2 className="mr-3 size-4" /> 
-                                <span className="font-bold text-xs uppercase tracking-widest text-destructive">Supprimer</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="w-56 p-2 rounded-xl shadow-2xl border-border/40"
+                        >
+                          <DropdownMenuLabel className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                            Actions Administrateur
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => approveMutation.mutate(conv.id)}
+                            className="rounded-lg px-3 py-2.5 focus:bg-emerald-50 dark:focus:bg-emerald-500/10 focus:text-emerald-600 dark:focus:text-emerald-400 cursor-pointer"
+                          >
+                            <CheckCircle2 className="mr-3 size-4" />
+                            <span className="font-bold text-xs uppercase tracking-widest">
+                              Approve
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="rounded-lg px-3 py-2.5 focus:bg-zinc-100 dark:focus:bg-zinc-800 cursor-pointer">
+                            <Forward className="mr-3 size-4" />
+                            <span className="font-bold text-xs uppercase tracking-widest">
+                              Transfer
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() =>
+                              rejectMutation.mutate({
+                                id: conv.id,
+                                reason: "Non conforme",
+                              })
+                            }
+                            className="rounded-lg px-3 py-2.5 focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+                          >
+                            <XCircle className="mr-3 size-4" />
+                            <span className="font-bold text-xs uppercase tracking-widest">
+                              Reject
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this application?",
+                                )
+                              ) {
+                                deleteMutation.mutate(conv.id)
+                              }
+                            }}
+                            className="rounded-lg px-3 py-2.5 focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+                          >
+                            <Trash2 className="mr-3 size-4" />
+                            <span className="font-bold text-xs uppercase tracking-widest text-destructive">
+                              Delete
+                            </span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden rounded-2xl border-none shadow-2xl">
@@ -310,9 +391,11 @@ export function ConventionManagement() {
                 <FileText size={28} />
               </div>
               <div className="space-y-1">
-                <DialogTitle className="text-2xl font-serif">{selectedConvention?.document_name}</DialogTitle>
+                <DialogTitle className="text-2xl font-serif break-all pr-6">
+                  {selectedConvention?.document_name}
+                </DialogTitle>
                 <DialogDescription className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Détails complets du dossier d'approbation
+                  Complete details of the approval file
                 </DialogDescription>
               </div>
             </div>
@@ -324,32 +407,53 @@ export function ConventionManagement() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-accent">
                   <User size={18} />
-                  <h3 className="text-xs font-bold uppercase tracking-widest">Informations Étudiant</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest">
+                    Student Information
+                  </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-6 bg-muted/30 p-6 rounded-2xl border border-border/40">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Nom Complet</p>
-                    <p className="text-sm font-bold">{selectedConvention?.owner?.full_name}</p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      Full Name
+                    </p>
+                    <p className="text-sm font-bold">
+                      {selectedConvention?.owner?.full_name}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Email</p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      Email
+                    </p>
                     <div className="flex items-center gap-2">
                       <Mail size={12} className="text-muted-foreground" />
-                      <p className="text-sm font-medium">{selectedConvention?.owner?.email}</p>
+                      <p className="text-sm font-medium">
+                        {selectedConvention?.owner?.email || "N/A"}
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Spécialité</p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      Specialty
+                    </p>
                     <div className="flex items-center gap-2">
-                      <GraduationCap size={12} className="text-muted-foreground" />
-                      <p className="text-sm font-medium">{selectedConvention?.owner?.specialty || "N/A"}</p>
+                      <GraduationCap
+                        size={12}
+                        className="text-muted-foreground"
+                      />
+                      <p className="text-sm font-medium">
+                        {selectedConvention?.owner?.specialty || "N/A"}
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Moyenne (GPA)</p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      Average (GPA)
+                    </p>
                     <div className="flex items-center gap-2">
                       <Trophy size={12} className="text-muted-foreground" />
-                      <Badge variant="secondary" className="font-mono text-xs">{selectedConvention?.owner?.gpa || "0.00"}</Badge>
+                      <Badge variant="secondary" className="font-mono text-xs">
+                        {selectedConvention?.owner?.gpa || "0.00"}
+                      </Badge>
                     </div>
                   </div>
                 </div>
@@ -359,32 +463,58 @@ export function ConventionManagement() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-accent">
                   <Building2 size={18} />
-                  <h3 className="text-xs font-bold uppercase tracking-widest">Détails du Stage</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest">
+                    Internship Details
+                  </h3>
                 </div>
                 <div className="grid grid-cols-1 gap-6 bg-muted/30 p-6 rounded-2xl border border-border/40">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Entreprise</p>
-                      <p className="text-sm font-bold">{selectedConvention?.internship_request?.company_name || "N/A"}</p>
+                      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                        Company
+                      </p>
+                      <p className="text-sm font-bold">
+                        {selectedConvention?.internship_request?.company_name ||
+                          "N/A"}
+                      </p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Période</p>
+                      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                        Period
+                      </p>
                       <div className="flex items-center gap-2">
                         <Calendar size={12} className="text-muted-foreground" />
                         <p className="text-xs font-medium">
-                          {selectedConvention?.internship_request?.start_date ? new Date(selectedConvention.internship_request.start_date).toLocaleDateString() : "..."} 
+                          {selectedConvention?.internship_request?.start_date
+                            ? new Date(
+                                selectedConvention.internship_request
+                                  .start_date,
+                              ).toLocaleDateString()
+                            : "..."}
                           {" - "}
-                          {selectedConvention?.internship_request?.end_date ? new Date(selectedConvention.internship_request.end_date).toLocaleDateString() : "..."}
+                          {selectedConvention?.internship_request?.end_date
+                            ? new Date(
+                                selectedConvention.internship_request.end_date,
+                              ).toLocaleDateString()
+                            : "..."}
                         </p>
                       </div>
                     </div>
                   </div>
                   <Separator className="bg-border/40" />
                   <div className="space-y-2">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Mission</p>
-                    <p className="text-sm font-bold leading-tight">{selectedConvention?.internship_request?.mission_title || "Sans titre"}</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed italic">
-                      "{selectedConvention?.internship_request?.mission_description || "Aucune description fournie."}"
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      Mission
+                    </p>
+                    <p className="text-sm font-bold leading-tight break-words">
+                      {selectedConvention?.internship_request?.mission_title ||
+                        "Untitled"}
+                    </p>
+                    <p className="text-xs text-muted-foreground leading-relaxed italic break-words">
+                      "
+                      {selectedConvention?.internship_request
+                        ?.mission_description || "No description provided."}
+                      "
                     </p>
                   </div>
                 </div>
@@ -394,14 +524,30 @@ export function ConventionManagement() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-accent">
                   <Clock size={18} />
-                  <h3 className="text-xs font-bold uppercase tracking-widest">État du Workflow</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest">
+                    Workflow State
+                  </h3>
                 </div>
                 <div className="flex items-center justify-between p-6 bg-zinc-900 text-zinc-100 rounded-2xl shadow-xl">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Niveau d'approbation</p>
-                    <p className="text-lg font-serif italic">Niveau {selectedConvention?.approval_level}</p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
+                      Approval Level
+                    </p>
+                    <p className="text-lg font-serif italic">
+                      Level {selectedConvention?.approval_level}
+                    </p>
                   </div>
-                  <Badge variant="outline" className="h-10 px-6 font-mono text-xs uppercase tracking-[0.2em] border-zinc-700 bg-zinc-800 text-zinc-300">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "h-10 px-6 font-mono text-xs uppercase tracking-[0.2em] text-zinc-300",
+                      selectedConvention?.status === "completed"
+                        ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                        : selectedConvention?.status === "rejected"
+                          ? "bg-destructive/10 text-destructive border-destructive/20"
+                          : "bg-zinc-800 border-zinc-700 text-zinc-300",
+                    )}
+                  >
                     {selectedConvention?.status}
                   </Badge>
                 </div>
@@ -409,24 +555,27 @@ export function ConventionManagement() {
 
               {/* Footer Actions */}
               <div className="flex items-center gap-3 pt-4 pb-8">
-                <Button 
+                <Button
                   className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-widest text-xs shadow-lg shadow-emerald-500/20"
                   onClick={() => {
                     approveMutation.mutate(selectedConvention.id)
                     setIsDetailsOpen(false)
                   }}
                 >
-                  <CheckCircle2 className="mr-2 size-4" /> Approuver le dossier
+                  <CheckCircle2 className="mr-2 size-4" /> Approve file
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   className="h-12 px-6 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-destructive/20"
                   onClick={() => {
-                    rejectMutation.mutate({ id: selectedConvention.id, reason: "Non conforme" })
+                    rejectMutation.mutate({
+                      id: selectedConvention.id,
+                      reason: "Non conforme",
+                    })
                     setIsDetailsOpen(false)
                   }}
                 >
-                  <XCircle className="mr-2 size-4" /> Rejeter
+                  <XCircle className="mr-2 size-4" /> Reject
                 </Button>
               </div>
             </div>

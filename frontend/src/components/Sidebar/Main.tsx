@@ -1,9 +1,13 @@
 import { Link as RouterLink, useRouterState } from "@tanstack/react-router"
 import type { LucideIcon } from "lucide-react"
 import { ChevronRight } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-import { motion, AnimatePresence } from "motion/react"
-
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -15,11 +19,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 
 export type Item = {
   icon: LucideIcon
@@ -34,32 +33,36 @@ interface MainProps {
   items: Item[]
 }
 
-function CollapsibleSidebarItem({ 
-  item, 
-  isActive, 
-  isItemActive, 
-  handleMenuClick 
-}: { 
-  item: Item, 
-  isActive: boolean, 
-  isItemActive: (item: Item) => boolean,
+function CollapsibleSidebarItem({
+  item,
+  isActive,
+  isItemActive,
+  handleMenuClick,
+}: {
+  item: Item
+  isActive: boolean
+  isItemActive: (item: Item) => boolean
   handleMenuClick: () => void
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Collapsible 
-      key={item.title} 
-      open={isOpen} 
+    <Collapsible
+      key={item.title}
+      open={isOpen}
       onOpenChange={setIsOpen}
-      asChild 
+      asChild
       className="group/collapsible"
     >
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
-          <SidebarMenuButton tooltip={item.title} isActive={isActive}>
-            <item.icon />
-            <span>{item.title}</span>
+          <SidebarMenuButton
+            tooltip={item.title}
+            isActive={isActive}
+            className="transition-all duration-200 hover:pl-3 data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
+          >
+            <item.icon className="size-[18px] transition-colors group-hover/menu-item:text-primary" />
+            <span className="font-medium">{item.title}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -84,7 +87,9 @@ function CollapsibleSidebarItem({
                           to={subItem.path}
                           search={subItem.search as any}
                           onClick={handleMenuClick}
+                          className="flex items-center gap-2 w-full"
                         >
+                          <subItem.icon className="size-3.5 opacity-60" />
                           <span>{subItem.title}</span>
                         </RouterLink>
                       </SidebarMenuSubButton>
@@ -132,7 +137,7 @@ export function Main({ items }: MainProps) {
 
             if (hasSubItems) {
               return (
-                <CollapsibleSidebarItem 
+                <CollapsibleSidebarItem
                   key={item.title}
                   item={item}
                   isActive={isActive}
@@ -147,6 +152,7 @@ export function Main({ items }: MainProps) {
                 <SidebarMenuButton
                   tooltip={item.title}
                   isActive={isActive}
+                  className="transition-all duration-200 hover:pl-3 data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
                   asChild
                 >
                   <RouterLink
@@ -154,8 +160,8 @@ export function Main({ items }: MainProps) {
                     search={item.search as any}
                     onClick={handleMenuClick}
                   >
-                    <item.icon />
-                    <span>{item.title}</span>
+                    <item.icon className="size-[18px] transition-colors group-hover/menu-item:text-primary" />
+                    <span className="font-medium">{item.title}</span>
                   </RouterLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
