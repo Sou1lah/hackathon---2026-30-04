@@ -37,6 +37,10 @@ export default function RecommendationForm() {
   const [mobility, setMobility] = useState<string>("both")
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [duration, setDuration] = useState<string>("")
+  const [specialty, setSpecialty] = useState<string>("")
+  const [level, setLevel] = useState<string>("")
+  const [language, setLanguage] = useState<string>("")
+  const [gpa, setGpa] = useState<string>("")
   const [recommendations, setRecommendations] = useState<RecommendationResult[]>([])
   const [isSubmitted, setIsSubmitted] = useState(false)
 
@@ -65,6 +69,10 @@ export default function RecommendationForm() {
       selected_mobility_type: mobility,
       selected_interests: selectedInterests,
       duration_preference: duration,
+      specialty: specialty || undefined,
+      level: level || undefined,
+      language: language || undefined,
+      gpa: gpa ? parseFloat(gpa) : undefined,
     })
   }
 
@@ -196,6 +204,53 @@ export default function RecommendationForm() {
                     </button>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <label className="text-sm font-bold">Spécialité</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Informatique, Management..."
+                  className="w-full px-4 py-3 bg-accent border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20"
+                  value={specialty}
+                  onChange={(e) => setSpecialty(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-bold">Niveau d'études</label>
+                <input
+                  type="text"
+                  placeholder="Ex: L3, M1, M2..."
+                  className="w-full px-4 py-3 bg-accent border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20"
+                  value={level}
+                  onChange={(e) => setLevel(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-bold">Langue(s) souhaitée(s)</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Français, Anglais..."
+                  className="w-full px-4 py-3 bg-accent border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-bold">Moyenne (GPA/Note)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Ex: 14.5, 3.8..."
+                  className="w-full px-4 py-3 bg-accent border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20"
+                  value={gpa}
+                  onChange={(e) => setGpa(e.target.value)}
+                />
               </div>
             </div>
 
