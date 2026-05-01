@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, List, Optional
 from sqlalchemy import DateTime
 from sqlmodel import Column, Field, Relationship, SQLModel, String
 
-from app.models import User
+from app.models import User, UserPublic
 from app.utils import get_datetime_utc
 
 
@@ -194,12 +194,17 @@ class Convention(ConventionBase, table=True):
     )
 
 
+
+
+
 class ConventionPublic(ConventionBase):
     id: uuid.UUID
     internship_request_id: uuid.UUID
     owner_id: uuid.UUID
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    owner: Optional[UserPublic] = None
+    internship_request: Optional[InternshipRequestPublic] = None
 
 
 class ConventionsPublic(SQLModel):

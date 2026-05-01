@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -44,9 +44,9 @@ const TransferAnimation = ({ type }: { type: "nationale" | "internationale" }) =
   return (
     <div className="relative h-32 w-full flex items-center justify-between px-12 md:px-24 mb-12">
       <div className="absolute inset-0 dot-pattern opacity-10" />
-      
+
       {/* Start Node */}
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="relative z-10 flex flex-col items-center gap-2"
@@ -63,13 +63,13 @@ const TransferAnimation = ({ type }: { type: "nationale" | "internationale" }) =
           <motion.div
             key={i}
             initial={{ left: "0%", opacity: 0 }}
-            animate={{ 
-              left: "100%", 
+            animate={{
+              left: "100%",
               opacity: [0, 1, 1, 0],
             }}
-            transition={{ 
-              duration: 2.5, 
-              repeat: Infinity, 
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
               delay: i * 0.6,
               ease: "linear"
             }}
@@ -79,7 +79,7 @@ const TransferAnimation = ({ type }: { type: "nationale" | "internationale" }) =
       </div>
 
       {/* End Node */}
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.3 }}
@@ -123,7 +123,7 @@ export default function MobilityView({ type }: MobilityViewProps) {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial="hidden"
       animate="visible"
       variants={stagger as any}
@@ -142,11 +142,11 @@ export default function MobilityView({ type }: MobilityViewProps) {
             {content.desc}
           </p>
         </div>
-        
+
         <div className="md:w-1/3 flex justify-center">
           <div className="size-32 md:size-48 bg-accent/5 rounded-[2.5rem] border border-accent/10 flex items-center justify-center relative">
-             <div className="absolute inset-0 dot-pattern opacity-20" />
-             {isNational ? <MapIcon size={64} className="text-accent" /> : <Globe size={64} className="text-accent" />}
+            <div className="absolute inset-0 dot-pattern opacity-20" />
+            {isNational ? <MapIcon size={64} className="text-accent" /> : <Globe size={64} className="text-accent" />}
           </div>
         </div>
       </motion.div>
@@ -175,31 +175,31 @@ export default function MobilityView({ type }: MobilityViewProps) {
             </TableHeader>
             <TableBody>
               {MOCK_STUDENTS.filter(s => s.type === type).map((student) => (
-                <TableRow 
-                  key={student.id} 
+                <TableRow
+                  key={student.id}
                   className="group hover:bg-muted/10 border-border/40 transition-colors cursor-pointer"
                   onClick={() => setSelectedStudent(student)}
                 >
                   <TableCell className="pl-8 py-6">
                     <div className="flex items-center gap-4">
-                       <div className="size-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-serif font-bold border border-accent/20">
-                          {student.name.split(" ").map(n => n[0]).join("")}
-                       </div>
-                       <div>
-                          <p className="font-bold text-foreground">{student.name}</p>
-                          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">{student.id}</p>
-                       </div>
+                      <div className="size-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-serif font-bold border border-accent/20">
+                        {student.name.split(" ").map(n => n[0]).join("")}
+                      </div>
+                      <div>
+                        <p className="font-bold text-foreground">{student.name}</p>
+                        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">{student.id}</p>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                       <Building2 size={14} className="text-accent/60" />
-                       {student.destination}
+                      <Building2 size={14} className="text-accent/60" />
+                      {student.destination}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={cn(
                         "text-[9px] font-bold uppercase tracking-widest px-3 py-1",
                         student.status === "Complété" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20"
@@ -210,7 +210,7 @@ export default function MobilityView({ type }: MobilityViewProps) {
                   </TableCell>
                   <TableCell className="text-right pr-8">
                     <Button variant="ghost" size="icon" className="rounded-xl hover:text-accent">
-                       <ArrowRight size={18} />
+                      <ArrowRight size={18} />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -236,7 +236,7 @@ export default function MobilityView({ type }: MobilityViewProps) {
               </div>
               <div className="p-10 space-y-8">
                 <div className="grid grid-cols-1 gap-4">
-                  {selectedStudent.requirements.map((req: any, idx: number) => (
+                  {selectedStudent.requirements.map((req, idx) => (
                     <div key={idx} className="flex items-center justify-between p-5 bg-muted/30 rounded-2xl border border-border/40 group hover:border-accent/30 transition-all">
                       <div className="flex items-center gap-4">
                         <div className={cn(
@@ -255,7 +255,7 @@ export default function MobilityView({ type }: MobilityViewProps) {
                   ))}
                 </div>
                 <div className="pt-4 border-t border-border/40 flex justify-end">
-                   <Button onClick={() => setSelectedStudent(null)} className="rounded-full px-8 bg-foreground text-background hover:bg-foreground/90">Fermer</Button>
+                  <Button onClick={() => setSelectedStudent(null)} className="rounded-full px-8 bg-foreground text-background hover:bg-foreground/90">Fermer</Button>
                 </div>
               </div>
             </>

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from sqlmodel import Session, col, func, select
+from sqlalchemy.orm import selectinload
 
 from app.models_mobility import (
     ActivityLogEntry,
@@ -162,18 +163,23 @@ def delete_convention(*, session: Session, db_convention: Convention) -> None:
     session.commit()
 
 
+
+
 def get_conventions_for_admin(
-    *, session: Session, approval_level: ApprovalLevel, skip: int = 0, limit: int = 100
+    *, session: Session, approval_level: ApprovalLevel | None = None, skip: int = 0, limit: int = 100
 ) -> tuple[list[Convention], int]:
-    count_statement = (
-        select(func.count())
-        .select_from(Convention)
-        .where(Convention.approval_level == approval_level)
-    )
+    statement = select(Convention)
+    count_statement = select(func.count()).select_from(Convention)
+    
+    if approval_level:
+        statement = statement.where(Convention.approval_level == approval_level)
+        count_statement = count_statement.where(Convention.approval_level == approval_level)
+        
     count = session.exec(count_statement).one()
+    
     statement = (
-        select(Convention)
-        .where(Convention.approval_level == approval_level)
+        statement
+        .options(selectinload(Convention.owner), selectinload(Convention.internship_request))
         .order_by(col(Convention.created_at).desc())
         .offset(skip)
         .limit(limit)

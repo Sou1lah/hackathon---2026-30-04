@@ -135,7 +135,11 @@ def delete_convention_endpoint(
     db_convention = get_convention(session=session, convention_id=id)
     if not db_convention:
         raise HTTPException(status_code=404, detail="Convention not found")
-    if db_convention.owner_id != current_user.id and not current_user.is_superuser:
+    if (
+        db_convention.owner_id != current_user.id 
+        and not current_user.is_superuser 
+        and not current_user.can_review_applications
+    ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     delete_convention(session=session, db_convention=db_convention)
     return Message(message="Convention deleted successfully")
@@ -154,12 +158,8 @@ def read_all_conventions_admin(
     Retrieve all conventions for reviewers.
     Permission: can_review_applications (DB field).
     """
-    # Superusers get N3 view; all other reviewers get N1 by default.
-    # More granular level routing can be added via additional DB fields if needed.
-    if current_reviewer.is_superuser:
-        level = ApprovalLevel.N3
-    else:
-        level = ApprovalLevel.N1
+    # Superusers see ALL; others see their specific level (N1 by default).
+    level = None if current_reviewer.is_superuser else ApprovalLevel.N1
 
     items, count = get_conventions_for_admin(
         session=session, approval_level=level, skip=skip, limit=limit
