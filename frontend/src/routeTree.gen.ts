@@ -15,11 +15,13 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutUsersRouteImport } from './routes/_layout/users'
 import { Route as LayoutSuiviRouteImport } from './routes/_layout/suivi'
 import { Route as LayoutStagesRouteImport } from './routes/_layout/stages'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutMobiliteRouteImport } from './routes/_layout/mobilite'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
+import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 import { Route as LayoutConventionRouteImport } from './routes/_layout/convention'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 
@@ -52,6 +54,11 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutUsersRoute = LayoutUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutSuiviRoute = LayoutSuiviRouteImport.update({
   id: '/suivi',
   path: '/suivi',
@@ -77,6 +84,11 @@ const LayoutItemsRoute = LayoutItemsRouteImport.update({
   path: '/items',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutDashboardRoute = LayoutDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutConventionRoute = LayoutConventionRouteImport.update({
   id: '/convention',
   path: '/convention',
@@ -96,11 +108,13 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/convention': typeof LayoutConventionRoute
+  '/dashboard': typeof LayoutDashboardRoute
   '/items': typeof LayoutItemsRoute
   '/mobilite': typeof LayoutMobiliteRoute
   '/settings': typeof LayoutSettingsRoute
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
+  '/users': typeof LayoutUsersRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -109,11 +123,13 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/convention': typeof LayoutConventionRoute
+  '/dashboard': typeof LayoutDashboardRoute
   '/items': typeof LayoutItemsRoute
   '/mobilite': typeof LayoutMobiliteRoute
   '/settings': typeof LayoutSettingsRoute
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
+  '/users': typeof LayoutUsersRoute
   '/': typeof LayoutIndexRoute
 }
 export interface FileRoutesById {
@@ -125,11 +141,13 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/convention': typeof LayoutConventionRoute
+  '/_layout/dashboard': typeof LayoutDashboardRoute
   '/_layout/items': typeof LayoutItemsRoute
   '/_layout/mobilite': typeof LayoutMobiliteRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/stages': typeof LayoutStagesRoute
   '/_layout/suivi': typeof LayoutSuiviRoute
+  '/_layout/users': typeof LayoutUsersRoute
   '/_layout/': typeof LayoutIndexRoute
 }
 export interface FileRouteTypes {
@@ -142,11 +160,13 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/convention'
+    | '/dashboard'
     | '/items'
     | '/mobilite'
     | '/settings'
     | '/stages'
     | '/suivi'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -155,11 +175,13 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/convention'
+    | '/dashboard'
     | '/items'
     | '/mobilite'
     | '/settings'
     | '/stages'
     | '/suivi'
+    | '/users'
     | '/'
   id:
     | '__root__'
@@ -170,11 +192,13 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_layout/admin'
     | '/_layout/convention'
+    | '/_layout/dashboard'
     | '/_layout/items'
     | '/_layout/mobilite'
     | '/_layout/settings'
     | '/_layout/stages'
     | '/_layout/suivi'
+    | '/_layout/users'
     | '/_layout/'
   fileRoutesById: FileRoutesById
 }
@@ -230,6 +254,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/users': {
+      id: '/_layout/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof LayoutUsersRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/suivi': {
       id: '/_layout/suivi'
       path: '/suivi'
@@ -265,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutItemsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/dashboard': {
+      id: '/_layout/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof LayoutDashboardRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/convention': {
       id: '/_layout/convention'
       path: '/convention'
@@ -285,22 +323,26 @@ declare module '@tanstack/react-router' {
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutConventionRoute: typeof LayoutConventionRoute
+  LayoutDashboardRoute: typeof LayoutDashboardRoute
   LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutMobiliteRoute: typeof LayoutMobiliteRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutStagesRoute: typeof LayoutStagesRoute
   LayoutSuiviRoute: typeof LayoutSuiviRoute
+  LayoutUsersRoute: typeof LayoutUsersRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutConventionRoute: LayoutConventionRoute,
+  LayoutDashboardRoute: LayoutDashboardRoute,
   LayoutItemsRoute: LayoutItemsRoute,
   LayoutMobiliteRoute: LayoutMobiliteRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutStagesRoute: LayoutStagesRoute,
   LayoutSuiviRoute: LayoutSuiviRoute,
+  LayoutUsersRoute: LayoutUsersRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 

@@ -1,13 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router"
-import Dashboard from "@/components/Mobility/Dashboard"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/_layout/")({
-  component: DashboardPage,
-  head: () => ({
-    meta: [{ title: "Dashboard - Mobility & Internships" }],
-  }),
+  beforeLoad: async () => {
+    throw redirect({
+      to: "/items",
+    })
+  },
 })
-
-function DashboardPage() {
-  return <Dashboard />
-}

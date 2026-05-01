@@ -3,7 +3,6 @@ from fastapi import APIRouter
 from app.api.routes import (
     activity_log,
     conventions,
-    dashboard,
     internships,
     items,
     login,
@@ -22,9 +21,10 @@ api_router.include_router(items.router)
 api_router.include_router(internships.router)
 api_router.include_router(conventions.router)
 api_router.include_router(mobility.router)
-api_router.include_router(activity_log.router)
-api_router.include_router(dashboard.router)
+from app.api.routes import overview
 
+api_router.include_router(activity_log.router)
+api_router.include_router(overview.router)
 
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)

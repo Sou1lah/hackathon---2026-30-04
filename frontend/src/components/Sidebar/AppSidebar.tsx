@@ -3,10 +3,11 @@ import {
   FilePlus,
   FileText,
   Globe,
-  Home,
   LayoutGrid,
   Map,
   Settings,
+  Users,
+  Home,
 } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -28,7 +29,8 @@ const baseItems: Item[] = [
   { icon: Map, title: "Mobilité Nationale", path: "/mobilite", search: { type: "nationale" } },
   { icon: Globe, title: "Mobilité Internationale", path: "/mobilite", search: { type: "internationale" } },
   { icon: LayoutGrid, title: "Items", path: "/items" },
-  { icon: Home, title: "Dashboard", path: "/" },
+  { icon: Users, title: "Utilisateurs", path: "/users" },
+  { icon: Home, title: "Dashboard", path: "/dashboard" },
 ]
 
 export function AppSidebar() {
