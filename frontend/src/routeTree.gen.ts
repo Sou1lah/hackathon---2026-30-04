@@ -15,15 +15,15 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
-import { Route as LayoutUsersRouteImport } from './routes/_layout/users'
+import { Route as LayoutSuiviStageRouteImport } from './routes/_layout/suivi-stage'
 import { Route as LayoutSuiviRouteImport } from './routes/_layout/suivi'
 import { Route as LayoutStagesRouteImport } from './routes/_layout/stages'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutMobiliteRouteImport } from './routes/_layout/mobilite'
-import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 import { Route as LayoutConventionRouteImport } from './routes/_layout/convention'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutAdminSuiviStageRouteImport } from './routes/_layout/admin/suivi-stage'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -54,9 +54,9 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutUsersRoute = LayoutUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
+const LayoutSuiviStageRoute = LayoutSuiviStageRouteImport.update({
+  id: '/suivi-stage',
+  path: '/suivi-stage',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutSuiviRoute = LayoutSuiviRouteImport.update({
@@ -79,11 +79,6 @@ const LayoutMobiliteRoute = LayoutMobiliteRouteImport.update({
   path: '/mobilite',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutItemsRoute = LayoutItemsRouteImport.update({
-  id: '/items',
-  path: '/items',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutDashboardRoute = LayoutDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -99,6 +94,11 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutAdminSuiviStageRoute = LayoutAdminSuiviStageRouteImport.update({
+  id: '/suivi-stage',
+  path: '/suivi-stage',
+  getParentRoute: () => LayoutAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
@@ -106,31 +106,31 @@ export interface FileRoutesByFullPath {
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/admin': typeof LayoutAdminRoute
+  '/admin': typeof LayoutAdminRouteWithChildren
   '/convention': typeof LayoutConventionRoute
   '/dashboard': typeof LayoutDashboardRoute
-  '/items': typeof LayoutItemsRoute
   '/mobilite': typeof LayoutMobiliteRoute
   '/settings': typeof LayoutSettingsRoute
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
-  '/users': typeof LayoutUsersRoute
+  '/suivi-stage': typeof LayoutSuiviStageRoute
+  '/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/admin': typeof LayoutAdminRoute
+  '/admin': typeof LayoutAdminRouteWithChildren
   '/convention': typeof LayoutConventionRoute
   '/dashboard': typeof LayoutDashboardRoute
-  '/items': typeof LayoutItemsRoute
   '/mobilite': typeof LayoutMobiliteRoute
   '/settings': typeof LayoutSettingsRoute
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
-  '/users': typeof LayoutUsersRoute
+  '/suivi-stage': typeof LayoutSuiviStageRoute
   '/': typeof LayoutIndexRoute
+  '/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -139,16 +139,16 @@ export interface FileRoutesById {
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/_layout/admin': typeof LayoutAdminRoute
+  '/_layout/admin': typeof LayoutAdminRouteWithChildren
   '/_layout/convention': typeof LayoutConventionRoute
   '/_layout/dashboard': typeof LayoutDashboardRoute
-  '/_layout/items': typeof LayoutItemsRoute
   '/_layout/mobilite': typeof LayoutMobiliteRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/stages': typeof LayoutStagesRoute
   '/_layout/suivi': typeof LayoutSuiviRoute
-  '/_layout/users': typeof LayoutUsersRoute
+  '/_layout/suivi-stage': typeof LayoutSuiviStageRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,12 +161,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/convention'
     | '/dashboard'
-    | '/items'
     | '/mobilite'
     | '/settings'
     | '/stages'
     | '/suivi'
-    | '/users'
+    | '/suivi-stage'
+    | '/admin/suivi-stage'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -176,13 +176,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/convention'
     | '/dashboard'
-    | '/items'
     | '/mobilite'
     | '/settings'
     | '/stages'
     | '/suivi'
-    | '/users'
+    | '/suivi-stage'
     | '/'
+    | '/admin/suivi-stage'
   id:
     | '__root__'
     | '/_layout'
@@ -193,13 +193,13 @@ export interface FileRouteTypes {
     | '/_layout/admin'
     | '/_layout/convention'
     | '/_layout/dashboard'
-    | '/_layout/items'
     | '/_layout/mobilite'
     | '/_layout/settings'
     | '/_layout/stages'
     | '/_layout/suivi'
-    | '/_layout/users'
+    | '/_layout/suivi-stage'
     | '/_layout/'
+    | '/_layout/admin/suivi-stage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -254,11 +254,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/users': {
-      id: '/_layout/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof LayoutUsersRouteImport
+    '/_layout/suivi-stage': {
+      id: '/_layout/suivi-stage'
+      path: '/suivi-stage'
+      fullPath: '/suivi-stage'
+      preLoaderRoute: typeof LayoutSuiviStageRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/suivi': {
@@ -289,13 +289,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutMobiliteRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/items': {
-      id: '/_layout/items'
-      path: '/items'
-      fullPath: '/items'
-      preLoaderRoute: typeof LayoutItemsRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/dashboard': {
       id: '/_layout/dashboard'
       path: '/dashboard'
@@ -317,32 +310,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/admin/suivi-stage': {
+      id: '/_layout/admin/suivi-stage'
+      path: '/suivi-stage'
+      fullPath: '/admin/suivi-stage'
+      preLoaderRoute: typeof LayoutAdminSuiviStageRouteImport
+      parentRoute: typeof LayoutAdminRoute
+    }
   }
 }
 
+interface LayoutAdminRouteChildren {
+  LayoutAdminSuiviStageRoute: typeof LayoutAdminSuiviStageRoute
+}
+
+const LayoutAdminRouteChildren: LayoutAdminRouteChildren = {
+  LayoutAdminSuiviStageRoute: LayoutAdminSuiviStageRoute,
+}
+
+const LayoutAdminRouteWithChildren = LayoutAdminRoute._addFileChildren(
+  LayoutAdminRouteChildren,
+)
+
 interface LayoutRouteChildren {
-  LayoutAdminRoute: typeof LayoutAdminRoute
+  LayoutAdminRoute: typeof LayoutAdminRouteWithChildren
   LayoutConventionRoute: typeof LayoutConventionRoute
   LayoutDashboardRoute: typeof LayoutDashboardRoute
-  LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutMobiliteRoute: typeof LayoutMobiliteRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutStagesRoute: typeof LayoutStagesRoute
   LayoutSuiviRoute: typeof LayoutSuiviRoute
-  LayoutUsersRoute: typeof LayoutUsersRoute
+  LayoutSuiviStageRoute: typeof LayoutSuiviStageRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutAdminRoute: LayoutAdminRoute,
+  LayoutAdminRoute: LayoutAdminRouteWithChildren,
   LayoutConventionRoute: LayoutConventionRoute,
   LayoutDashboardRoute: LayoutDashboardRoute,
-  LayoutItemsRoute: LayoutItemsRoute,
   LayoutMobiliteRoute: LayoutMobiliteRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutStagesRoute: LayoutStagesRoute,
   LayoutSuiviRoute: LayoutSuiviRoute,
-  LayoutUsersRoute: LayoutUsersRoute,
+  LayoutSuiviStageRoute: LayoutSuiviStageRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 

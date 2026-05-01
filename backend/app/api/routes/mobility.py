@@ -10,6 +10,12 @@ from app.crud_mobility import (
     get_mobility_file,
     get_mobility_files,
     update_mobility_file,
+    get_internship_summary_data,
+    create_internship_report,
+    get_internship_reports,
+    update_internship_report,
+    create_tutor_evaluation,
+    get_tutor_evaluation,
 )
 from app.models import Message
 from app.models_mobility import (
@@ -18,6 +24,12 @@ from app.models_mobility import (
     MobilityFilesPublic,
     MobilityFileUpdate,
     MobilityType,
+    InternshipReportCreate,
+    InternshipReportPublic,
+    InternshipReportsPublic,
+    InternshipReportUpdate,
+    TutorEvaluationCreate,
+    TutorEvaluationPublic,
 )
 
 router = APIRouter(prefix="/mobility", tags=["mobility"])
@@ -106,3 +118,62 @@ def delete_mobility(
         raise HTTPException(status_code=403, detail="Not enough permissions")
     delete_mobility_file(session=session, db_file=db_file)
     return Message(message="Mobility file deleted successfully")
+
+
+@router.get("/internship-summary/{id}", response_model=dict[str, Any])
+def read_internship_summary(
+    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Get summary data for the internship dashboard.
+    """
+    return get_internship_summary_data(session=session, internship_request_id=id)
+
+
+# ---------- Reports ----------
+
+@router.get("/reports/{internship_id}", response_model=InternshipReportsPublic)
+def read_reports(
+    session: SessionDep,
+    current_user: CurrentUser,
+    internship_id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    items, count = get_internship_reports(
+        session=session, internship_request_id=internship_id, skip=skip, limit=limit
+    )
+    return InternshipReportsPublic(
+        data=[InternshipReportPublic.model_validate(i) for i in items], count=count
+    )
+
+
+@router.post("/reports/", response_model=InternshipReportPublic)
+def create_report(
+    *, session: SessionDep, current_user: CurrentUser, report_in: InternshipReportCreate
+) -> Any:
+    return create_internship_report(
+        session=session, report_in=report_in, owner_id=current_user.id
+    )
+
+
+# ---------- Evaluations ----------
+
+@router.get("/evaluations/{internship_id}", response_model=TutorEvaluationPublic | None)
+def read_evaluation(
+    session: SessionDep, current_user: CurrentUser, internship_id: uuid.UUID
+) -> Any:
+    return get_tutor_evaluation(session=session, internship_request_id=internship_id)
+
+
+@router.post("/evaluations/", response_model=TutorEvaluationPublic)
+def create_evaluation(
+    *, session: SessionDep, current_user: CurrentUser, evaluation_in: TutorEvaluationCreate
+) -> Any:
+    # DB-driven permission check: can_review_applications covers tutors and admins
+    if not current_user.is_superuser and not current_user.can_review_applications:
+        raise HTTPException(status_code=403, detail="Access denied: 'can_review_applications' required")
+    
+    return create_tutor_evaluation(
+        session=session, evaluation_in=evaluation_in, owner_id=current_user.id
+    )

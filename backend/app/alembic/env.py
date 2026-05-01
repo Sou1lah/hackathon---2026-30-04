@@ -20,6 +20,10 @@ fileConfig(config.config_file_name)
 # target_metadata = None
 
 from app.models import SQLModel  # noqa
+from app.models_mobility import InternshipRequest, Convention, MobilityFile, ActivityLogEntry, InternshipReport, TutorEvaluation  # noqa
+from app.models_suivi import ActivityLog, TutorFeedback  # noqa
+from app.models_recommendation import UserInteraction  # noqa
+from app.models_scraper import InternshipOffer  # noqa
 from app.core.config import settings # noqa
 
 target_metadata = SQLModel.metadata

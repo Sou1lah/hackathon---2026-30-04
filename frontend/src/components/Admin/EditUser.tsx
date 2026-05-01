@@ -43,6 +43,12 @@ const formSchema = z
     confirm_password: z.string().optional(),
     is_superuser: z.boolean().optional(),
     is_active: z.boolean().optional(),
+    // DB-driven permission flags
+    can_access_dashboard: z.boolean().optional(),
+    can_apply_internship: z.boolean().optional(),
+    can_view_convention: z.boolean().optional(),
+    can_view_tracking: z.boolean().optional(),
+    can_review_applications: z.boolean().optional(),
   })
   .refine((data) => !data.password || data.password === data.confirm_password, {
     message: "The passwords don't match",
@@ -70,6 +76,11 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
       full_name: user.full_name ?? undefined,
       is_superuser: user.is_superuser,
       is_active: user.is_active,
+      can_access_dashboard: user.can_access_dashboard ?? false,
+      can_apply_internship: user.can_apply_internship ?? false,
+      can_view_convention: user.can_view_convention ?? false,
+      can_view_tracking: user.can_view_tracking ?? false,
+      can_review_applications: user.can_review_applications ?? false,
     },
   })
 
@@ -102,16 +113,16 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
         onSelect={(e) => e.preventDefault()}
         onClick={() => setIsOpen(true)}
       >
-        <Pencil />
+        <Pencil className="size-4 mr-2" />
         Edit User
       </DropdownMenuItem>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
               <DialogTitle>Edit User</DialogTitle>
               <DialogDescription>
-                Update the user details below.
+                Update the user details and permissions below.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -155,7 +166,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Set Password</FormLabel>
+                    <FormLabel>Set Password (Optional)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Password"
@@ -186,40 +197,128 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="is_superuser"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Is superuser?</FormLabel>
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-4 pt-4 border-t border-border mt-2">
+                <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Permissions</h4>
+                
+                <div className="grid grid-cols-1 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="can_access_dashboard"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer">Access Dashboard</FormLabel>
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Is active?</FormLabel>
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="can_apply_internship"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer">Apply for Internships</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="can_view_convention"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer">View Conventions</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="can_view_tracking"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer">View Internship Tracking</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="can_review_applications"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer">Review Applications (Reviewer/Admin)</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-border mt-2">
+                <FormField
+                  control={form.control}
+                  name="is_superuser"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal font-bold text-destructive">Is superuser?</FormLabel>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_active"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">Is active?</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="pt-6">
               <DialogClose asChild>
                 <Button variant="outline" disabled={mutation.isPending}>
                   Cancel

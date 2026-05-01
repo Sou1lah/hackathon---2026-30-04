@@ -3,7 +3,508 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ActivityLogReadActivityLogData, ActivityLogReadActivityLogResponse, ActivityLogCreateLogEntryData, ActivityLogCreateLogEntryResponse, ConventionsReadConventionsData, ConventionsReadConventionsResponse, ConventionsCreateConventionEndpointData, ConventionsCreateConventionEndpointResponse, ConventionsReadConventionData, ConventionsReadConventionResponse, ConventionsUpdateConventionEndpointData, ConventionsUpdateConventionEndpointResponse, ConventionsDeleteConventionEndpointData, ConventionsDeleteConventionEndpointResponse, ConventionsSignConventionData, ConventionsSignConventionResponse, ConventionsReadAllConventionsAdminData, ConventionsReadAllConventionsAdminResponse, ConventionsApproveConventionEndpointData, ConventionsApproveConventionEndpointResponse, ConventionsRejectConventionEndpointData, ConventionsRejectConventionEndpointResponse, ConventionsForwardConventionEndpointData, ConventionsForwardConventionEndpointResponse, HealthHealthResponse, InternshipsReadInternshipRequestsData, InternshipsReadInternshipRequestsResponse, InternshipsCreateInternshipData, InternshipsCreateInternshipResponse, InternshipsReadInternshipRequestData, InternshipsReadInternshipRequestResponse, InternshipsUpdateInternshipData, InternshipsUpdateInternshipResponse, InternshipsDeleteInternshipData, InternshipsDeleteInternshipResponse, InternshipsRefreshOffersResponse, InternshipsReadOffersData, InternshipsReadOffersResponse, InternshipsReadRecommendedOffersData, InternshipsReadRecommendedOffersResponse, InternshipsReadOfferData, InternshipsReadOfferResponse, InternshipsLogInteractionData, InternshipsLogInteractionResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MobilityReadMobilityFilesData, MobilityReadMobilityFilesResponse, MobilityCreateMobilityData, MobilityCreateMobilityResponse, MobilityReadMobilityFileData, MobilityReadMobilityFileResponse, MobilityUpdateMobilityData, MobilityUpdateMobilityResponse, MobilityDeleteMobilityData, MobilityDeleteMobilityResponse, MobilityReadInternshipSummaryData, MobilityReadInternshipSummaryResponse, MobilityReadReportsData, MobilityReadReportsResponse, MobilityCreateReportData, MobilityCreateReportResponse, MobilityReadEvaluationData, MobilityReadEvaluationResponse, MobilityCreateEvaluationData, MobilityCreateEvaluationResponse, OverviewGetOverviewDataResponse, PrivateCreateUserData, PrivateCreateUserResponse, RecommendationsReadUserProfileResponse, RecommendationsSubmitStageRequestData, RecommendationsSubmitStageRequestResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class ActivityLogService {
+    /**
+     * Read Activity Log
+     * Retrieve activity log entries for a specific internship request.
+     * @param data The data for the request.
+     * @param data.internshipRequestId
+     * @param data.skip
+     * @param data.limit
+     * @returns ActivityLogEntriesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readActivityLog(data: ActivityLogReadActivityLogData): CancelablePromise<ActivityLogReadActivityLogResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/activity-log/',
+            query: {
+                internship_request_id: data.internshipRequestId,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Log Entry
+     * Create a new activity log entry.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ActivityLogEntryPublic Successful Response
+     * @throws ApiError
+     */
+    public static createLogEntry(data: ActivityLogCreateLogEntryData): CancelablePromise<ActivityLogCreateLogEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/activity-log/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ConventionsService {
+    /**
+     * Read Conventions
+     * Retrieve conventions for the current user.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns ConventionsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readConventions(data: ConventionsReadConventionsData = {}): CancelablePromise<ConventionsReadConventionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/conventions/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Convention Endpoint
+     * Create new convention.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ConventionPublic Successful Response
+     * @throws ApiError
+     */
+    public static createConventionEndpoint(data: ConventionsCreateConventionEndpointData): CancelablePromise<ConventionsCreateConventionEndpointResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/conventions/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Convention
+     * Get convention by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ConventionPublic Successful Response
+     * @throws ApiError
+     */
+    public static readConvention(data: ConventionsReadConventionData): CancelablePromise<ConventionsReadConventionResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/conventions/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Convention Endpoint
+     * Update a convention.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns ConventionPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateConventionEndpoint(data: ConventionsUpdateConventionEndpointData): CancelablePromise<ConventionsUpdateConventionEndpointResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/conventions/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Convention Endpoint
+     * Delete a convention.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteConventionEndpoint(data: ConventionsDeleteConventionEndpointData): CancelablePromise<ConventionsDeleteConventionEndpointResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/conventions/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Sign Convention
+     * Advance the convention to the next signature step.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ConventionPublic Successful Response
+     * @throws ApiError
+     */
+    public static signConvention(data: ConventionsSignConventionData): CancelablePromise<ConventionsSignConventionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/conventions/{id}/sign',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read All Conventions Admin
+     * Retrieve conventions for the current admin's level.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns ConventionsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readAllConventionsAdmin(data: ConventionsReadAllConventionsAdminData = {}): CancelablePromise<ConventionsReadAllConventionsAdminResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/conventions/admin/all',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Approve Convention Endpoint
+     * Approve a convention and move it to the next level.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ConventionPublic Successful Response
+     * @throws ApiError
+     */
+    public static approveConventionEndpoint(data: ConventionsApproveConventionEndpointData): CancelablePromise<ConventionsApproveConventionEndpointResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/conventions/{id}/approve',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Reject Convention Endpoint
+     * Reject a convention.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.reason
+     * @returns ConventionPublic Successful Response
+     * @throws ApiError
+     */
+    public static rejectConventionEndpoint(data: ConventionsRejectConventionEndpointData): CancelablePromise<ConventionsRejectConventionEndpointResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/conventions/{id}/reject',
+            path: {
+                id: data.id
+            },
+            query: {
+                reason: data.reason
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Forward Convention Endpoint
+     * Forward a convention to a specific level.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.nextLevel
+     * @returns ConventionPublic Successful Response
+     * @throws ApiError
+     */
+    public static forwardConventionEndpoint(data: ConventionsForwardConventionEndpointData): CancelablePromise<ConventionsForwardConventionEndpointResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/conventions/{id}/forward',
+            path: {
+                id: data.id
+            },
+            query: {
+                next_level: data.nextLevel
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class HealthService {
+    /**
+     * Health
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static health(): CancelablePromise<HealthHealthResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/health'
+        });
+    }
+}
+
+export class InternshipsService {
+    /**
+     * Read Internship Requests
+     * Retrieve internship requests for the current user.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns InternshipRequestsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readInternshipRequests(data: InternshipsReadInternshipRequestsData = {}): CancelablePromise<InternshipsReadInternshipRequestsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/internship-requests/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Internship
+     * Create new internship request.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns InternshipRequestPublic Successful Response
+     * @throws ApiError
+     */
+    public static createInternship(data: InternshipsCreateInternshipData): CancelablePromise<InternshipsCreateInternshipResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/internship-requests/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Internship Request
+     * Get internship request by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns InternshipRequestPublic Successful Response
+     * @throws ApiError
+     */
+    public static readInternshipRequest(data: InternshipsReadInternshipRequestData): CancelablePromise<InternshipsReadInternshipRequestResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/internship-requests/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Internship
+     * Update an internship request.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns InternshipRequestPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateInternship(data: InternshipsUpdateInternshipData): CancelablePromise<InternshipsUpdateInternshipResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/internship-requests/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Internship
+     * Delete an internship request.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteInternship(data: InternshipsDeleteInternshipData): CancelablePromise<InternshipsDeleteInternshipResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/internship-requests/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Refresh Offers
+     * Triggers scraping and DB sync for internship offers in the background.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static refreshOffers(): CancelablePromise<InternshipsRefreshOffersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/internships/refresh'
+        });
+    }
+    
+    /**
+     * Read Offers
+     * Retrieve stored internship offers.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns InternshipOffersPublic Successful Response
+     * @throws ApiError
+     */
+    public static readOffers(data: InternshipsReadOffersData = {}): CancelablePromise<InternshipsReadOffersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/internships/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Recommended Offers
+     * Retrieve recommended internship offers for the current user.
+     * @param data The data for the request.
+     * @param data.limit
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static readRecommendedOffers(data: InternshipsReadRecommendedOffersData = {}): CancelablePromise<InternshipsReadRecommendedOffersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/internships/recommended',
+            query: {
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Offer
+     * Get a specific internship offer by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns InternshipOfferPublic Successful Response
+     * @throws ApiError
+     */
+    public static readOffer(data: InternshipsReadOfferData): CancelablePromise<InternshipsReadOfferResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/internships/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Log Interaction
+     * Log a user interaction (view, click, save) for an internship offer.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.eventType
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static logInteraction(data: InternshipsLogInteractionData): CancelablePromise<InternshipsLogInteractionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/internships/{id}/track',
+            path: {
+                id: data.id
+            },
+            query: {
+                event_type: data.eventType
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**
@@ -213,6 +714,239 @@ export class LoginService {
     }
 }
 
+export class MobilityService {
+    /**
+     * Read Mobility Files
+     * Retrieve mobility files, optionally filtered by type (nationale/internationale).
+     * @param data The data for the request.
+     * @param data.mobilityType
+     * @param data.skip
+     * @param data.limit
+     * @returns MobilityFilesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readMobilityFiles(data: MobilityReadMobilityFilesData = {}): CancelablePromise<MobilityReadMobilityFilesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/mobility/',
+            query: {
+                mobility_type: data.mobilityType,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Mobility
+     * Create new mobility file.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns MobilityFilePublic Successful Response
+     * @throws ApiError
+     */
+    public static createMobility(data: MobilityCreateMobilityData): CancelablePromise<MobilityCreateMobilityResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/mobility/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Mobility File
+     * Get mobility file by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns MobilityFilePublic Successful Response
+     * @throws ApiError
+     */
+    public static readMobilityFile(data: MobilityReadMobilityFileData): CancelablePromise<MobilityReadMobilityFileResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/mobility/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Mobility
+     * Update a mobility file.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns MobilityFilePublic Successful Response
+     * @throws ApiError
+     */
+    public static updateMobility(data: MobilityUpdateMobilityData): CancelablePromise<MobilityUpdateMobilityResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/mobility/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Mobility
+     * Delete a mobility file.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteMobility(data: MobilityDeleteMobilityData): CancelablePromise<MobilityDeleteMobilityResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/mobility/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Internship Summary
+     * Get summary data for the internship dashboard.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static readInternshipSummary(data: MobilityReadInternshipSummaryData): CancelablePromise<MobilityReadInternshipSummaryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/mobility/internship-summary/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Reports
+     * @param data The data for the request.
+     * @param data.internshipId
+     * @param data.skip
+     * @param data.limit
+     * @returns InternshipReportsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readReports(data: MobilityReadReportsData): CancelablePromise<MobilityReadReportsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/mobility/reports/{internship_id}',
+            path: {
+                internship_id: data.internshipId
+            },
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Report
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns InternshipReportPublic Successful Response
+     * @throws ApiError
+     */
+    public static createReport(data: MobilityCreateReportData): CancelablePromise<MobilityCreateReportResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/mobility/reports/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Evaluation
+     * @param data The data for the request.
+     * @param data.internshipId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static readEvaluation(data: MobilityReadEvaluationData): CancelablePromise<MobilityReadEvaluationResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/mobility/evaluations/{internship_id}',
+            path: {
+                internship_id: data.internshipId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Evaluation
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns TutorEvaluationPublic Successful Response
+     * @throws ApiError
+     */
+    public static createEvaluation(data: MobilityCreateEvaluationData): CancelablePromise<MobilityCreateEvaluationResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/mobility/evaluations/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class OverviewService {
+    /**
+     * Get Overview Data
+     * Get detailed overview statistics for the dashboard using real data.
+     * @returns DashboardOverviewResponse Successful Response
+     * @throws ApiError
+     */
+    public static getOverviewData(): CancelablePromise<OverviewGetOverviewDataResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/overview/'
+        });
+    }
+}
+
 export class PrivateService {
     /**
      * Create User
@@ -226,6 +960,45 @@ export class PrivateService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/private/users/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class RecommendationsService {
+    /**
+     * Read User Profile
+     * Get current user profile for display (read-only in UI).
+     * @returns UserPublic Successful Response
+     * @throws ApiError
+     */
+    public static readUserProfile(): CancelablePromise<RecommendationsReadUserProfileResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/recommendations/me/profile'
+        });
+    }
+    
+    /**
+     * Submit Stage Request
+     * Submit a stage request and get ranked internship recommendations.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @param data.debug
+     * @returns RecommendationResponse Successful Response
+     * @throws ApiError
+     */
+    public static submitStageRequest(data: RecommendationsSubmitStageRequestData): CancelablePromise<RecommendationsSubmitStageRequestResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/recommendations/stage-request',
+            query: {
+                debug: data.debug
+            },
             body: data.requestBody,
             mediaType: 'application/json',
             errors: {

@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, datetime, timezone
 from enum import Enum
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from sqlalchemy import DateTime
 from sqlmodel import Column, Field, Relationship, SQLModel, String
@@ -18,6 +19,13 @@ class InternshipStatus(str, Enum):
     active = "active"
     completed = "completed"
     blocked = "blocked"
+
+
+class ReportStatus(str, Enum):
+    pending = "pending"
+    reviewed = "reviewed"
+    approved = "approved"
+    rejected = "rejected"
 
 
 class VerificationStatus(str, Enum):
@@ -52,6 +60,9 @@ class AlertSeverity(str, Enum):
 
 
 # ---------- InternshipRequest ----------
+
+
+
 
 class InternshipRequestBase(SQLModel):
     student_name: str = Field(max_length=255)
@@ -112,11 +123,17 @@ class InternshipRequest(InternshipRequestBase, table=True):
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
-    owner: User | None = Relationship()
-    conventions: list["Convention"] = Relationship(
+    owner: Optional[User] = Relationship()
+    conventions: List["Convention"] = Relationship(
         back_populates="internship_request", cascade_delete=True
     )
-    activity_logs: list["ActivityLogEntry"] = Relationship(
+    activity_logs: List["ActivityLogEntry"] = Relationship(
+        back_populates="internship_request", cascade_delete=True
+    )
+    reports: List["InternshipReport"] = Relationship(
+        back_populates="internship_request", cascade_delete=True
+    )
+    evaluation: Optional["TutorEvaluation"] = Relationship(
         back_populates="internship_request", cascade_delete=True
     )
 
@@ -139,6 +156,8 @@ class ConventionBase(SQLModel):
     document_name: str = Field(max_length=255)
     signature_step: int = Field(default=1, ge=1, le=8)
     status: str = Field(default="pending", max_length=50)
+    approval_level: ApprovalLevel = Field(default=ApprovalLevel.N1)
+    admin_status: str = Field(default="pending", max_length=50)
 
 
 class ConventionCreate(ConventionBase):
@@ -149,6 +168,8 @@ class ConventionUpdate(SQLModel):
     document_name: str | None = Field(default=None, max_length=255)
     signature_step: int | None = Field(default=None, ge=1, le=8)
     status: str | None = Field(default=None, max_length=50)
+    approval_level: ApprovalLevel | None = None
+    admin_status: str | None = None
 
 
 class Convention(ConventionBase, table=True):
@@ -167,7 +188,7 @@ class Convention(ConventionBase, table=True):
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
-    owner: User | None = Relationship()
+    owner: "User" = Relationship()
     internship_request: InternshipRequest | None = Relationship(
         back_populates="conventions"
     )
@@ -227,7 +248,7 @@ class MobilityFile(MobilityFileBase, table=True):
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
-    owner: User | None = Relationship()
+    owner: "User" = Relationship()
 
 
 class MobilityFilePublic(MobilityFileBase):
@@ -270,7 +291,7 @@ class ActivityLogEntry(ActivityLogEntryBase, table=True):
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
-    owner: User | None = Relationship()
+    owner: "User" = Relationship()
     internship_request: InternshipRequest | None = Relationship(
         back_populates="activity_logs"
     )
@@ -286,6 +307,94 @@ class ActivityLogEntryPublic(ActivityLogEntryBase):
 class ActivityLogEntriesPublic(SQLModel):
     data: list[ActivityLogEntryPublic]
     count: int
+
+
+# ---------- InternshipReport ----------
+
+class InternshipReportBase(SQLModel):
+    title: str = Field(max_length=255)
+    file_url: str | None = Field(default=None, max_length=512)
+    status: ReportStatus = ReportStatus.pending
+    feedback: str | None = Field(default=None, max_length=2000)
+
+
+class InternshipReportCreate(InternshipReportBase):
+    internship_request_id: uuid.UUID
+
+
+class InternshipReportUpdate(SQLModel):
+    title: str | None = Field(default=None, max_length=255)
+    status: ReportStatus | None = None
+    feedback: str | None = Field(default=None, max_length=2000)
+
+
+class InternshipReport(InternshipReportBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    internship_request_id: uuid.UUID = Field(
+        foreign_key="internshiprequest.id", nullable=False, ondelete="CASCADE"
+    )
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    submitted_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    reviewed_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    internship_request: InternshipRequest | None = Relationship(
+        back_populates="reports"
+    )
+
+
+class InternshipReportPublic(InternshipReportBase):
+    id: uuid.UUID
+    internship_request_id: uuid.UUID
+    owner_id: uuid.UUID
+    submitted_at: datetime | None = None
+    reviewed_at: datetime | None = None
+
+
+class InternshipReportsPublic(SQLModel):
+    data: list[InternshipReportPublic]
+    count: int
+
+
+# ---------- TutorEvaluation ----------
+
+class TutorEvaluationBase(SQLModel):
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=2000)
+
+
+class TutorEvaluationCreate(TutorEvaluationBase):
+    internship_request_id: uuid.UUID
+
+
+class TutorEvaluation(TutorEvaluationBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    internship_request_id: uuid.UUID = Field(
+        foreign_key="internshiprequest.id", nullable=False, ondelete="CASCADE"
+    )
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    internship_request: InternshipRequest | None = Relationship(
+        back_populates="evaluation"
+    )
+
+
+class TutorEvaluationPublic(TutorEvaluationBase):
+    id: uuid.UUID
+    internship_request_id: uuid.UUID
+    owner_id: uuid.UUID
+    created_at: datetime | None = None
 
 
 # ---------- Dashboard Stats ----------
@@ -326,3 +435,19 @@ class AlertPublic(AlertBase):
 class AlertsPublic(SQLModel):
     data: list[AlertPublic]
     count: int
+
+
+class InternshipSummaryPublic(SQLModel):
+    id: uuid.UUID
+    status: str
+    progress: float
+    current_step: int
+    total_hours: int
+    recent_logs: list[ActivityLogEntryPublic]
+    reports: list[InternshipReportPublic]
+    evaluation: TutorEvaluationPublic | None = None
+    alerts: list[dict]
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    created_at: datetime | None = None
+    days_active: int | None = 0

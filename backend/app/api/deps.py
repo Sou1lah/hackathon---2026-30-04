@@ -57,12 +57,40 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
     return current_user
 
 
-def get_current_admin(current_user: CurrentUser) -> User:
-    if current_user.role != "admin" and not current_user.is_superuser:
+def require_permission(flag: str):
+    """
+    Factory that returns a FastAPI dependency which checks a DB boolean
+    permission field on the current user.  Superusers always pass.
+
+    Usage:
+        @router.get("/...", dependencies=[Depends(require_permission("can_view_convention"))])
+    """
+    def _check(current_user: CurrentUser) -> User:
+        if current_user.is_superuser:
+            return current_user
+        if not getattr(current_user, flag, False):
+            raise HTTPException(
+                status_code=403,
+                detail=f"Access denied: '{flag}' permission required",
+            )
+        return current_user
+
+    # Give the inner function a unique name so FastAPI can distinguish deps
+    _check.__name__ = f"require_{flag}"
+    return _check
+
+
+# ── Convenience aliases (DB-driven, no role logic) ──────────────────────────
+
+def get_current_reviewer(current_user: CurrentUser) -> User:
+    """Users who can review / approve applications."""
+    if current_user.is_superuser:
+        return current_user
+    if not current_user.can_review_applications:
         raise HTTPException(
-            status_code=403, detail="The user doesn't have enough privileges"
+            status_code=403, detail="Access denied: 'can_review_applications' required"
         )
     return current_user
 
 
-CurrentAdmin = Annotated[User, Depends(get_current_admin)]
+CurrentReviewer = Annotated[User, Depends(get_current_reviewer)]

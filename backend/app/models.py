@@ -17,6 +17,8 @@ class UserRole(str, Enum):
     prof_national = "prof_national"
     prof_international = "prof_international"
     admin = "admin"
+    # NOTE: admin_level_1 / admin_level_2 removed — access is controlled by
+    # DB permission flags (can_review_applications etc.), not by role values.
 
 
 # Shared properties
@@ -30,6 +32,12 @@ class UserBase(SQLModel):
     level: str | None = Field(default=None, max_length=100)
     language: str | None = Field(default=None, max_length=255)
     gpa: float | None = Field(default=None)
+    # Permission flags (DB-driven, no role inference on frontend)
+    can_access_dashboard: bool = Field(default=False)
+    can_apply_internship: bool = Field(default=False)
+    can_view_convention: bool = Field(default=False)
+    can_view_tracking: bool = Field(default=False)
+    can_review_applications: bool = Field(default=False)
 
     @field_validator("email")
     @classmethod
@@ -100,6 +108,8 @@ class User(UserBase, table=True):
     total_sessions: int = Field(default=0)
     engagement_score: float = Field(default=0.0)
     profile_locked: bool = Field(default=True)
+
+
 
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 

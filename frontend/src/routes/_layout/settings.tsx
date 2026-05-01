@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_layout/settings")({
   head: () => ({
     meta: [
       {
-        title: "Settings - Mobility Hub",
+        title: "Settings - E-Learning",
       },
     ],
   }),

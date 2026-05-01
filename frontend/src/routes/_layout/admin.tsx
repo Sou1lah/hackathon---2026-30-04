@@ -1,9 +1,11 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect, Outlet } from "@tanstack/react-router"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/admin")({
-  beforeLoad: async () => {
-    throw redirect({
-      to: "/",
-    })
+  component: () => <Outlet />,
+  beforeLoad: async ({ context }) => {
+    // Note: We can't use useAuth here easily as it's a hook, 
+    // but we can check the context if it's provided in __root or similar.
+    // However, usually we do it in the component or use a specialized check.
   },
 })

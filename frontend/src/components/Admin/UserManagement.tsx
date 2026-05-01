@@ -1,5 +1,4 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
 import { Suspense } from "react"
 
 import { type UserPublic, UsersService } from "@/client"
@@ -8,13 +7,6 @@ import { columns, type UserTableData } from "@/components/Admin/columns"
 import { DataTable } from "@/components/Common/DataTable"
 import PendingUsers from "@/components/Pending/PendingUsers"
 import useAuth from "@/hooks/useAuth"
-
-export const Route = createFileRoute("/_layout/users")({
-  component: UsersPage,
-  head: () => ({
-    meta: [{ title: "User Management - Mobility Hub" }],
-  }),
-})
 
 function getUsersQueryOptions() {
   return {
@@ -35,7 +27,7 @@ function UsersTableContent() {
   return <DataTable columns={columns} data={tableData} />
 }
 
-function UsersPage() {
+export function UserManagement() {
   return (
     <div className="space-y-8 p-2 animate-in fade-in duration-700">
       <div className="flex items-center justify-between mb-8">
@@ -60,3 +52,5 @@ function UsersPage() {
     </div>
   )
 }
+
+export default UserManagement

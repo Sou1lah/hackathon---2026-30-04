@@ -58,7 +58,10 @@ def create_internship(
 ) -> Any:
     """
     Create new internship request.
+    Requires can_apply_internship DB permission.
     """
+    if not current_user.is_superuser and not current_user.can_apply_internship:
+        raise HTTPException(status_code=403, detail="Access denied: 'can_apply_internship' required")
     return create_internship_request(
         session=session, request_in=request_in, owner_id=current_user.id
     )

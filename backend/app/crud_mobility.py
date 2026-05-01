@@ -7,6 +7,7 @@ from sqlmodel import Session, col, func, select
 from app.models_mobility import (
     ActivityLogEntry,
     ActivityLogEntryCreate,
+    ApprovalLevel,
     Convention,
     ConventionCreate,
     ConventionUpdate,
@@ -15,6 +16,12 @@ from app.models_mobility import (
     InternshipRequestCreate,
     InternshipRequestUpdate,
     InternshipStatus,
+    InternshipReport,
+    InternshipReportCreate,
+    InternshipReportUpdate,
+    ReportStatus,
+    TutorEvaluation,
+    TutorEvaluationCreate,
     MobilityFile,
     MobilityFileCreate,
     MobilityFileUpdate,
@@ -155,6 +162,101 @@ def delete_convention(*, session: Session, db_convention: Convention) -> None:
     session.commit()
 
 
+def get_conventions_for_admin(
+    *, session: Session, approval_level: ApprovalLevel, skip: int = 0, limit: int = 100
+) -> tuple[list[Convention], int]:
+    count_statement = (
+        select(func.count())
+        .select_from(Convention)
+        .where(Convention.approval_level == approval_level)
+    )
+    count = session.exec(count_statement).one()
+    statement = (
+        select(Convention)
+        .where(Convention.approval_level == approval_level)
+        .order_by(col(Convention.created_at).desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    items = session.exec(statement).all()
+    return list(items), count
+
+
+def approve_convention(
+    *, session: Session, db_convention: Convention, admin_id: uuid.UUID
+) -> Convention:
+    # Logic: N1 -> N2 -> N3 -> Completed
+    if db_convention.approval_level == ApprovalLevel.N1:
+        db_convention.approval_level = ApprovalLevel.N2
+        db_convention.admin_status = "approved_l1"
+    elif db_convention.approval_level == ApprovalLevel.N2:
+        db_convention.approval_level = ApprovalLevel.N3
+        db_convention.admin_status = "approved_l2"
+    elif db_convention.approval_level == ApprovalLevel.N3:
+        db_convention.status = "completed"
+        db_convention.admin_status = "approved_final"
+    
+    db_convention.updated_at = datetime.now(timezone.utc)
+    
+    # Audit log
+    log = ActivityLogEntry(
+        date=datetime.now(timezone.utc).date(),
+        content=f"Convention approved by admin {admin_id} at level {db_convention.approval_level}",
+        hours=0,
+        internship_request_id=db_convention.internship_request_id,
+        owner_id=db_convention.owner_id
+    )
+    session.add(log)
+    session.add(db_convention)
+    session.commit()
+    session.refresh(db_convention)
+    return db_convention
+
+
+def reject_convention(
+    *, session: Session, db_convention: Convention, admin_id: uuid.UUID, reason: str = ""
+) -> Convention:
+    db_convention.status = "rejected"
+    db_convention.admin_status = "rejected"
+    db_convention.updated_at = datetime.now(timezone.utc)
+    
+    # Audit log
+    log = ActivityLogEntry(
+        date=datetime.now(timezone.utc).date(),
+        content=f"Convention rejected by admin {admin_id}. Reason: {reason}",
+        hours=0,
+        internship_request_id=db_convention.internship_request_id,
+        owner_id=db_convention.owner_id
+    )
+    session.add(log)
+    session.add(db_convention)
+    session.commit()
+    session.refresh(db_convention)
+    return db_convention
+
+
+def forward_convention(
+    *, session: Session, db_convention: Convention, admin_id: uuid.UUID, next_level: ApprovalLevel
+) -> Convention:
+    db_convention.approval_level = next_level
+    db_convention.admin_status = f"forwarded_to_{next_level}"
+    db_convention.updated_at = datetime.now(timezone.utc)
+    
+    # Audit log
+    log = ActivityLogEntry(
+        date=datetime.now(timezone.utc).date(),
+        content=f"Convention forwarded by admin {admin_id} to level {next_level}",
+        hours=0,
+        internship_request_id=db_convention.internship_request_id,
+        owner_id=db_convention.owner_id
+    )
+    session.add(log)
+    session.add(db_convention)
+    session.commit()
+    session.refresh(db_convention)
+    return db_convention
+
+
 # ---------- MobilityFile ----------
 
 def create_mobility_file(
@@ -252,6 +354,156 @@ def get_activity_log_entries(
     )
     items = session.exec(statement).all()
     return list(items), count
+
+
+# ---------- InternshipReport ----------
+
+def create_internship_report(
+    *, session: Session, report_in: InternshipReportCreate, owner_id: uuid.UUID
+) -> InternshipReport:
+    db_obj = InternshipReport.model_validate(
+        report_in, update={"owner_id": owner_id}
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_internship_reports(
+    *,
+    session: Session,
+    internship_request_id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 100,
+) -> tuple[list[InternshipReport], int]:
+    count_statement = (
+        select(func.count())
+        .select_from(InternshipReport)
+        .where(InternshipReport.internship_request_id == internship_request_id)
+    )
+    count = session.exec(count_statement).one()
+    statement = (
+        select(InternshipReport)
+        .where(InternshipReport.internship_request_id == internship_request_id)
+        .order_by(col(InternshipReport.submitted_at).desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    items = session.exec(statement).all()
+    return list(items), count
+
+
+def update_internship_report(
+    *, session: Session, db_report: InternshipReport, report_in: InternshipReportUpdate
+) -> InternshipReport:
+    update_dict = report_in.model_dump(exclude_unset=True)
+    db_report.sqlmodel_update(update_dict)
+    if report_in.status:
+        db_report.reviewed_at = datetime.now(timezone.utc)
+    session.add(db_report)
+    session.commit()
+    session.refresh(db_report)
+    return db_report
+
+
+# ---------- TutorEvaluation ----------
+
+def create_tutor_evaluation(
+    *, session: Session, evaluation_in: TutorEvaluationCreate, owner_id: uuid.UUID
+) -> TutorEvaluation:
+    # Delete existing evaluation if any
+    existing = session.exec(
+        select(TutorEvaluation).where(
+            TutorEvaluation.internship_request_id == evaluation_in.internship_request_id
+        )
+    ).first()
+    if existing:
+        session.delete(existing)
+    
+    db_obj = TutorEvaluation.model_validate(
+        evaluation_in, update={"owner_id": owner_id}
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_tutor_evaluation(
+    *, session: Session, internship_request_id: uuid.UUID
+) -> TutorEvaluation | None:
+    return session.exec(
+        select(TutorEvaluation).where(
+            TutorEvaluation.internship_request_id == internship_request_id
+        )
+    ).first()
+
+
+# ---------- Summary Helper ----------
+
+def get_internship_summary_data(
+    *, session: Session, internship_request_id: uuid.UUID
+) -> dict[str, Any]:
+    internship = session.get(InternshipRequest, internship_request_id)
+    if not internship:
+        return {}
+    
+    # Calculate total hours
+    total_hours = session.exec(
+        select(func.sum(ActivityLogEntry.hours))
+        .where(ActivityLogEntry.internship_request_id == internship_request_id)
+    ).one() or 0
+    
+    # Get last 3 entries
+    recent_logs = session.exec(
+        select(ActivityLogEntry)
+        .where(ActivityLogEntry.internship_request_id == internship_request_id)
+        .order_by(col(ActivityLogEntry.date).desc())
+        .limit(3)
+    ).all()
+    
+    # Get reports status
+    reports = session.exec(
+        select(InternshipReport)
+        .where(InternshipReport.internship_request_id == internship_request_id)
+        .order_by(col(InternshipReport.submitted_at).desc())
+    ).all()
+    
+    # Get evaluation
+    evaluation = get_tutor_evaluation(session=session, internship_request_id=internship_request_id)
+    
+    # Alerts (simple logic for now)
+    alerts = []
+    if total_hours < 50:
+        alerts.append({
+            "type": "warning",
+            "message": "Volume horaire faible pour cette periode."
+        })
+    
+    # SLA Tracking (14 days)
+    days_active = (datetime.now(timezone.utc) - internship.created_at).days if internship.created_at else 0
+    if days_active > 14 and internship.status != InternshipStatus.completed:
+        alerts.append({
+            "type": "critical",
+            "message": f"Retard detecte: Le dossier est en cours depuis {days_active} jours (SLA: 14j)."
+        })
+    
+    return {
+        "id": internship.id,
+        "status": internship.status,
+        "progress": internship.progress,
+        "current_step": internship.current_step,
+        "total_hours": total_hours,
+        "recent_logs": recent_logs,
+        "reports": reports,
+        "evaluation": evaluation,
+        "alerts": alerts,
+        "start_date": internship.start_date,
+        "end_date": internship.end_date,
+        "created_at": internship.created_at,
+        "days_active": days_active,
+    }
 
 
 # ---------- Dashboard Stats ----------

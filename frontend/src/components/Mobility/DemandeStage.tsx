@@ -13,12 +13,17 @@ import {
 import { AnimatePresence, motion } from "motion/react"
 import React, { useState } from "react"
 import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 const STEPS = [
-  { id: "personal", label: "Infos Étudiant", icon: User },
+  { id: "personal", label: "Infos Etudiant", icon: User },
   { id: "organization", label: "Entreprise d'Accueil", icon: Building2 },
-  { id: "mission", label: "Détails Mission", icon: Calendar },
-  { id: "documents", label: "Pièces Jointes", icon: Upload },
+  { id: "mission", label: "Details Mission", icon: Calendar },
+  { id: "documents", label: "Pieces Jointes", icon: Upload },
 ]
 
 export default function DemandeStage() {
@@ -36,260 +41,230 @@ export default function DemandeStage() {
     setCurrentStep((p) => Math.min(p + 1, STEPS.length - 1))
   const prevStep = () => setCurrentStep((p) => Math.max(p - 1, 0))
 
-  const inputCls =
-    "w-full px-4 py-3 bg-accent border border-border rounded-xl outline-none text-sm transition-all focus:bg-card focus:border-primary focus:ring-2 focus:ring-primary/20"
-
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20">
-      <div className="flex items-center justify-between">
+    <div className="max-w-5xl mx-auto space-y-10 pb-20 p-2">
+      <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-900 pb-6">
         <div>
-          <h1 className="text-2xl font-bold">Nouvelle Demande de Stage</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Nouvelle Demande de Stage</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-1">
             Formulaire multisectoriel de soumission de stage.
           </p>
         </div>
-        <div
-          className={cn(
-            "flex items-center gap-3 px-4 py-2 rounded-full border transition-all shadow-sm",
-            verificationStatus === "idle" &&
-              "bg-card border-border text-muted-foreground",
-            verificationStatus === "checking" &&
-              "bg-blue-500/10 border-blue-500/30 text-blue-500 animate-pulse",
-            verificationStatus === "verified" &&
-              "bg-green-500/10 border-green-500/30 text-green-500",
-            verificationStatus === "failed" &&
-              "bg-red-500/10 border-red-500/30 text-red-500",
-          )}
-        >
-          {verificationStatus === "idle" && <AlertCircle size={18} />}
-          {verificationStatus === "checking" && (
-            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          )}
-          {verificationStatus === "verified" && <ShieldCheck size={18} />}
-          <span className="text-sm font-bold">
-            {verificationStatus === "idle"
-              ? "Vérification PROGRES requise"
-              : verificationStatus === "checking"
-                ? "Vérification en cours..."
-                : verificationStatus === "verified"
-                  ? "Éligibilité Confirmée"
-                  : "Échec"}
-          </span>
-          {verificationStatus === "idle" && (
-            <button
-              onClick={handleVerify}
-              className="ml-2 text-xs bg-foreground text-background px-3 py-1 rounded-full font-bold hover:opacity-80"
+        <div className="flex items-center gap-3">
+            <Badge 
+              variant={
+                verificationStatus === "verified" ? "default" : 
+                verificationStatus === "failed" ? "destructive" : 
+                "secondary"
+              }
+              className={cn(
+                "px-4 py-1.5 font-mono text-[10px] tracking-widest gap-2 border-none",
+                verificationStatus === "checking" && "animate-pulse"
+              )}
             >
-              Lancer
-            </button>
-          )}
+              {verificationStatus === "checking" ? (
+                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : verificationStatus === "verified" ? (
+                <ShieldCheck size={14} />
+              ) : (
+                <AlertCircle size={14} />
+              )}
+              {verificationStatus === "idle" ? "VERIFICATION PROGRES REQUISE" : 
+               verificationStatus === "checking" ? "VERIFICATION EN COURS" : 
+               verificationStatus === "verified" ? "ELIGIBILITE CONFIRMEE" : "ECHEC"}
+            </Badge>
+            {verificationStatus === "idle" && (
+              <Button size="sm" onClick={handleVerify} className="h-8 rounded-full font-bold text-[10px] tracking-wider uppercase bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900">
+                Lancer
+              </Button>
+            )}
         </div>
       </div>
 
-      {/* Stepper */}
-      <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
-        <div className="flex items-center justify-between">
-          {STEPS.map((step, i) => (
-            <React.Fragment key={step.id}>
-              <div
-                className={cn(
-                  "flex flex-col items-center gap-2 relative z-10",
-                  currentStep >= i ? "text-primary" : "text-muted-foreground",
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center transition-all border-2",
-                    currentStep === i
-                      ? "bg-primary text-primary-foreground border-primary shadow-lg"
-                      : currentStep > i
-                        ? "bg-green-500 text-white border-green-500"
-                        : "bg-card border-border",
-                  )}
-                >
-                  {currentStep > i ? (
-                    <CheckCircle2 size={22} />
-                  ) : (
-                    <step.icon size={22} />
-                  )}
-                </div>
-                <span className="text-xs font-bold whitespace-nowrap uppercase tracking-wider">
-                  {step.label}
-                </span>
+      {/* Stepper - Geist Aesthetic */}
+      <div className="grid grid-cols-4 gap-4">
+        {STEPS.map((step, i) => (
+          <div key={step.id} className="relative">
+            <div className={cn(
+              "flex flex-col gap-2 p-4 rounded-xl border transition-all",
+              currentStep === i ? "bg-zinc-50 dark:bg-zinc-900 border-zinc-900 dark:border-zinc-50 shadow-sm" : 
+              currentStep > i ? "bg-zinc-50/50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800" :
+              "bg-transparent border-zinc-100 dark:border-zinc-900"
+            )}>
+              <div className="flex items-center justify-between">
+                <step.icon size={16} className={cn(
+                  currentStep === i ? "text-zinc-900 dark:text-zinc-50" : 
+                  currentStep > i ? "text-emerald-500" : "text-zinc-300 dark:text-zinc-700"
+                )} />
+                {currentStep > i && <CheckCircle2 size={16} className="text-emerald-500" />}
               </div>
-              {i < STEPS.length - 1 && (
-                <div className="flex-1 px-4 -mt-6">
-                  <div className="h-[2px] w-full bg-accent rounded-full">
-                    <motion.div
-                      className="h-full bg-primary rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: currentStep > i ? "100%" : "0%" }}
-                      transition={{ duration: 0.5 }}
-                    />
-                  </div>
-                </div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
+              <span className={cn(
+                "text-[10px] font-bold uppercase tracking-widest",
+                currentStep === i ? "text-zinc-900 dark:text-zinc-50" : "text-zinc-400"
+              )}>
+                {step.label}
+              </span>
+            </div>
+            {i < STEPS.length - 1 && (
+               <div className="hidden md:block absolute top-1/2 -right-2 transform -translate-y-1/2 z-20">
+                  <ChevronRight size={16} className="text-zinc-200 dark:text-zinc-800" />
+               </div>
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Form Content */}
-      <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden min-h-[500px] flex flex-col">
-        <div className="p-8 flex-1">
+      <Card className="border-zinc-200 dark:border-zinc-800 shadow-none min-h-[500px] flex flex-col">
+        <CardContent className="p-10 flex-1">
           <AnimatePresence mode="wait">
             {currentStep === 0 && (
               <motion.div
                 key="step0"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-8"
               >
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold">Nom Complet</label>
-                    <input
+                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Nom Complet</Label>
+                    <Input
                       type="text"
                       placeholder="Ex: El Bouni Khaled"
-                      className={inputCls}
+                      className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/30"
                       defaultValue="El Bouni Khaled"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold">
-                      Numéro d'Inscription
-                    </label>
-                    <input
+                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Numero d'Inscription</Label>
+                    <Input
                       type="text"
                       placeholder="Ex: 20/00123"
-                      className={cn(inputCls, "font-mono")}
+                      className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 font-mono"
                       defaultValue="21/340051"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold">
-                      Date de Naissance
-                    </label>
-                    <input type="date" className={inputCls} />
+                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Date de Naissance</Label>
+                    <Input type="date" className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/30" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold">
-                      Email Académique
-                    </label>
-                    <input
+                    <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Email Academique</Label>
+                    <Input
                       type="email"
                       placeholder="k.elbouni@institution.dz"
-                      className={inputCls}
+                      className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/30"
                     />
                   </div>
                 </div>
-                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex gap-3 text-blue-500 text-sm italic">
-                  <AlertCircle size={20} className="shrink-0" />
-                  Les informations étudiant sont synchronisées avec votre
-                  dossier PROGRES.
+                <div className="p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900 rounded-xl flex gap-3 text-zinc-500 text-sm">
+                  <AlertCircle size={18} className="shrink-0 text-zinc-400" />
+                  <p className="italic">Les informations etudiant sont synchronisees avec votre dossier PROGRES.</p>
                 </div>
               </motion.div>
             )}
+            
             {currentStep === 3 && (
               <motion.div
                 key="step3"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-8"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-10"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[
-                    "Relevé de notes",
+                    "Releve de notes",
                     "Lettre de Motivation",
-                    "CV à jour",
+                    "CV a jour",
                     "Attestation d'Assurance",
                   ].map((doc) => (
                     <div
                       key={doc}
-                      className="p-6 border-2 border-dashed border-border rounded-2xl hover:border-primary transition-all group flex items-center justify-between bg-accent/50"
+                      className="p-5 border border-zinc-100 dark:border-zinc-900 rounded-xl hover:border-zinc-900 dark:hover:border-zinc-50 transition-all group flex items-center justify-between bg-zinc-50/30 dark:bg-zinc-950/30"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-card shadow-sm rounded-lg flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
-                          <FileText size={20} />
+                        <div className="w-10 h-10 bg-white dark:bg-zinc-900 shadow-sm rounded-lg flex items-center justify-center text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors border border-zinc-100 dark:border-zinc-800">
+                          <FileText size={18} />
                         </div>
                         <div>
-                          <p className="font-bold text-sm">{doc}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                          <p className="font-bold text-sm text-zinc-900 dark:text-zinc-50">{doc}</p>
+                          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">
                             PDF, JPG (Max 5MB)
                           </p>
                         </div>
                       </div>
-                      <button className="bg-card border border-border px-4 py-2 rounded-lg text-xs font-bold hover:bg-foreground hover:text-background transition-all shadow-sm">
+                      <Button variant="outline" size="sm" className="h-8 text-[10px] font-bold uppercase tracking-widest px-4 border-zinc-200 dark:border-zinc-800">
                         Choisir
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>
-                <div className="p-8 border-2 border-dashed border-primary/30 bg-primary/5 rounded-3xl flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center">
-                    <Upload size={32} />
+                
+                <div className="p-12 border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/30 rounded-2xl flex flex-col items-center text-center space-y-4">
+                  <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-900 text-zinc-400 rounded-full flex items-center justify-center">
+                    <Upload size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">Zone de dépôt globale</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Glissez-déposez vos documents ici.
-                    </p>
+                    <h3 className="font-bold text-zinc-900 dark:text-zinc-50">Zone de depot globale</h3>
+                    <p className="text-zinc-500 text-sm">Glissez-deposez vos documents ici.</p>
                   </div>
-                  <button className="bg-primary text-primary-foreground px-6 py-2 rounded-full text-sm font-bold hover:opacity-90 shadow-lg transition-all">
+                  <Button variant="secondary" className="rounded-full px-8 bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:opacity-90 transition-all">
                     Parcourir
-                  </button>
+                  </Button>
                 </div>
               </motion.div>
             )}
+            
             {currentStep !== 0 && currentStep !== 3 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center h-full text-muted-foreground italic"
+                className="flex flex-col items-center justify-center h-full text-zinc-400"
               >
-                <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4">
-                  {React.createElement(STEPS[currentStep].icon, { size: 32 })}
+                <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-950 rounded-full border border-zinc-100 dark:border-zinc-900 flex items-center justify-center mb-4">
+                  {React.createElement(STEPS[currentStep].icon, { size: 32, className: "text-zinc-300" })}
                 </div>
-                Contenu de l'étape "{STEPS[currentStep].label}" en cours de
-                configuration...
+                <p className="font-mono text-xs uppercase tracking-widest italic">
+                  Configuration de "{STEPS[currentStep].label}"...
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-        <div className="p-6 bg-accent/50 border-t border-border flex items-center justify-between">
-          <button
+        </CardContent>
+        
+        <CardFooter className="p-6 bg-zinc-50/50 dark:bg-zinc-950/50 border-t border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
+          <Button
+            variant="ghost"
             onClick={prevStep}
             className={cn(
-              "flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold transition-all",
-              currentStep === 0
-                ? "opacity-0 pointer-events-none"
-                : "text-muted-foreground hover:bg-card border border-transparent hover:border-border",
+              "gap-2 font-bold text-xs uppercase tracking-widest",
+              currentStep === 0 && "opacity-0 pointer-events-none"
             )}
           >
-            <ChevronLeft size={18} /> Précédent
-          </button>
+            <ChevronLeft size={16} /> Precedent
+          </Button>
+          
           <div className="flex items-center gap-4">
-            <button className="text-muted-foreground text-sm font-bold hover:text-foreground transition-colors">
+            <Button variant="link" className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest hover:text-zinc-900 dark:hover:text-zinc-50">
               Sauvegarder brouillon
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={nextStep}
               disabled={verificationStatus !== "verified"}
               className={cn(
-                "flex items-center gap-2 px-8 py-2 rounded-xl text-sm font-bold transition-all",
-                verificationStatus !== "verified"
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-primary text-primary-foreground shadow-lg hover:opacity-90",
+                "gap-2 px-8 font-bold text-xs uppercase tracking-widest transition-all",
+                verificationStatus === "verified" ? "bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 shadow-md hover:opacity-90" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 cursor-not-allowed"
               )}
             >
-              {currentStep === STEPS.length - 1 ? "Soumettre" : "Continuer"}{" "}
-              <ChevronRight size={18} />
-            </button>
+              {currentStep === STEPS.length - 1 ? "Soumettre" : "Continuer"}
+              <ChevronRight size={16} />
+            </Button>
           </div>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
+
