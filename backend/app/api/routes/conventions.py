@@ -120,7 +120,11 @@ def sign_convention(
     db_convention = get_convention(session=session, convention_id=id)
     if not db_convention:
         raise HTTPException(status_code=404, detail="Convention not found")
-    if db_convention.owner_id != current_user.id and not current_user.is_superuser:
+    if (
+        db_convention.owner_id != current_user.id 
+        and not current_user.is_superuser 
+        and not current_user.can_review_applications
+    ):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return advance_signature(session=session, db_convention=db_convention)
 

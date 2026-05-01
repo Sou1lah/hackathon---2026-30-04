@@ -43,7 +43,11 @@ def extract_structured_fields(text: str) -> dict:
         "specialty": None,
         "required_level": None,
         "required_language": None,
-        "gpa_requirement": None
+        "gpa_requirement": None,
+        "mobility_type": "national",
+        "country": "Algeria",
+        "country_flag": "🇩🇿",
+        "country_code": "dz"
     }
     
     if not text:
@@ -80,13 +84,72 @@ def extract_structured_fields(text: str) -> dict:
                 break
                 
         # 4. GPA Requirement Extraction
-        # Look for numbers near 'gpa' or 'moyenne'
         gpa_match = re.search(r'(?:gpa|moyenne).*?([0-9]+[\.,][0-9]+)', text_lower)
         if gpa_match:
             try:
                 fields["gpa_requirement"] = float(gpa_match.group(1).replace(',', '.'))
             except ValueError:
                 pass
+
+        # 5. Mobility & Country Extraction
+        # (search_val, name, flag, code)
+        countries = [
+            ("france", "France", "🇫🇷", "fr"),
+            ("spain", "Spain", "🇪🇸", "es"),
+            ("espagne", "Spain", "🇪🇸", "es"),
+            ("germany", "Germany", "🇩🇪", "de"),
+            ("allemagne", "Germany", "🇩🇪", "de"),
+            ("usa", "USA", "🇺🇸", "us"),
+            ("united states", "USA", "🇺🇸", "us"),
+            ("uk", "UK", "🇬🇧", "gb"),
+            ("united kingdom", "UK", "🇬🇧", "gb"),
+            ("canada", "Canada", "🇨🇦", "ca"),
+            ("italy", "Italy", "🇮🇹", "it"),
+            ("italie", "Italy", "🇮🇹", "it"),
+            ("switzerland", "Switzerland", "🇨🇭", "ch"),
+            ("suisse", "Switzerland", "🇨🇭", "ch"),
+            ("belgium", "Belgium", "🇧🇪", "be"),
+            ("belgique", "Belgium", "🇧🇪", "be"),
+            ("netherlands", "Netherlands", "🇳🇱", "nl"),
+            ("pays-bas", "Netherlands", "🇳🇱", "nl"),
+            ("china", "China", "🇨🇳", "cn"),
+            ("chine", "China", "🇨🇳", "cn"),
+            ("japan", "Japan", "🇯🇵", "jp"),
+            ("japon", "Japan", "🇯🇵", "jp"),
+            ("india", "India", "🇮🇳", "in"),
+            ("inde", "India", "🇮🇳", "in"),
+            ("turkey", "Turkey", "🇹🇷", "tr"),
+            ("turquie", "Turkey", "🇹🇷", "tr"),
+            ("indonesia", "Indonesia", "🇮🇩", "id"),
+            ("indonésie", "Indonesia", "🇮🇩", "id"),
+            ("brazil", "Brazil", "🇧🇷", "br"),
+            ("brésil", "Brazil", "🇧🇷", "br"),
+            ("australia", "Australia", "🇦🇺", "au"),
+            ("australie", "Australia", "🇦🇺", "au"),
+        ]
+        
+        is_intl = False
+        for search_val, name, flag, code in countries:
+            if search_val in text_lower:
+                fields["country"] = name
+                fields["country_flag"] = flag
+                fields["country_code"] = code
+                fields["mobility_type"] = "international"
+                is_intl = True
+                break
+        
+        if not is_intl:
+            if any(word in text_lower for word in ["algeria", "algérie", "alger", "oran", "annaba", "setif", "constantine"]):
+                fields["country"] = "Algeria"
+                fields["country_flag"] = "🇩🇿"
+                fields["country_code"] = "dz"
+                fields["mobility_type"] = "national"
+            elif any(word in text_lower for word in ["international", "abroad", "étranger", "erasmus", "mobility"]):
+                fields["mobility_type"] = "international"
+                if fields["mobility_type"] == "international" and fields["country"] == "Algeria":
+                   fields["country"] = "International"
+                   fields["country_flag"] = "🌎"
+                   fields["country_code"] = "un" # generic
                 
     except Exception as e:
         logger.warning(f"Field extraction failed silently. Error: {e}")

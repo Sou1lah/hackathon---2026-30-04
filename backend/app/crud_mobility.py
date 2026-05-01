@@ -194,12 +194,15 @@ def approve_convention(
     # Logic: N1 -> N2 -> N3 -> Completed
     if db_convention.approval_level == ApprovalLevel.N1:
         db_convention.approval_level = ApprovalLevel.N2
+        db_convention.signature_step = 5  # Moving to Dean's turn
         db_convention.admin_status = "approved_l1"
     elif db_convention.approval_level == ApprovalLevel.N2:
         db_convention.approval_level = ApprovalLevel.N3
+        db_convention.signature_step = 6  # Moving to Vice-Rectorate's turn
         db_convention.admin_status = "approved_l2"
     elif db_convention.approval_level == ApprovalLevel.N3:
         db_convention.status = "completed"
+        db_convention.signature_step = 8  # Completed
         db_convention.admin_status = "approved_final"
     
     db_convention.updated_at = datetime.now(timezone.utc)
@@ -509,6 +512,9 @@ def get_internship_summary_data(
         "end_date": internship.end_date,
         "created_at": internship.created_at,
         "days_active": days_active,
+        "mission_title": internship.mission_title,
+        "company_name": internship.company_name,
+        "supervisor_name": internship.supervisor_name,
     }
 
 

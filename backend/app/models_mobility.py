@@ -79,6 +79,7 @@ class InternshipRequestBase(SQLModel):
     verification_status: VerificationStatus = VerificationStatus.idle
     progress: int = Field(default=0, ge=0, le=100)
     current_step: int = Field(default=1, ge=1, le=8)
+    supervisor_name: str | None = Field(default=None, max_length=255)
 
 
 class InternshipRequestCreate(InternshipRequestBase):
@@ -100,6 +101,7 @@ class InternshipRequestUpdate(SQLModel):
     verification_status: VerificationStatus | None = None
     progress: int | None = Field(default=None, ge=0, le=100)
     current_step: int | None = Field(default=None, ge=1, le=8)
+    supervisor_name: str | None = Field(default=None, max_length=255)
 
 
 class InternshipRequest(InternshipRequestBase, table=True):

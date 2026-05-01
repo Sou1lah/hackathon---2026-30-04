@@ -35,6 +35,12 @@ interface InternshipOffer {
   mobility_type?: string | null
   keywords?: string[] | null
   target_audience?: string | null
+  university_name?: string | null
+  university_logo?: string | null
+  country_flag?: string | null
+  country?: string | null
+  country_code?: string | null
+  specialty?: string | null
 }
 
 interface InternshipOffersResponse {
@@ -43,30 +49,33 @@ interface InternshipOffersResponse {
 }
 
 const fetchOffers = async (): Promise<InternshipOffersResponse> => {
-  const response = await fetch(`${OpenAPI.BASE}/api/v1/internships/`)
+  const apiUrl = import.meta.env.VITE_API_URL || ""
+  const response = await fetch(`${apiUrl}/api/v1/internships/`)
   if (!response.ok) throw new Error("Failed to fetch internship offers")
   return response.json()
 }
 
 function OfferSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {[1, 2, 3, 4].map((i) => (
         <Card
           key={i}
-          className="border-zinc-200 dark:border-zinc-800 shadow-none bg-white dark:bg-zinc-950 overflow-hidden"
+          className="border-zinc-200 dark:border-zinc-800 shadow-none bg-white dark:bg-zinc-950 overflow-hidden flex flex-col md:flex-row h-full min-h-[320px]"
         >
-          <CardHeader className="pb-2 space-y-4">
-            <div className="flex justify-between">
-              <div className="h-4 w-16 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
-              <div className="h-4 w-20 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
+          <div className="w-full md:w-1/2 bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
+          <div className="w-full md:w-1/2 p-6 space-y-4">
+            <div className="h-4 w-24 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
+            <div className="h-8 w-full bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
+            <div className="space-y-2">
+              <div className="h-3 w-full bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
+              <div className="h-3 w-5/6 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
             </div>
-            <div className="h-6 w-3/4 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="h-3 w-full bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
-            <div className="h-3 w-5/6 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
-          </CardContent>
+            <div className="flex gap-2">
+              <div className="h-6 w-16 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
+              <div className="h-6 w-16 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded" />
+            </div>
+          </div>
         </Card>
       ))}
     </div>
@@ -89,7 +98,8 @@ export default function InternshipOffers() {
       !q ||
       o.title.toLowerCase().includes(q) ||
       (o.description ?? "").toLowerCase().includes(q) ||
-      (o.keywords ?? []).some((k) => k.toLowerCase().includes(q))
+      (o.keywords ?? []).some((k) => k.toLowerCase().includes(q)) ||
+      (o.university_name ?? "").toLowerCase().includes(q)
     const matchesFilter =
       filter === "all" ||
       (o.mobility_type ?? "").toLowerCase() === filter
@@ -102,13 +112,13 @@ export default function InternshipOffers() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-100 dark:border-zinc-900 pb-8">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-2 font-mono">
-            UBMA · INTERNSHIP PORTAL
+            UBMA · GLOBAL MOBILITY
           </p>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Available Internships
+            Internship Opportunities
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-base">
-            Browse all current cooperation and internship opportunities.
+            Discover internships from top Algerian and international universities.
           </p>
         </div>
 
@@ -138,38 +148,37 @@ export default function InternshipOffers() {
           <Zap className="h-5 w-5 text-white dark:text-zinc-900" fill="currentColor" />
         </div>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          <span className="font-semibold text-zinc-900 dark:text-zinc-50">Looking for the perfect match?</span>{" "}
-          Use our{" "}
+          <span className="font-semibold text-zinc-900 dark:text-zinc-50">Intelligent Matchmaking:</span>{" "}
+          View internships tailored to your profile in the{" "}
           <span className="inline-flex items-center gap-1 font-bold text-zinc-900 dark:text-zinc-50">
             <Sparkles className="h-3.5 w-3.5" /> Smart Match
           </span>{" "}
-          tab to get personalized recommendations based on your CV and preferences.
+          section.
         </p>
       </div>
 
       {/* ── Search & Filters ── */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
           <Input
-            placeholder="Search internships..."
-            className="pl-9 border-zinc-200 dark:border-zinc-800"
+            placeholder="Search by title, university, or keywords..."
+            className="pl-11 h-12 border-zinc-200 dark:border-zinc-800 rounded-xl"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1.5 rounded-2xl w-fit">
+        <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl w-fit">
           {(["all", "national", "international"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-8 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${
-                filter === f
+              className={`px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === f
                   ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-sm"
                   : "bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-              }`}
+                }`}
             >
-              {f === "all" ? "All Offers" : f === "national" ? "National" : "International"}
+              {f === "all" ? "All" : f === "national" ? "National" : "International"}
             </button>
           ))}
         </div>
@@ -195,102 +204,106 @@ export default function InternshipOffers() {
               <Briefcase className="h-12 w-12 mx-auto text-zinc-300 dark:text-zinc-700 mb-4" />
               <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">No offers found</h3>
               <p className="text-sm text-zinc-400 mt-1">
-                {search ? "Try adjusting your search." : "Check back later for new opportunities."}
+                {search ? "Try adjusting your search terms." : "New opportunities are added daily."}
               </p>
             </motion.div>
           ) : (
             <motion.div
               key="grid"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {filtered.map((offer, i) => (
                 <motion.div
                   key={offer.id}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="h-full"
                 >
-                  <Card className="h-full flex flex-col border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 shadow-none hover:shadow-lg transition-all group bg-white dark:bg-zinc-950">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between mb-3">
-                        {offer.mobility_type ? (
-                          <Badge
-                            variant={offer.mobility_type === "international" ? "default" : "secondary"}
-                            className="text-[9px] uppercase tracking-widest rounded-full px-2"
-                          >
-                            <Globe className="h-2.5 w-2.5 mr-1" />
-                            {offer.mobility_type}
-                          </Badge>
-                        ) : (
-                          <Badge
-                            variant="outline"
-                            className="text-[9px] uppercase tracking-widest rounded-full px-2 text-zinc-400 border-zinc-200 dark:border-zinc-800"
-                          >
-                            <Briefcase className="h-2.5 w-2.5 mr-1" />
-                            Cooperation
-                          </Badge>
-                        )}
-
-                        {offer.published_date && (
-                          <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(offer.published_date).toLocaleDateString("fr-DZ", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </span>
-                        )}
+                  <Card className="h-full flex flex-col border-zinc-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 shadow-none hover:shadow-2xl transition-all duration-500 group bg-white dark:bg-zinc-950 overflow-hidden min-h-[550px] rounded-[2rem]">
+                    {/* ── Top Photo with Fade ── */}
+                    <div className="relative w-full h-[240px] shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+                      <img
+                        src={`/flags/${offer.country_code?.toLowerCase() || "dz"}.png`}
+                        alt={offer.country ?? "Flag"}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                      />
+                      
+                      {/* The Fade Below */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-zinc-950 via-transparent to-transparent z-10" />
+                      
+                      {/* Overlays */}
+                      <div className="absolute top-4 left-4 z-20">
+                         <div className="flex items-center gap-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-full px-3 py-1.5 shadow-xl">
+                            <span className="text-lg">{offer.country_flag}</span>
+                            <span className="text-[9px] font-bold text-zinc-900 dark:text-white uppercase tracking-[0.2em]">{offer.mobility_type}</span>
+                         </div>
                       </div>
 
-                      <CardTitle
-                        className="text-base font-bold leading-snug line-clamp-2 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors"
-                        dir="rtl"
-                        lang="ar"
-                      >
-                        {offer.title}
-                      </CardTitle>
-                    </CardHeader>
-
-                    <CardContent className="flex-1 space-y-3">
-                      {offer.description && (
-                        <p className="text-sm text-zinc-500 line-clamp-3 leading-relaxed">
-                          {offer.description}
-                        </p>
-                      )}
-                      {offer.keywords && offer.keywords.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          <Tag className="h-3 w-3 text-zinc-400 mt-0.5" />
-                          {offer.keywords.slice(0, 4).map((k) => (
-                            <Badge
-                              key={k}
-                              variant="secondary"
-                              className="bg-zinc-50 dark:bg-zinc-900 border-none text-[9px] font-medium text-zinc-500 px-1.5 py-0"
-                            >
-                              {k}
-                            </Badge>
-                          ))}
+                      {offer.university_logo && (
+                        <div className="absolute bottom-4 right-4 z-20 h-12 w-12 rounded-xl bg-white dark:bg-zinc-800 p-1.5 shadow-xl border border-zinc-200 dark:border-zinc-800">
+                          <img 
+                            src={offer.university_logo} 
+                            alt={offer.university_name ?? ""} 
+                            className="w-full h-full object-contain"
+                          />
                         </div>
                       )}
-                    </CardContent>
+                    </div>
 
-                    <CardFooter className="pt-4 border-t border-zinc-50 dark:border-zinc-900 mt-auto flex gap-2">
-                      <a
-                        href={offer.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 h-9 rounded-lg flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-50 transition-all border border-zinc-200 dark:border-zinc-800"
-                      >
-                        Details <ExternalLink className="h-3 w-3" />
-                      </a>
-                      <Button
-                        onClick={() => applyMutation.mutate(offer)}
-                        disabled={applyMutation.isPending}
-                        className="flex-1 h-9 rounded-lg bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest shadow-sm hover:opacity-90 transition-all"
-                      >
-                        {applyMutation.isPending ? "Applying..." : "Apply"}
-                      </Button>
-                    </CardFooter>
+                    {/* ── Card Content ── */}
+                    <div className="flex-1 p-8 pt-2 flex flex-col relative z-20">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1.5">
+                           <Calendar className="h-3.5 w-3.5 text-indigo-500" />
+                           {offer.published_date
+                            ? new Date(offer.published_date).toLocaleDateString("en-US", { day: 'numeric', month: 'short' })
+                            : "New"}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Globe size={12} className="text-zinc-400" />
+                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{offer.country}</span>
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 leading-tight tracking-tight mb-4 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                        {offer.title}
+                      </h3>
+
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 mb-6 leading-relaxed flex-grow">
+                        {offer.description}
+                      </p>
+
+                      <div className="flex flex-col gap-4 mt-auto">
+                        {offer.keywords && offer.keywords.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {offer.keywords.slice(0, 3).map((k) => (
+                              <Badge key={k} variant="secondary" className="bg-zinc-50 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border-none text-[9px] font-bold uppercase tracking-widest px-2 py-0.5">
+                                #{k}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 pt-6 border-t border-zinc-100 dark:border-zinc-900">
+                           <Button
+                              onClick={() => applyMutation.mutate(offer)}
+                              disabled={applyMutation.isPending}
+                              className="h-12 flex-1 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white font-bold uppercase tracking-widest text-[10px] hover:bg-indigo-700 dark:hover:bg-indigo-400 transition-all shadow-lg shadow-indigo-500/20"
+                           >
+                              {applyMutation.isPending ? "..." : "Apply"}
+                           </Button>
+                           <a
+                              href={offer.source_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center transition-all border border-zinc-200 dark:border-zinc-800"
+                           >
+                              <ExternalLink size={18} />
+                           </a>
+                        </div>
+                      </div>
+                    </div>
                   </Card>
                 </motion.div>
               ))}

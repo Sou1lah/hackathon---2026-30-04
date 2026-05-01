@@ -19,10 +19,12 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useTranslation } from "react-i18next"
 
 export type Item = {
   icon: LucideIcon
   title: string
+  key: string
   path: string
   /** Optional TanStack Router search params for this item */
   search?: Record<string, string>
@@ -45,10 +47,11 @@ function CollapsibleSidebarItem({
   handleMenuClick: () => void
 }) {
   const [isOpen, setIsOpen] = useState(false)
+  const { t } = useTranslation()
 
   return (
     <Collapsible
-      key={item.title}
+      key={item.key}
       open={isOpen}
       onOpenChange={setIsOpen}
       asChild
@@ -57,12 +60,12 @@ function CollapsibleSidebarItem({
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
-            tooltip={item.title}
+            tooltip={t(item.key)}
             isActive={isActive}
             className="transition-all duration-200 hover:pl-3 data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
           >
-            <item.icon className="size-5 transition-colors group-hover/menu-item:text-primary" />
-            <span className="font-semibold text-base">{item.title}</span>
+            <item.icon className="size-6 transition-colors group-hover/menu-item:text-primary" />
+            <span className="font-bold text-lg">{t(item.key)}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -78,7 +81,7 @@ function CollapsibleSidebarItem({
               >
                 <SidebarMenuSub>
                   {item.subItems?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
+                    <SidebarMenuSubItem key={subItem.key}>
                       <SidebarMenuSubButton
                         asChild
                         isActive={isItemActive(subItem)}
@@ -89,8 +92,8 @@ function CollapsibleSidebarItem({
                           onClick={handleMenuClick}
                           className="flex items-center gap-2 w-full"
                         >
-                          <subItem.icon className="size-3.5 opacity-60" />
-                          <span>{subItem.title}</span>
+                          <subItem.icon className="size-4 opacity-60" />
+                          <span className="text-base">{t(subItem.key)}</span>
                         </RouterLink>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
@@ -107,6 +110,7 @@ function CollapsibleSidebarItem({
 
 export function Main({ items }: MainProps) {
   const { isMobile, setOpenMobile } = useSidebar()
+  const { t } = useTranslation()
   const router = useRouterState()
   const currentPath = router.location.pathname
   const currentSearch = router.location.search
@@ -138,7 +142,7 @@ export function Main({ items }: MainProps) {
             if (hasSubItems) {
               return (
                 <CollapsibleSidebarItem
-                  key={item.title}
+                  key={item.key}
                   item={item}
                   isActive={isActive}
                   isItemActive={isItemActive}
@@ -148,9 +152,9 @@ export function Main({ items }: MainProps) {
             }
 
             return (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem key={item.key}>
                 <SidebarMenuButton
-                  tooltip={item.title}
+                  tooltip={t(item.key)}
                   isActive={isActive}
                   className="transition-all duration-200 hover:pl-3 data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
                   asChild
@@ -160,8 +164,8 @@ export function Main({ items }: MainProps) {
                     search={item.search as any}
                     onClick={handleMenuClick}
                   >
-                    <item.icon className="size-5 transition-colors group-hover/menu-item:text-primary" />
-                    <span className="font-semibold text-base">{item.title}</span>
+                    <item.icon className="size-6 transition-colors group-hover/menu-item:text-primary" />
+                    <span className="font-bold text-lg">{t(item.key)}</span>
                   </RouterLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>

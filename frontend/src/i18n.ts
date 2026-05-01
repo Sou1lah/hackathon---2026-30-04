@@ -1,0 +1,277 @@
+import i18n from "i18next"
+import { initReactI18next } from "react-i18next"
+import LanguageDetector from "i18next-browser-languagedetector"
+
+const resources = {
+  en: {
+    translation: {
+      // Sidebar
+      dashboard: "Dashboard",
+      add_internship: "Add Internship",
+      internship_request: "Internship Request",
+      application_management: "Application Management",
+      internship_convention: "Internship Convention",
+      internship_tracking: "Internship Tracking",
+      all_internships: "All Internships",
+      mobility: "Mobility",
+      national_mobility: "National Mobility",
+      international_mobility: "International Mobility",
+      user_settings: "User Settings",
+      
+      // Header
+      notifications: "Notifications",
+      no_notifications: "No new notifications",
+      mark_all_read: "Mark all as read",
+      language: "Language",
+      english: "English",
+      arabic: "Arabic",
+      french: "French",
+
+      // Dashboard & Home
+      welcome: "Welcome",
+      admin_intelligence: "Administrative Intelligence",
+      system_overview: "System Overview",
+      dashboard_subtitle: "Synthesized insights into university internship workflows and system performance.",
+      student_portal: "Student Portal",
+      student_home_subtitle: "Synthesize your academic journey. Manage internships and mobility opportunities with refined precision.",
+      sync_status: "Sync Status",
+      total_dossiers: "Total Dossiers",
+      compliance_rate: "Compliance Rate",
+      internships_count: "Internships",
+      active_workflows: "Active Workflows",
+      priority_alerts: "Priority Alerts",
+      sla_distribution: "SLA Distribution",
+      recent_offers: "Recent Offers",
+      integrity: "Integrity",
+      on_time: "On Time",
+      breached: "Breached",
+      compliant_files: "Compliant Files",
+      breached_sla: "Breached SLA",
+      full_registry: "Full Registry",
+      review_dossier: "Review dossier",
+      no_alerts: "No urgent notifications at this time.",
+      retry_connection: "Retry Connection",
+      system_unavailable: "System Unavailable",
+      system_unavailable_desc: "The system is currently unable to retrieve analytics.",
+      active_now: "currently active",
+      files_flagged: "files flagged",
+      new_this_week: "new this week",
+
+      // Student Home Cards
+      internships_pfe: "Internships & PFE",
+      internships_desc: "Initiate administrative workflows, generate conventions, and monitor validation progress.",
+      explore_offers: "Explore offers",
+      mobility_desc: "Identify national and international opportunities to expand your academic horizon.",
+      view_destinations: "View destinations",
+      active_status: "Active Status",
+      current_tracking: "Current Tracking",
+      academic_dossier: "Academic Dossier",
+      convention: "Convention",
+      verified: "Verified",
+      in_progress: "In Progress",
+      view_full_tracking: "View Full Tracking",
+      announcements: "Announcements",
+
+      // Common Actions
+      save: "Save",
+      cancel: "Cancel",
+      edit: "Edit",
+      delete: "Delete",
+      view: "View",
+      submit: "Submit",
+      loading: "Loading...",
+      logout: "Log Out",
+
+      // Access Denied
+      access_denied: "Access Denied",
+      no_permission: "You do not have permission to access",
+      contact_admin: "Contact your administrator to obtain the necessary access.",
+      rights_management: "Access rights are managed by your account in the database. No roles are hardcoded.",
+    },
+  },
+  fr: {
+    translation: {
+      // Sidebar
+      dashboard: "Tableau de bord",
+      add_internship: "Ajouter un stage",
+      internship_request: "Demande de stage",
+      application_management: "Gestion des candidatures",
+      internship_convention: "Convention de stage",
+      internship_tracking: "Suivi de stage",
+      all_internships: "Tous les stages",
+      mobility: "Mobilité",
+      national_mobility: "Mobilité nationale",
+      international_mobility: "Mobilité internationale",
+      user_settings: "Paramètres utilisateur",
+
+      // Header
+      notifications: "Notifications",
+      no_notifications: "Aucune nouvelle notification",
+      mark_all_read: "Tout marquer comme lu",
+      language: "Langue",
+      english: "Anglais",
+      arabic: "Arabe",
+      french: "Français",
+
+      // Dashboard & Home
+      welcome: "Bienvenue",
+      admin_intelligence: "Intelligence Administrative",
+      system_overview: "Aperçu du Système",
+      dashboard_subtitle: "Aperçu synthétisé des flux de stages universitaires et des performances du système.",
+      student_portal: "Portail Étudiant",
+      student_home_subtitle: "Synthétisez votre parcours académique. Gérez vos stages et opportunités de mobilité avec une précision raffinée.",
+      sync_status: "État de Sync",
+      total_dossiers: "Total Dossiers",
+      compliance_rate: "Taux de Conformité",
+      internships_count: "Stages",
+      active_workflows: "Flux Actifs",
+      priority_alerts: "Alertes Prioritaires",
+      sla_distribution: "Distribution SLA",
+      recent_offers: "Offres Récentes",
+      integrity: "Intégrité",
+      on_time: "À temps",
+      breached: "Dépassé",
+      compliant_files: "Fichiers conformes",
+      breached_sla: "SLA dépassé",
+      full_registry: "Registre Complet",
+      review_dossier: "Réviser le dossier",
+      no_alerts: "Aucune notification urgente pour le moment.",
+      retry_connection: "Réessayer la Connexion",
+      system_unavailable: "Système Indisponible",
+      system_unavailable_desc: "Le système est actuellement incapable de récupérer les analyses.",
+      active_now: "actuellement actifs",
+      files_flagged: "fichiers signalés",
+      new_this_week: "nouveaux cette semaine",
+
+      // Student Home Cards
+      internships_pfe: "Stages & PFE",
+      internships_desc: "Initiez des flux administratifs, générez des conventions et suivez les progrès de validation.",
+      explore_offers: "Explorer les offres",
+      mobility_desc: "Identifiez des opportunités nationales et internationales pour élargir votre horizon académique.",
+      view_destinations: "Voir les destinations",
+      active_status: "Statut Actif",
+      current_tracking: "Suivi Actuel",
+      academic_dossier: "Dossier Académique",
+      convention: "Convention",
+      verified: "Vérifié",
+      in_progress: "En cours",
+      view_full_tracking: "Voir le suivi complet",
+      announcements: "Annonces",
+
+      // Common Actions
+      save: "Enregistrer",
+      cancel: "Annuler",
+      edit: "Modifier",
+      delete: "Supprimer",
+      view: "Voir",
+      submit: "Soumettre",
+      loading: "Chargement...",
+      logout: "Déconnexion",
+
+      // Access Denied
+      access_denied: "Accès Refusé",
+      no_permission: "Vous n'avez pas la permission d'accéder à",
+      contact_admin: "Contactez votre administrateur pour obtenir l'accès nécessaire.",
+      rights_management: "Les droits d'accès sont gérés par votre compte dans la base de données. Aucun rôle n'est codé en dur.",
+    },
+  },
+  ar: {
+    translation: {
+      // Sidebar
+      dashboard: "لوحة التحكم",
+      add_internship: "إضافة تربص",
+      internship_request: "طلب تربص",
+      application_management: "إدارة الطلبات",
+      internship_convention: "اتفاقية التربص",
+      internship_tracking: "متابعة التربص",
+      all_internships: "جميع التربصات",
+      mobility: "الحركية",
+      national_mobility: "حركية وطنية",
+      international_mobility: "حركية دولية",
+      user_settings: "إعدادات المستخدم",
+
+      // Header
+      notifications: "التنبيهات",
+      no_notifications: "لا توجد تنبيهات جديدة",
+      mark_all_read: "تحديد الكل كمقروء",
+      language: "اللغة",
+      english: "الإنجليزية",
+      arabic: "العربية",
+      french: "الفرنسية",
+
+      // Dashboard & Home
+      welcome: "مرحباً",
+      admin_intelligence: "الذكاء الإداري",
+      system_overview: "نظرة عامة على النظام",
+      dashboard_subtitle: "رؤى مركبة لسير عمل التربصات الجامعية وأداء النظام.",
+      student_portal: "بوابة الطالب",
+      student_home_subtitle: "لخص مسيرتك الأكاديمية. أدر التربصات وفرص الحركية بدقة متناهية.",
+      sync_status: "حالة المزامنة",
+      total_dossiers: "إجمالي الملفات",
+      compliance_rate: "معدل الامتثال",
+      internships_count: "التربصات",
+      active_workflows: "سير العمل النشط",
+      priority_alerts: "تنبيهات ذات أولوية",
+      sla_distribution: "توزيع SLA",
+      recent_offers: "العروض الأخيرة",
+      integrity: "سلامة النظام",
+      on_time: "في الوقت المحدد",
+      breached: "متجاوز",
+      compliant_files: "الملفات الممتثلة",
+      breached_sla: "تجاوز SLA",
+      full_registry: "السجل الكامل",
+      review_dossier: "مراجعة الملف",
+      no_alerts: "لا توجد تنبيهات عاجلة في الوقت الحالي.",
+      retry_connection: "إعادة محاولة الاتصال",
+      system_unavailable: "النظام غير متوفر",
+      system_unavailable_desc: "النظام غير قادر حاليًا على استرداد التحليلات.",
+      active_now: "نشط حاليا",
+      files_flagged: "ملفات تم وضع علامة عليها",
+      new_this_week: "جديد هذا الأسبوع",
+
+      // Student Home Cards
+      internships_pfe: "التربصات و PFE",
+      internships_desc: "ابدأ سير العمل الإداري، وقم بتوليد الاتفاقيات، ومراقبة تقدم التحقق.",
+      explore_offers: "استكشف العروض",
+      mobility_desc: "حدد الفرص الوطنية والدولية لتوسيع أفقك الأكاديمي.",
+      view_destinations: "عرض الوجهات",
+      active_status: "الحالة النشطة",
+      current_tracking: "المتابعة الحالية",
+      academic_dossier: "الملف الأكاديمي",
+      convention: "الاتفاقية",
+      verified: "تم التحقق",
+      in_progress: "قيد التنفيذ",
+      view_full_tracking: "عرض المتابعة الكاملة",
+      announcements: "الإعلانات",
+
+      // Common Actions
+      save: "حفظ",
+      cancel: "إلغاء",
+      edit: "تعديل",
+      delete: "حذف",
+      view: "عرض",
+      submit: "إرسال",
+      loading: "جاري التحميل...",
+      logout: "تسجيل الخروج",
+
+      // Access Denied
+      access_denied: "تم رفض الوصول",
+      no_permission: "ليس لديك صلاحية الوصول إلى",
+      contact_admin: "اتصل بالمسؤول للحصول على صلاحيات الوصول اللازمة.",
+      rights_management: "تتم إدارة حقوق الوصول من خلال حسابك في قاعدة البيانات. لا توجد أدوار محددة مسبقًا.",
+    },
+  },
+}
+
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources,
+    fallbackLng: "en",
+    interpolation: {
+      escapeValue: false,
+    },
+  })
+
+export default i18n

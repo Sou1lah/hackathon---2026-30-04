@@ -33,6 +33,10 @@ interface OfferPayload {
   required_level: string | null
   required_language: string | null
   gpa_requirement: number | null
+  university_name: string | null
+  university_logo: string | null
+  country: string | null
+  country_flag: string | null
 }
 
 const SPECIALTY_OPTIONS = [
@@ -74,6 +78,10 @@ export default function AddInternshipForm() {
     required_level: null,
     required_language: null,
     gpa_requirement: null,
+    university_name: "",
+    university_logo: "",
+    country: "",
+    country_flag: "",
   })
   const [keywordInput, setKeywordInput] = useState("")
   const [success, setSuccess] = useState(false)
@@ -122,6 +130,10 @@ export default function AddInternshipForm() {
         required_level: null,
         required_language: null,
         gpa_requirement: null,
+        university_name: "",
+        university_logo: "",
+        country: "",
+        country_flag: "",
       })
       setTimeout(() => setSuccess(false), 5000)
     },
@@ -151,20 +163,20 @@ export default function AddInternshipForm() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 pb-20 px-4">
+    <div className="max-w-5xl mx-auto space-y-12 pb-24 px-4 pt-10">
       {/* Header */}
-      <div className="border-b border-zinc-100 dark:border-zinc-900 pb-8">
+      <div className="border-b border-zinc-100 dark:border-zinc-900 pb-12 text-center">
         <Badge
           variant="outline"
-          className="mb-4 gap-2 px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest border-zinc-200 dark:border-zinc-800"
+          className="mb-6 gap-2 px-6 py-2 text-[11px] font-mono uppercase tracking-[0.2em] border-zinc-200 dark:border-zinc-800 rounded-full"
         >
-          <Building2 size={12} /> Admin Panel
+          <Building2 size={14} /> Administrative Terminal
         </Badge>
-        <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Add Internship Offer
+        <h1 className="text-6xl font-bold tracking-tighter text-zinc-900 dark:text-zinc-50 leading-tight">
+          Publish <span className="text-zinc-400">New</span> Internship
         </h1>
-        <p className="text-zinc-500 dark:text-zinc-400 mt-2">
-          Manually publish a new internship to the platform database.
+        <p className="text-zinc-500 dark:text-zinc-400 mt-4 text-xl max-w-2xl mx-auto leading-relaxed">
+          Create and broadcast professional opportunities directly to the global student registry.
         </p>
       </div>
 
@@ -187,15 +199,15 @@ export default function AddInternshipForm() {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* ─── Section 1: Core Information ─── */}
         <Card className="border-zinc-200 dark:border-zinc-800 shadow-none">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-3">
-              <span className="flex items-center justify-center w-7 h-7 rounded-md bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-xs font-mono font-bold">
+          <CardHeader className="p-10 pb-4">
+            <CardTitle className="text-2xl flex items-center gap-4 font-bold tracking-tight">
+              <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-sm font-mono font-black">
                 01
               </span>
               Core Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-10 pt-4 space-y-8">
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
                 Offer Title *
@@ -205,7 +217,7 @@ export default function AddInternshipForm() {
                 placeholder="e.g. Software Engineering Internship – Sonatrach"
                 value={form.title}
                 onChange={(e) => set("title", e.target.value)}
-                className="border-zinc-200 dark:border-zinc-800"
+                className="border-zinc-200 dark:border-zinc-800 h-14 text-base px-6 rounded-2xl"
               />
             </div>
 
@@ -219,7 +231,7 @@ export default function AddInternshipForm() {
                 placeholder="https://company.com/internship/2024"
                 value={form.source_url}
                 onChange={(e) => set("source_url", e.target.value)}
-                className="border-zinc-200 dark:border-zinc-800 font-mono text-sm"
+                className="border-zinc-200 dark:border-zinc-800 font-mono text-base h-14 px-6 rounded-2xl"
               />
               <p className="text-[10px] text-zinc-400">
                 Must be unique. Used as the canonical identifier for this offer.
@@ -235,7 +247,7 @@ export default function AddInternshipForm() {
                 placeholder="Describe the internship role, responsibilities and requirements…"
                 value={form.description ?? ""}
                 onChange={(e) => set("description", e.target.value)}
-                className="flex w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-zinc-900/20 dark:focus-visible:ring-zinc-50/20 resize-none"
+                className="flex w-full rounded-[1.5rem] border border-zinc-200 dark:border-zinc-800 bg-transparent px-6 py-4 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-zinc-900/20 dark:focus-visible:ring-zinc-50/20 resize-none"
               />
             </div>
 
@@ -268,9 +280,9 @@ export default function AddInternshipForm() {
 
         {/* ─── Section 2: Targeting ─── */}
         <Card className="border-zinc-200 dark:border-zinc-800 shadow-none">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-3">
-              <span className="flex items-center justify-center w-7 h-7 rounded-md bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-xs font-mono font-bold">
+          <CardHeader className="p-10 pb-4">
+            <CardTitle className="text-2xl flex items-center gap-4 font-bold tracking-tight">
+              <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-sm font-mono font-black">
                 02
               </span>
               Targeting & Classification
@@ -401,12 +413,75 @@ export default function AddInternshipForm() {
           </CardContent>
         </Card>
 
-        {/* ─── Section 3: Keywords ─── */}
+        {/* ─── Section 3: Branding ─── */}
+        <Card className="border-zinc-200 dark:border-zinc-800 shadow-none">
+          <CardHeader className="p-10 pb-4">
+            <CardTitle className="text-2xl flex items-center gap-4 font-bold tracking-tight">
+              <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-sm font-mono font-black">
+                03
+              </span>
+              Branding & Location
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  University / Institution Name
+                </Label>
+                <Input
+                  placeholder="e.g. Université de Annaba"
+                  value={form.university_name ?? ""}
+                  onChange={(e) => set("university_name", e.target.value)}
+                  className="border-zinc-200 dark:border-zinc-800"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Institution Logo URL
+                </Label>
+                <Input
+                  placeholder="https://univ-annaba.dz/logo.png"
+                  value={form.university_logo ?? ""}
+                  onChange={(e) => set("university_logo", e.target.value)}
+                  className="border-zinc-200 dark:border-zinc-800"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Country Name
+                </Label>
+                <Input
+                  placeholder="e.g. Algeria, France, Spain"
+                  value={form.country ?? ""}
+                  onChange={(e) => set("country", e.target.value)}
+                  className="border-zinc-200 dark:border-zinc-800"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Country Flag Emoji
+                </Label>
+                <Input
+                  placeholder="e.g. 🇩🇿, 🇫🇷, 🇪🇸"
+                  value={form.country_flag ?? ""}
+                  onChange={(e) => set("country_flag", e.target.value)}
+                  className="border-zinc-200 dark:border-zinc-800"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ─── Section 4: Keywords ─── */}
         <Card className="border-zinc-200 dark:border-zinc-800 shadow-none">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-3">
               <span className="flex items-center justify-center w-7 h-7 rounded-md bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-xs font-mono font-bold">
-                03
+                04
               </span>
               Keywords
             </CardTitle>
@@ -465,7 +540,7 @@ export default function AddInternshipForm() {
         <Button
           type="submit"
           disabled={mutation.isPending}
-          className="w-full py-6 text-sm font-bold uppercase tracking-widest bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:opacity-90 transition-all shadow-lg hover:shadow-xl active:scale-[0.99] rounded-xl"
+          className="w-full h-20 text-sm font-bold uppercase tracking-[0.3em] bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:opacity-90 transition-all shadow-2xl hover:shadow-zinc-900/20 active:scale-[0.98] rounded-[2rem] border-8 border-white dark:border-zinc-950"
         >
           {mutation.isPending ? (
             <>

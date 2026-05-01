@@ -69,57 +69,83 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
           >
-            <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all shadow-md hover:shadow-xl group bg-white dark:bg-zinc-950 flex flex-col">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between mb-4">
+            <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all shadow-md hover:shadow-xl group bg-white dark:bg-zinc-950 flex flex-col overflow-hidden rounded-[1.5rem]">
+              <div className="relative w-full h-[180px] shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+                <img
+                  src={`/flags/${rec.offer.country_code?.toLowerCase() || "dz"}.png`}
+                  alt={rec.offer.country ?? "Flag"}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-zinc-950 via-transparent to-transparent z-10" />
+                
+                <div className="absolute top-4 left-4 z-20">
                   <Badge
                     variant="outline"
-                    className="font-mono text-[10px] px-2 py-0.5 bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50"
+                    className="font-mono text-[9px] px-2 py-0.5 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50 rounded-full"
                   >
                     {Math.round(rec.score)}% MATCH
                   </Badge>
+                </div>
+
+                {rec.offer.university_logo && (
+                  <div className="absolute bottom-4 right-4 z-20 h-10 w-10 rounded-lg bg-white dark:bg-zinc-800 p-1 shadow-lg border border-zinc-100 dark:border-zinc-900">
+                    <img 
+                      src={rec.offer.university_logo} 
+                      alt={rec.offer.university_name ?? ""} 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <CardHeader className="pb-2 pt-4 px-6">
+                <div className="flex items-center justify-between mb-2">
                   <Badge
                     variant={rec.offer.mobility_type === "international" ? "default" : "secondary"}
-                    className="text-[9px] uppercase tracking-wider rounded-full px-2"
+                    className="text-[8px] uppercase tracking-wider rounded-full px-2"
                   >
                     {rec.offer.mobility_type}
                   </Badge>
+                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+                    <Globe size={10} />
+                    {rec.offer.country}
+                  </div>
                 </div>
-                <CardTitle className="text-xl leading-tight font-bold group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
+                <CardTitle className="text-lg leading-tight font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
                   {rec.offer.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6 flex-1">
-                <p className="text-sm text-zinc-500 line-clamp-3 leading-relaxed">
+              <CardContent className="space-y-4 flex-1 px-6">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                   {rec.offer.description}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {rec.offer.keywords?.slice(0, 4).map((k) => (
+                <div className="flex flex-wrap gap-1.5">
+                  {rec.offer.keywords?.slice(0, 3).map((k) => (
                     <Badge
                       key={k}
                       variant="secondary"
-                      className="bg-zinc-50 dark:bg-zinc-900 border-none text-[10px] font-medium text-zinc-500 dark:text-zinc-400 px-2 py-0"
+                      className="bg-zinc-50 dark:bg-zinc-900 border-none text-[8px] font-medium text-zinc-400 px-2 py-0"
                     >
                       #{k}
                     </Badge>
                   ))}
                 </div>
               </CardContent>
-              <CardFooter className="border-t border-zinc-50 dark:border-zinc-900 pt-6 mt-auto gap-3">
+              <CardFooter className="border-t border-zinc-50 dark:border-zinc-900 p-6 pt-4 mt-auto gap-2">
                 <a
                   href={rec.offer.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all border border-zinc-200 dark:border-zinc-800"
+                  className="flex-1 h-9 rounded-lg bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-[9px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all border border-zinc-200 dark:border-zinc-800"
                 >
                   Details
                 </a>
                 <Button
                   onClick={() => applyMutation.mutate(rec.offer)}
                   disabled={applyMutation.isPending}
-                  className="flex-1 h-10 rounded-lg bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
+                  className="flex-1 h-9 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-[9px] font-bold uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
                 >
-                  {applyMutation.isPending ? "Applying..." : "Apply"}
+                  {applyMutation.isPending ? "..." : "Apply"}
                 </Button>
               </CardFooter>
             </Card>
@@ -135,10 +161,9 @@ function StagesPage() {
   const [results, setResults] = useState<RecommendationResponse | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
-  // Admins and Teachers see the "Add Internship" creation form
-  if (user?.is_superuser || user?.can_review_applications || user?.role?.startsWith("prof_")) {
-    return <AddInternshipForm />
-  }
+  const [showAdminForm, setShowAdminForm] = useState(
+    user?.is_superuser || user?.can_review_applications || user?.role?.startsWith("prof_")
+  )
 
   const handleResults = (data: RecommendationResponse) => {
     setResults(data)
@@ -146,8 +171,38 @@ function StagesPage() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
+  // Toggle for Admins
+  const isAdmin = user?.is_superuser || user?.can_review_applications || user?.role?.startsWith("prof_")
+
+  if (isAdmin && showAdminForm) {
+    return (
+      <div className="relative">
+        <div className="max-w-5xl mx-auto px-4 pt-8 flex justify-end">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAdminForm(false)}
+            className="rounded-full gap-2 font-bold text-[10px] uppercase tracking-widest border-zinc-200 dark:border-zinc-800"
+          >
+            <Sparkles size={14} /> Switch to Student View
+          </Button>
+        </div>
+        <AddInternshipForm />
+      </div>
+    )
+  }
+
   return (
     <div className="relative min-h-screen">
+      {isAdmin && !showAdminForm && (
+        <div className="max-w-7xl mx-auto px-4 pt-8 flex justify-end absolute top-0 right-0 z-10">
+          <Button 
+            onClick={() => setShowAdminForm(true)}
+            className="rounded-full gap-2 font-bold text-[10px] uppercase tracking-widest bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 shadow-xl"
+          >
+            <Plus size={14} /> Back to Admin Console
+          </Button>
+        </div>
+      )}
       <AnimatePresence mode="wait">
         {results ? (
           <motion.div

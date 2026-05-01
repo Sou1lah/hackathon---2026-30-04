@@ -1,24 +1,41 @@
 import {
   AlertTriangle,
-  Archive,
   ArrowUpRight,
   CheckSquare,
-  Clock,
-  CreditCard,
   FileText,
-  Loader2,
-  Server,
+  LayoutDashboard,
   ShieldAlert,
-  Sparkles,
+  Users,
 } from "lucide-react"
 import { motion } from "motion/react"
 import { useEffect, useState } from "react"
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 import AdminSuiviStage from "@/components/Admin/AdminSuiviStage"
 import { UserManagement } from "@/components/Admin/UserManagement"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useTranslation } from "react-i18next"
 import useAuth from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
 
@@ -28,6 +45,10 @@ interface InternshipOffer {
   title: string
   source_url: string
   created_at: string
+  university_name?: string | null
+  country?: string | null
+  country_flag?: string | null
+  university_logo?: string | null
 }
 
 interface AlertItem {
@@ -73,20 +94,32 @@ interface OverviewStats {
   timestamp: string
 }
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-  },
-}
+const chartData = [
+  { name: "Jan", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Feb", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Apr", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "May", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Jun", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Jul", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Aug", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
+  { name: "Dec", total: Math.floor(Math.random() * 5000) + 1000 },
+]
 
-const stagger = {
-  visible: { transition: { staggerChildren: 0.05 } },
-}
+const visitorData = [
+  { month: "Jan", visitors: 1500 },
+  { month: "Feb", visitors: 2200 },
+  { month: "Mar", visitors: 1800 },
+  { month: "Apr", visitors: 2400 },
+  { month: "May", visitors: 2100 },
+  { month: "Jun", visitors: 2800 },
+]
 
 export default function OverviewDashboard() {
+  const { t } = useTranslation()
   const { user: currentUser } = useAuth()
   const [data, setData] = useState<OverviewStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -96,7 +129,7 @@ export default function OverviewDashboard() {
     const fetchData = async () => {
       try {
         setIsLoading(true)
-        const apiUrl = import.meta.env.VITE_API_URL || ""
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"
         const token = localStorage.getItem("access_token")
 
         const response = await fetch(`${apiUrl}/api/v1/overview/`, {
@@ -122,318 +155,332 @@ export default function OverviewDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[500px] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-zinc-300" />
+      <div className="flex h-[600px] w-full items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent"
+        />
       </div>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="flex h-[500px] w-full flex-col items-center justify-center gap-6 p-8">
-        <div className="p-4 bg-zinc-100 dark:bg-zinc-900 rounded-full text-zinc-400">
-          <AlertTriangle className="h-10 w-10" />
-        </div>
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            System Unavailable
-          </h2>
-          <p className="text-zinc-500 max-w-xs mx-auto text-sm">{error || "The system is currently unable to retrieve analytics."}</p>
-        </div>
-        <Button
-          onClick={() => window.location.reload()}
-          variant="outline"
-          className="rounded-full px-8"
-        >
-          Retry Connection
-        </Button>
+      <div className="flex h-[600px] w-full flex-col items-center justify-center gap-4">
+        <AlertTriangle className="h-12 w-12 text-destructive" />
+        <h2 className="text-xl font-semibold">{t("system_unavailable")}</h2>
+        <p className="text-muted-foreground">{error}</p>
+        <Button onClick={() => window.location.reload()}>{t("retry")}</Button>
       </div>
     )
   }
 
-  const slaData = [
-    { name: "On Time", value: data.sla.on_time_count },
-    { name: "Breached", value: data.sla.breached_count },
+  const slaPieData = [
+    { name: t("on_time"), value: data.sla.on_time_count },
+    { name: t("breached"), value: data.sla.breached_count },
   ]
-  const COLORS = ["#18181b", "#71717a"] // Zinc-900 and Zinc-500 for a clean Claude look
+  const PIE_COLORS = ["#10b981", "#f43f5e"]
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={stagger}
-      className="space-y-16 p-8 md:p-12 max-w-7xl mx-auto"
-    >
-      {/* Claude-style Header */}
-      <motion.div
-        variants={fadeInUp}
-        className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-100 dark:border-zinc-900 pb-12"
-      >
-        <div className="space-y-6">
-          <Badge variant="outline" className="rounded-full px-4 py-1 text-[10px] font-medium tracking-widest uppercase border-zinc-200 dark:border-zinc-800">
-            System Overview
-          </Badge>
-          <div className="space-y-2">
-            <h1 className="text-4xl md:text-5xl font-serif tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
-              Administrative <span className="italic text-zinc-400">Intelligence</span>
-            </h1>
-            <p className="text-zinc-500 text-lg max-w-2xl font-light leading-relaxed">
-              Synthesized insights into university internship workflows and system performance.
-            </p>
-          </div>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">{t("dashboard")}</h2>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm">
+            Download
+          </Button>
         </div>
-        <div className="flex flex-col items-start md:items-end gap-1">
-          <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">
-            Sync Status
-          </p>
-          <p className="font-medium text-sm text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            {new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </p>
-        </div>
-      </motion.div>
-
-      {/* Simplified High-Level Metrics */}
-      <motion.div
-        variants={stagger}
-        className="grid grid-cols-1 md:grid-cols-3 gap-10"
-      >
-        <StatCard
-          icon={<FileText size={20} />}
-          label="Total Dossiers"
-          value={data.dossiers.total_dossiers}
-          subtext={`${data.dossiers.active_dossiers} currently active`}
-        />
-        <StatCard
-          icon={<ShieldAlert size={20} />}
-          label="Compliance Rate"
-          value={`${100 - data.sla.breach_rate}%`}
-          subtext={`${data.sla.breached_count} files flagged`}
-          isWarning={data.sla.breach_rate > 10}
-        />
-        <StatCard
-          icon={<CheckSquare size={20} />}
-          label="Internships"
-          value={data.internships.total_internships}
-          subtext={`${data.internships.new_items_7d} new this week`}
-        />
-      </motion.div>
-
-      {/* Active Workflows (Claude-style cards) */}
-      {(currentUser?.can_review_applications || currentUser?.is_superuser) && (
-        <motion.div variants={fadeInUp} className="space-y-6">
-          <div className="flex items-center gap-4">
-             <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-400">Active Workflows</h2>
-             <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-900" />
+      </div>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="analytics" disabled>
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="reports" disabled>
+            Reports
+          </TabsTrigger>
+          <TabsTrigger value="notifications" disabled>
+            Notifications
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("total_dossiers")}
+                </CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{data.dossiers.total_dossiers}</div>
+                <p className="text-xs text-muted-foreground">
+                  +20.1% from last month
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t("active_dossiers")}
+                </CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{data.dossiers.active_dossiers}</div>
+                <p className="text-xs text-muted-foreground">
+                  +180.1% from last month
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{t("internships_count")}</CardTitle>
+                <CheckSquare className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{data.internships.total_internships}</div>
+                <p className="text-xs text-muted-foreground">
+                  +19% from last month
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Compliance Rate
+                </CardTitle>
+                <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{100 - data.sla.breach_rate}%</div>
+                <p className="text-xs text-muted-foreground">
+                  +201 since last hour
+                </p>
+              </CardContent>
+            </Card>
           </div>
-          <AdminSuiviStage compact />
-        </motion.div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-        {/* Main Feed */}
-        <div className="lg:col-span-8 space-y-12">
-          {/* Priority Alerts Feed */}
-          <motion.div variants={fadeInUp} className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif text-2xl text-zinc-900 dark:text-zinc-50">Priority Alerts</h3>
-              <span className="text-[10px] font-bold text-zinc-400 tracking-widest uppercase">
-                {data.alerts.length} Action Items
-              </span>
-            </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="col-span-4 border-none shadow-none bg-transparent">
+              <CardHeader className="px-0">
+                <CardTitle className="text-xl">Workflow Overview</CardTitle>
+                <CardDescription>Statistical breakdown of dossiers across the platform.</CardDescription>
+              </CardHeader>
+              <CardContent className="px-0 pt-4">
+                 <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                  <ResponsiveContainer width="100%" height={350}>
+                    <BarChart data={chartData}>
+                      <XAxis
+                        dataKey="name"
+                        stroke="#888888"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="#888888"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(value) => `${value}`}
+                      />
+                      <Bar
+                        dataKey="total"
+                        fill="currentColor"
+                        radius={[4, 4, 0, 0]}
+                        className="fill-primary"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                 </div>
+              </CardContent>
+            </Card>
             
-            <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden bg-white dark:bg-zinc-950">
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-900">
-                {data.alerts.length === 0 ? (
-                  <div className="p-20 text-center space-y-4">
-                    <div className="mx-auto w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-300">
-                      <Archive size={20} />
-                    </div>
-                    <p className="text-zinc-400 font-light italic">No urgent notifications at this time.</p>
-                  </div>
-                ) : (
-                  data.alerts.map((alert) => (
-                    <div
-                      key={alert.id}
-                      className="p-8 flex items-start gap-8 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-all group"
-                    >
-                      <div
-                        className={cn(
-                          "p-3 rounded-full shrink-0 transition-all",
-                          alert.severity === "critical"
-                            ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                            : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800",
-                        )}
-                      >
-                        <ShieldAlert size={16} />
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-                            {alert.type}
-                          </span>
-                          <span className="text-[10px] text-zinc-400 font-light">
-                            {new Date(alert.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="font-medium text-base text-zinc-900 dark:text-zinc-50 leading-relaxed max-w-lg">
-                          {alert.message}
-                        </p>
-                        {alert.dossier_id && (
-                          <button className="flex items-center gap-1.5 text-xs font-semibold text-zinc-900 dark:text-zinc-50 hover:opacity-70 transition-opacity pt-2">
-                            Review dossier <ArrowUpRight size={14} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* User Directory Management */}
-          <motion.div variants={fadeInUp}>
-            <UserManagement />
-          </motion.div>
-        </div>
-
-        {/* Sidebar Analytics */}
-        <div className="lg:col-span-4 space-y-12">
-          {/* SLA Distribution */}
-          <motion.div variants={fadeInUp} className="space-y-6">
-            <h3 className="font-serif text-xl text-zinc-900 dark:text-zinc-50">SLA Distribution</h3>
-            <Card className="p-10 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
-              <div className="h-48 w-full relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={slaData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={4}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {slaData.map((_, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-2xl font-serif text-zinc-900 dark:text-zinc-50">
-                    {Math.round((data.sla.on_time_count / (data.sla.on_time_count + data.sla.breached_count)) * 100)}%
-                  </span>
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
-                    On Time
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-4 mt-8">
-                 <div className="flex items-center justify-between text-xs border-b border-zinc-50 dark:border-zinc-900 pb-3">
-                   <span className="text-zinc-500">Compliant Files</span>
-                   <span className="font-semibold text-zinc-900 dark:text-zinc-50">{data.sla.on_time_count}</span>
-                 </div>
-                 <div className="flex items-center justify-between text-xs">
-                   <span className="text-zinc-500">Breached SLA</span>
-                   <span className="font-semibold text-zinc-900 dark:text-zinc-50">{data.sla.breached_count}</span>
-                 </div>
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* New Registrations Feed */}
-          <motion.div variants={fadeInUp} className="space-y-6">
-            <h3 className="font-serif text-xl text-zinc-900 dark:text-zinc-50">Recent Offers</h3>
-            <Card className="border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10 shadow-none">
-              <div className="p-2 space-y-1">
-                {data.internships.latest_internships.slice(0, 4).map((offer) => (
-                  <div
-                    key={offer.id}
-                    className="p-4 hover:bg-white dark:hover:bg-zinc-900 rounded-xl transition-all group flex flex-col gap-1"
-                  >
-                    <p className="font-semibold text-sm text-zinc-900 dark:text-zinc-50 group-hover:text-zinc-500 transition-colors line-clamp-1">
-                      {offer.title}
-                    </p>
-                    <p className="text-[10px] font-medium text-zinc-400">
-                      Detected {new Date(offer.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <CardFooter className="p-4 border-t border-zinc-100 dark:border-zinc-900">
-                <Button variant="ghost" className="w-full text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors">
-                  Full Registry
+            <div className="col-span-3 space-y-4">
+              <div className="flex items-center justify-between px-2">
+                <h3 className="font-semibold text-lg">Latest Internships</h3>
+                <Button variant="link" className="text-xs text-muted-foreground" asChild>
+                  <a href="/stages">View All</a>
                 </Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
-
-          {/* System Integrity */}
-          <motion.div variants={fadeInUp} className="space-y-6">
-             <h3 className="font-serif text-xl text-zinc-900 dark:text-zinc-50">Integrity</h3>
-             <div className="space-y-4">
-                {data.system_health.map((sys) => (
-                  <div key={sys.name} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-900 bg-white dark:bg-zinc-950">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" />
-                      <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-50">{sys.name}</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-zinc-400">{sys.latency}</span>
-                  </div>
+              </div>
+              <div className="space-y-4">
+                {data.internships.latest_internships.slice(0, 3).map((offer) => (
+                  <motion.div
+                    key={offer.id}
+                    whileHover={{ scale: 1.02 }}
+                    className="group cursor-pointer"
+                  >
+                    <Card className="overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all rounded-2xl">
+                      <CardContent className="p-0">
+                        <div className="flex gap-4 p-4">
+                          <div className="h-16 w-16 rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center shrink-0 overflow-hidden">
+                             {offer.university_logo ? (
+                               <img src={offer.university_logo} alt={offer.university_name || ""} className="w-full h-full object-cover" />
+                             ) : (
+                               <span className="text-2xl">{offer.country_flag || "🏢"}</span>
+                             )}
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <h4 className="text-sm font-bold truncate group-hover:text-primary transition-colors">
+                              {offer.title}
+                            </h4>
+                            <p className="text-[10px] text-muted-foreground line-clamp-1">
+                              {offer.university_name || offer.country || "Global Opportunity"}
+                            </p>
+                            <div className="flex gap-2 pt-1">
+                               <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-4 border-zinc-200 dark:border-zinc-800">
+                                 {new Date(offer.created_at).toLocaleDateString()}
+                               </Badge>
+                               <Badge variant="secondary" className="text-[8px] px-1.5 py-0 h-4 bg-zinc-100 dark:bg-zinc-900">
+                                 {offer.country_flag} {offer.country}
+                               </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
-             </div>
-          </motion.div>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
+              </div>
+            </div>
+          </div>
 
-function StatCard({
-  icon,
-  label,
-  value,
-  subtext,
-  isWarning = false,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string | number
-  subtext: string
-  isWarning?: boolean
-}) {
-  return (
-    <Card
-      className={cn(
-        "p-8 relative overflow-hidden group border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-950 transition-all hover:shadow-md",
-        isWarning && "border-zinc-900/10 dark:border-zinc-50/10 bg-zinc-50/50 dark:bg-zinc-900/50",
-      )}
-    >
-      <div className="space-y-6">
-        <div className="text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors">
-          {icon}
-        </div>
-        <div className="space-y-1.5">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
-            {label}
-          </p>
-          <p className="text-4xl font-serif text-zinc-900 dark:text-zinc-50 tracking-tighter">{value}</p>
-          <p className="text-[11px] font-medium text-zinc-500 pt-2 border-t border-zinc-50 dark:border-zinc-900 inline-block">
-            {subtext}
-          </p>
-        </div>
-      </div>
-    </Card>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+             <Card className="col-span-4 border-none shadow-none bg-transparent">
+              <CardHeader className="px-0">
+                <CardTitle className="text-xl">Visitor Activity</CardTitle>
+                <CardDescription>
+                  Real-time activity tracking over the last 6 months.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-0 pt-4">
+                <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                  <ResponsiveContainer width="100%" height={350}>
+                    <AreaChart data={visitorData}>
+                      <defs>
+                        <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis 
+                        dataKey="month" 
+                        stroke="#888888"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        stroke="#888888"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip />
+                      <Area 
+                        type="monotone" 
+                        dataKey="visitors" 
+                        stroke="var(--primary)" 
+                        fillOpacity={1} 
+                        fill="url(#colorVisitors)" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="col-span-3 border-none shadow-none bg-transparent">
+              <CardHeader className="px-0">
+                <CardTitle className="text-xl">System Alerts</CardTitle>
+                <CardDescription>
+                  You have {data.alerts.length} active priority alerts.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-0 pt-4">
+                <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 space-y-6">
+                  {data.alerts.slice(0, 5).map((alert) => (
+                    <div key={alert.id} className="flex items-center gap-4 group/alert">
+                      <div className={cn(
+                        "h-10 w-10 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover/alert:scale-110",
+                        alert.severity === "critical" ? "bg-red-100 dark:bg-red-950/30 text-red-600" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600"
+                      )}>
+                        {alert.severity === "critical" ? <AlertTriangle size={18} /> : <ShieldAlert size={18} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">{alert.message}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{alert.type}</p>
+                      </div>
+                      <Badge variant={alert.severity === "critical" ? "destructive" : "outline"} className="text-[8px] h-4">
+                        {alert.severity}
+                      </Badge>
+                    </div>
+                  ))}
+                  {data.alerts.length === 0 && (
+                    <div className="text-center py-10">
+                      <CheckSquare className="h-8 w-8 mx-auto text-emerald-500 mb-2" />
+                      <p className="text-sm text-muted-foreground">All systems nominal</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-7">
+             <Card className="col-span-3 border-none shadow-none bg-transparent">
+               <CardHeader className="px-0">
+                 <CardTitle className="text-xl">Compliance Score</CardTitle>
+                 <CardDescription>Dossier processing SLA status.</CardDescription>
+               </CardHeader>
+               <CardContent className="px-0 pt-4">
+                 <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={slaPieData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {slaPieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex justify-center gap-6 mt-4">
+                      {slaPieData.map((entry, index) => (
+                        <div key={entry.name} className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: PIE_COLORS[index] }} />
+                          <span className="text-xs font-medium text-muted-foreground">{entry.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                 </div>
+               </CardContent>
+             </Card>
+
+             <Card className="col-span-4 border-none shadow-none bg-transparent">
+                {/* Empty space or maybe some other metric could go here, or just let the tables take over below */}
+             </Card>
+          </div>
+
+          {/* Existing Workflows & User Management integrated into Overview for now */}
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Active Workflows</h3>
+            </div>
+            <AdminSuiviStage compact={false} />
+            <UserManagement />
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }

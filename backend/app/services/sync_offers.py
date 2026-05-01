@@ -15,7 +15,7 @@ engine = create_engine(
     pool_pre_ping=True,
 )
 
-async def sync_internship_offers_to_db() -> dict:
+async def sync_internship_offers_to_db(session_arg: Session = None) -> dict:
     """
     Fetches offers from the website and syncs them to the database.
     """
@@ -27,7 +27,7 @@ async def sync_internship_offers_to_db() -> dict:
     now = get_datetime_utc()
     
     for offer_data in scraped_offers:
-        # NLP Processing (Non-blocking) - Do this OUTSIDE the DB session
+        # NLP Processing (Non-blocking)
         combined_text = offer_data["title"]
         if offer_data.get("description"):
             combined_text += " " + offer_data["description"]
@@ -38,8 +38,13 @@ async def sync_internship_offers_to_db() -> dict:
         text_for_extraction = translated_text if translated_text else combined_text
         structured_fields = extract_structured_fields(text_for_extraction)
 
-        # Now open the session ONLY for DB interaction
-        with Session(engine) as session:
+        # Open a session if not provided
+        if session_arg:
+            session = session_arg
+        else:
+            session = Session(engine)
+
+        try:
             # Check if offer exists by source_url
             statement = select(InternshipOffer).where(InternshipOffer.source_url == offer_data["source_url"])
             existing_offer = session.exec(statement).first()
@@ -81,6 +86,10 @@ async def sync_internship_offers_to_db() -> dict:
                     required_level=structured_fields.get("required_level"),
                     required_language=structured_fields.get("required_language"),
                     gpa_requirement=structured_fields.get("gpa_requirement"),
+                    mobility_type=structured_fields.get("mobility_type") or "national",
+                    country=structured_fields.get("country") or "Algeria",
+                    country_flag=structured_fields.get("country_flag") or "🇩🇿",
+                    country_code=structured_fields.get("country_code") or "dz",
                     created_at=now,
                     updated_at=now
                 )
@@ -88,6 +97,9 @@ async def sync_internship_offers_to_db() -> dict:
                 new_count += 1
                 
             session.commit()
+        finally:
+            if not session_arg:
+                session.close()
     
     logger.info(f"Sync complete: {new_count} new, {updated_count} updated")
     return {

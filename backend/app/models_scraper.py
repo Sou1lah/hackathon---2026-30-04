@@ -22,6 +22,12 @@ class InternshipOfferBase(SQLModel):
     required_level: str | None = Field(default=None, max_length=50)
     required_language: str | None = Field(default=None, max_length=50)
     gpa_requirement: float | None = Field(default=None)
+    # University branding
+    university_name: str | None = Field(default=None, max_length=255)
+    university_logo: str | None = Field(default=None, max_length=1000)  # image URL
+    country_flag: str | None = Field(default=None, max_length=10)        # emoji flag e.g. 🇩🇿
+    country: str | None = Field(default=None, max_length=100)
+    country_code: str | None = Field(default=None, max_length=5)        # ISO code e.g. dz
 
 
 class InternshipOffer(InternshipOfferBase, table=True):

@@ -3,7 +3,7 @@ import { z } from "zod"
 import MobilityView from "@/components/Mobility/MobilityView"
 
 const mobiliteSearchSchema = z.object({
-  type: z.enum(["nationale", "internationale"]).catch("nationale"),
+  type: z.enum(["national", "international"]).catch("national"),
 })
 
 export const Route = createFileRoute("/_layout/mobilite")({

@@ -8,15 +8,12 @@ import {
   FileText,
   Globe,
   Info,
-  Lock,
-  Mail,
   Sparkles,
   Tag,
   Upload,
   X,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import type React from "react"
 import { useRef, useState } from "react"
 import { OpenAPI } from "@/client/core/OpenAPI"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"

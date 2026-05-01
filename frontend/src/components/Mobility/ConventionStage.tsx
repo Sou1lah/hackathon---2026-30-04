@@ -12,7 +12,10 @@ import {
   Printer,
   ShieldCheck,
   Share2,
+  Trash2,
   X,
+  FileCode,
+  Layers,
 } from "lucide-react"
 import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
@@ -29,6 +32,15 @@ import {
 } from "@/components/ui/table"
 import useAuth from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 
 const SIGNATURE_STEPS = [
   { label: "Student", role: "Signatory 1", level: "N0" },
@@ -53,23 +65,26 @@ function approvalLabel(level: string) {
   return map[level] ?? level
 }
 
-// ──── Bottom Sheet Drawer ─────────────────────────────────────────────────────
-function ConventionBottomSheet({
+// ──── Bottom Sheet Drawer ───────────────
+function ConventionDetailsModal({
   convention,
+  isOpen,
   onClose,
   onSign,
+  onDelete,
   isSigning,
 }: {
   convention: any
+  isOpen: boolean
   onClose: () => void
   onSign: (id: string) => void
+  onDelete: (id: string) => void
   isSigning: boolean
 }) {
   const getStepStatus = (index: number) => {
     if (convention.status === "completed") return "completed"
     if (convention.status === "rejected") return "failed"
-    const levelMap: Record<string, number> = { N1: 3, N2: 4, N3: 5 }
-    const current = levelMap[convention.approval_level] ?? 0
+    const current = (convention.signature_step || 1) - 1
     if (index < current) return "completed"
     if (index === current) return "current"
     return "pending"
@@ -81,228 +96,118 @@ function ConventionBottomSheet({
   const progressValue = (completedSteps / SIGNATURE_STEPS.length) * 100
 
   return (
-    <AnimatePresence>
-      {/* Backdrop */}
-      <motion.div
-        key="backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Sheet sliding from bottom */}
-      <motion.div
-        key="sheet"
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 32, stiffness: 280 }}
-        className="fixed bottom-0 inset-x-0 z-50 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh]"
-      >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-12 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700" />
-        </div>
-
-        {/* Dark header strip */}
-        <div className="relative bg-zinc-900 text-white px-6 py-5 shrink-0 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
-              backgroundSize: "20px 20px",
-            }}
-          />
-          <div className="relative z-10 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="size-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
-                <FileText size={22} className="text-white" />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[1000px] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-zinc-950">
+        <DialogHeader className="p-8 pb-4 bg-zinc-50 dark:bg-zinc-900/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="size-14 rounded-2xl bg-white dark:bg-zinc-950 flex items-center justify-center text-zinc-900 dark:text-zinc-50 shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
+                <FileCode size={28} />
               </div>
-              <div className="min-w-0">
-                <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-400 mb-0.5">
-                  Convention · {convention.id.split("-")[0].toUpperCase()}
-                </p>
-                <h2 className="text-base font-bold text-white leading-tight truncate max-w-xs sm:max-w-sm md:max-w-lg">
+              <div className="space-y-1">
+                <DialogTitle className="text-2xl font-bold tracking-tight">
                   {convention.document_name}
-                </h2>
-                <p className="text-[10px] text-zinc-400 font-mono mt-1">
-                  Submitted{" "}
-                  {new Date(convention.created_at).toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
+                </DialogTitle>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+                  REF: {convention.id.split("-")[0].toUpperCase()} — SYSTEM CLEARANCE GRANTED
                 </p>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button className="size-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-300 transition-all">
-                <Download size={14} />
-              </button>
-              <button className="size-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-300 transition-all">
-                <Printer size={14} />
-              </button>
-              <button className="size-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-300 transition-all">
-                <Share2 size={14} />
-              </button>
-              <button
-                onClick={onClose}
-                className="size-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-400 hover:text-white transition-all ml-1"
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (confirm("Delete this convention?")) onDelete(convention.id)
+                }}
+                className="h-10 w-10 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
               >
-                <X size={16} />
-              </button>
+                <Trash2 size={18} />
+              </Button>
             </div>
           </div>
+        </DialogHeader>
 
-          {/* Status badges */}
-          <div className="relative z-10 flex items-center gap-2 mt-4">
-            <Badge
-              variant="outline"
-              className={cn(
-                "border px-3 py-1 text-[9px] font-bold uppercase tracking-widest rounded-full",
-                statusColor(convention.status),
-              )}
-            >
-              {convention.status}
-            </Badge>
-            <Badge
-              variant="outline"
-              className="border border-white/20 bg-white/10 text-zinc-300 text-[9px] font-mono px-3 py-1 rounded-full"
-            >
-              {approvalLabel(convention.approval_level)}
-            </Badge>
-          </div>
-        </div>
-
-        {/* Scrollable body */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-6">
-          {/* Progress bar */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest font-bold text-zinc-500">
-              <span>Signature Progress</span>
-              <span className="text-zinc-900 dark:text-zinc-50">
-                {completedSteps} / {SIGNATURE_STEPS.length}
-              </span>
-            </div>
-            <Progress value={progressValue} className="h-2.5 bg-zinc-100 dark:bg-zinc-900 rounded-full" />
-            <p className="text-[10px] text-zinc-400 font-mono">
-              {progressValue.toFixed(0)}% completed · {SIGNATURE_STEPS.length - completedSteps} step
-              {SIGNATURE_STEPS.length - completedSteps !== 1 ? "s" : ""} remaining
-            </p>
+        <div className="flex flex-col md:flex-row h-[70vh]">
+          {/* Left: PDF Preview Placeholder */}
+          <div className="flex-1 bg-zinc-100 dark:bg-zinc-900 relative group overflow-hidden">
+             <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-400 space-y-4">
+                <FileText size={64} className="opacity-20" />
+                <p className="text-[10px] font-mono uppercase tracking-[0.2em] font-bold">PDF Document Preview</p>
+                <Button variant="outline" className="rounded-full h-8 text-[10px] font-bold uppercase tracking-widest border-zinc-200 dark:border-zinc-800">
+                  <Download size={14} className="mr-2" /> Download Document
+                </Button>
+             </div>
+             {/* Imagine an iframe here */}
+             <div className="absolute inset-4 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl opacity-50" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left: Mission & company info */}
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
-                  <Building2 size={10} /> Mission
-                </p>
-                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-                  {convention.internship_request?.mission_title || "—"}
-                </p>
-                {convention.internship_request?.mission_description && (
-                  <p className="text-xs text-zinc-500 leading-relaxed italic">
-                    "{convention.internship_request.mission_description}"
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800 space-y-1">
-                  <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-400">Company</p>
-                  <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-                    {convention.internship_request?.company_name || "—"}
-                  </p>
+          {/* Right: Sidebar Progress */}
+          <ScrollArea className="w-full md:w-[380px] border-l border-zinc-100 dark:border-zinc-900 bg-white dark:bg-zinc-950">
+            <div className="p-8 space-y-10">
+              {/* Overall Progress */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                    <Layers size={14} className="text-zinc-400" /> System Progress
+                  </h3>
+                  <Badge variant="outline" className={cn("rounded-full px-3 py-0.5 text-[9px] font-bold tracking-widest uppercase", statusColor(convention.status))}>
+                    {convention.status}
+                  </Badge>
                 </div>
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800 space-y-1">
-                  <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-400">Period</p>
-                  <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
-                    <Calendar size={10} />
-                    {convention.internship_request?.start_date
-                      ? new Date(convention.internship_request.start_date).toLocaleDateString()
-                      : "—"}
-                    {" → "}
-                    {convention.internship_request?.end_date
-                      ? new Date(convention.internship_request.end_date).toLocaleDateString()
-                      : "—"}
-                  </p>
+                <div className="space-y-2">
+                  <Progress value={progressValue} className="h-3 bg-zinc-100 dark:bg-zinc-900 rounded-full" />
+                  <div className="flex justify-between text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+                    <span>{progressValue.toFixed(0)}% Completed</span>
+                    <span>{completedSteps}/{SIGNATURE_STEPS.length} Steps</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-zinc-900 dark:bg-zinc-900 rounded-xl border border-zinc-800 flex items-center gap-3">
-                <ShieldCheck size={18} className="text-zinc-400 shrink-0" />
-                <div>
-                  <p className="text-[10px] font-bold text-white uppercase tracking-widest">PAdES Certificate</p>
-                  <p className="text-[9px] font-mono text-zinc-500 mt-0.5">LTV Version — PDF/A-3</p>
-                </div>
-              </div>
-            </div>
+              <Separator className="bg-zinc-100 dark:bg-zinc-900" />
 
-            {/* Right: Signature circuit timeline */}
-            <div className="space-y-3">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
-                <CheckCircle size={10} /> Signature Circuit
-              </p>
-              <div className="space-y-0">
+              {/* Steps Timeline */}
+              <div className="space-y-6">
                 {SIGNATURE_STEPS.map((step, i) => {
                   const st = getStepStatus(i)
                   return (
-                    <div key={i} className="flex gap-3">
+                    <div key={i} className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div
                           className={cn(
-                            "size-5 rounded-full border-2 flex items-center justify-center shrink-0 z-10 transition-all",
+                            "size-6 rounded-full border-2 flex items-center justify-center shrink-0 z-10 transition-all",
                             st === "completed"
                               ? "bg-emerald-500 border-emerald-500 text-white"
                               : st === "current"
-                                ? "bg-zinc-900 dark:bg-zinc-50 border-zinc-900 dark:border-zinc-50 text-zinc-50 dark:text-zinc-900 ring-2 ring-zinc-200 dark:ring-zinc-700"
-                                : st === "failed"
-                                  ? "bg-red-500 border-red-500 text-white"
-                                  : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800",
+                                ? "bg-zinc-900 dark:bg-zinc-50 border-zinc-900 dark:border-zinc-50 text-zinc-50 dark:text-zinc-900 ring-4 ring-zinc-100 dark:ring-zinc-900"
+                                : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800",
                           )}
                         >
                           {st === "completed" ? (
-                            <CheckCircle2 size={11} />
-                          ) : st === "failed" ? (
-                            <AlertCircle size={11} />
+                            <CheckCircle2 size={12} />
                           ) : (
-                            <span className="text-[8px] font-mono font-bold">{i + 1}</span>
+                            <span className="text-[10px] font-mono font-bold">{i + 1}</span>
                           )}
                         </div>
                         {i < SIGNATURE_STEPS.length - 1 && (
                           <div
                             className={cn(
-                              "w-px flex-1 my-0.5 min-h-[20px]",
-                              st === "completed" ? "bg-emerald-400" : "bg-zinc-100 dark:bg-zinc-800",
+                              "w-px flex-1 my-1 min-h-[24px]",
+                              st === "completed" ? "bg-emerald-500" : "bg-zinc-100 dark:bg-zinc-800",
                             )}
                           />
                         )}
                       </div>
-                      <div className="pb-3">
-                        <p
-                          className={cn(
-                            "text-xs font-bold leading-none mb-0.5",
-                            st === "completed" || st === "current"
-                              ? "text-zinc-900 dark:text-zinc-50"
-                              : "text-zinc-400",
-                          )}
-                        >
+                      <div className="pb-2">
+                        <p className={cn("text-xs font-bold mb-0.5", st === "pending" ? "text-zinc-400" : "text-zinc-900 dark:text-zinc-50")}>
                           {step.label}
                         </p>
-                        <p className="text-[9px] text-zinc-400 font-mono">{step.role}</p>
-                        {st === "completed" && (
-                          <p className="text-[8px] font-mono text-emerald-500 font-bold mt-1 uppercase">
-                            Validated
-                          </p>
-                        )}
+                        <p className="text-[10px] text-zinc-400 font-mono tracking-tight">{step.role}</p>
                         {st === "current" && (
-                          <p className="text-[8px] font-mono text-amber-500 font-bold mt-1 uppercase animate-pulse">
-                            In Progress
-                          </p>
+                          <div className="mt-2 flex items-center gap-2">
+                             <div className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                             <span className="text-[9px] font-bold text-amber-600 uppercase tracking-widest">Awaiting Action</span>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -310,43 +215,33 @@ function ConventionBottomSheet({
                 })}
               </div>
             </div>
-          </div>
+          </ScrollArea>
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 border-t border-zinc-100 dark:border-zinc-900 px-6 py-4 flex items-center justify-between gap-3 bg-zinc-50/50 dark:bg-zinc-900/30">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            className="text-zinc-500 font-bold text-xs uppercase tracking-wider"
-          >
-            Close
+        <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
+          <Button variant="ghost" onClick={onClose} className="rounded-xl h-12 px-6 text-xs font-bold uppercase tracking-widest">
+             Dismiss
           </Button>
-          {convention.status === "pending" && (
-            <Button
-              onClick={() => onSign(convention.id)}
-              disabled={isSigning}
-              className="bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 font-bold uppercase tracking-widest text-xs px-8 hover:opacity-90 transition-all"
-            >
-              {isSigning ? "Processing…" : "Sign Now"}
-            </Button>
-          )}
-          {convention.status === "completed" && (
-            <Badge className="bg-emerald-500 text-white px-5 py-2 rounded-full font-bold uppercase text-[9px] tracking-widest">
-              Signed &amp; Validated
-            </Badge>
-          )}
-          {convention.status === "rejected" && (
-            <Badge
-              variant="destructive"
-              className="px-5 py-2 rounded-full font-bold uppercase text-[9px] tracking-widest"
-            >
-              Rejected
-            </Badge>
-          )}
+          <div className="flex items-center gap-4">
+             {convention.status === "pending" && convention.signature_step === 1 && (
+                <Button
+                  onClick={() => onSign(convention.id)}
+                  disabled={isSigning}
+                  className="h-12 px-10 rounded-2xl bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 font-bold uppercase tracking-[0.2em] text-[10px] shadow-xl hover:opacity-90"
+                >
+                  {isSigning ? "Signing..." : "Execute Signature"}
+                </Button>
+             )}
+             {convention.status === "completed" && (
+                <Badge className="bg-emerald-500 text-white px-6 py-2 rounded-full font-bold uppercase text-[9px] tracking-widest">
+                   Finalized & Verified
+                </Badge>
+             )}
+          </div>
         </div>
-      </motion.div>
-    </AnimatePresence>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -354,7 +249,6 @@ function ConventionBottomSheet({
 export default function ConventionStage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [selected, setSelected] = useState<any>(null)
 
   const { data: conventions, isLoading } = useQuery({
     queryKey: ["my-conventions"],
@@ -385,6 +279,22 @@ export default function ConventionStage() {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const token = localStorage.getItem("access_token")
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/conventions/${id}`,
+        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      )
+      if (!response.ok) throw new Error("Failed to delete")
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-conventions"] })
+      setSelected(null)
+    },
+  })
+
   const rows: any[] = conventions?.data ?? []
 
   if (isLoading) {
@@ -403,7 +313,7 @@ export default function ConventionStage() {
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-2 font-mono">
             UBMA · APPLICATIONS
           </p>
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-5xl font-serif tracking-tight font-bold text-zinc-900 dark:text-zinc-50 leading-tight">
             Internship Conventions
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">
@@ -422,19 +332,26 @@ export default function ConventionStage() {
       </div>
 
       {rows.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-80 gap-6">
-          <div className="p-5 bg-zinc-100 dark:bg-zinc-900 rounded-full text-zinc-400">
-            <FileText size={40} />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center py-32 px-4 text-center border-2 border-dashed border-zinc-100 dark:border-zinc-900 rounded-[3rem] bg-zinc-50/30 dark:bg-zinc-950/20"
+        >
+          <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2rem] text-zinc-200 dark:text-zinc-800 shadow-sm mb-8 ring-1 ring-zinc-100 dark:ring-zinc-800">
+            <FileText size={64} className="opacity-20" />
           </div>
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">
-              No Convention Yet
+          <div className="space-y-3 max-w-sm">
+            <h2 className="text-3xl font-serif font-bold text-zinc-900 dark:text-zinc-50">
+              No active <span className="italic text-blue-600 dark:text-blue-400">agreements</span>
             </h2>
-            <p className="text-zinc-500 text-sm">
-              Apply to an internship first to generate a convention.
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-light leading-relaxed">
+              When you apply for an internship, your official conventions will appear here for electronic signature.
             </p>
           </div>
-        </div>
+          <Button variant="outline" className="mt-10 rounded-full h-12 px-8 text-[10px] font-bold uppercase tracking-[0.2em] border-zinc-200 dark:border-zinc-800 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-zinc-900 transition-all">
+            Explore Opportunities
+          </Button>
+        </motion.div>
       ) : (
         <div className="overflow-x-auto border border-zinc-100 dark:border-zinc-900 rounded-2xl">
           <Table>
@@ -463,11 +380,7 @@ export default function ConventionStage() {
             <TableBody>
               {rows.map((conv) => {
                 // compute progress inline for table
-                const levelMap: Record<string, number> = { N1: 3, N2: 4, N3: 5 }
-                const done =
-                  conv.status === "completed"
-                    ? SIGNATURE_STEPS.length
-                    : (levelMap[conv.approval_level] ?? 0)
+                const done = conv.status === 'completed' ? SIGNATURE_STEPS.length : (conv.signature_step - 1)
                 const pct = Math.round((done / SIGNATURE_STEPS.length) * 100)
 
                 return (
@@ -548,15 +461,14 @@ export default function ConventionStage() {
 
       {/* Bottom sheet drawer */}
       <AnimatePresence>
-        {selected && (
-          <ConventionBottomSheet
-            key={selected.id}
-            convention={selected}
-            onClose={() => setSelected(null)}
-            onSign={(id) => signMutation.mutate(id)}
-            isSigning={signMutation.isPending}
-          />
-        )}
+      <ConventionDetailsModal
+        isOpen={!!selected}
+        convention={selected || {}}
+        onClose={() => setSelected(null)}
+        onSign={(id) => signMutation.mutate(id)}
+        onDelete={(id) => deleteMutation.mutate(id)}
+        isSigning={signMutation.isPending}
+      />
       </AnimatePresence>
     </div>
   )

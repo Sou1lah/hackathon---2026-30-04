@@ -52,116 +52,84 @@ export default function AdminSuiviStage({ compact = false }: { compact?: boolean
   )
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={stagger as any}
-      className="container max-w-7xl py-12 space-y-16"
-    >
+    <div className="p-[48px] space-y-[32px] bg-white dark:bg-zinc-950 min-h-screen">
       {/* Header */}
       {!compact && (
-        <motion.div
-          variants={fadeInUp as any}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-8"
-        >
-          <div className="space-y-4">
-            <Badge variant="section" className="px-4 py-1.5 text-[10px]">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-accent animate-pulse mr-2" />
-              Administrative Supervision
-            </Badge>
-            <h1 className="text-5xl md:text-6xl font-serif tracking-tight text-foreground leading-[1.1]">
-              Student <span className="gradient-text">Tracking</span>
+        <div className="flex flex-row justify-between items-start mb-6">
+          <div className="space-y-1">
+            <h1 className="text-[32px] font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Student Tracking
             </h1>
-            <p className="text-muted-foreground text-xl max-w-2xl leading-relaxed">
-              Supervise trainee activity, consult their logs, and provide your
-              pedagogical expertise.
+            <p className="text-[13px] text-zinc-500 dark:text-zinc-400 max-w-[520px] leading-relaxed">
+              Supervise trainee activity, consult their logs, and provide pedagogical expertise.
             </p>
           </div>
-        </motion.div>
+          <div className="relative w-full md:w-[320px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+            <Input
+              placeholder="Search student..."
+              className="pl-11 h-11 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[14px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
       )}
 
       {/* Stats Grid */}
-      <motion.div
-        variants={stagger as any}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
-      >
-        <Card className="p-8 border-border/50 bg-muted/20 relative overflow-hidden group">
-          <div className="p-4 w-fit rounded-2xl mb-6 bg-accent/10 text-accent group-hover:scale-110 transition-transform">
-            <UserIcon size={24} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px] mb-[20px]">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-[24px_28px] flex flex-col justify-between h-[140px] shadow-sm">
+          <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-400">Total Students</span>
+          <div className="flex items-baseline gap-3">
+            <span className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50">{usersData?.count || 0}</span>
+            <span className="text-[12px] text-zinc-400 font-medium">Registered</span>
           </div>
-          <div>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1.5">
-              Total Students
-            </p>
-            <p className="text-4xl font-serif text-foreground">
-              {usersData?.count || 0}
-            </p>
-          </div>
-        </Card>
+        </div>
 
-        <Card className="p-8 border-border/50 bg-muted/20 relative overflow-hidden group">
-          <div className="p-4 w-fit rounded-2xl mb-6 bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-            <TrendingUp size={24} />
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-[24px_28px] flex flex-col justify-between h-[140px] shadow-sm">
+          <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-400">Logs this week</span>
+          <div className="flex items-baseline gap-3">
+            <span className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50">--</span>
+            <span className="text-[12px] text-zinc-400 font-medium">New entries</span>
           </div>
-          <div>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1.5">
-              Logs this week
-            </p>
-            <p className="text-4xl font-serif text-foreground">--</p>
-          </div>
-        </Card>
+        </div>
 
-        <Card className="p-8 border-foreground text-background bg-foreground relative overflow-hidden shadow-2xl">
-          <div className="absolute inset-0 dot-pattern opacity-[0.03]" />
-          <div className="relative z-10">
-            <div className="p-4 w-fit rounded-2xl mb-6 bg-white/10 text-white">
-              <Calendar size={24} />
-            </div>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1.5 text-white/60">
-              Deadlines
-            </p>
-            <p className="text-4xl font-serif text-white">0</p>
+        <div className="bg-zinc-900 dark:bg-indigo-950 text-white rounded-2xl p-[24px_28px] flex items-center gap-6 h-[140px] shadow-lg">
+          <div className="w-12 h-12 rounded-full bg-zinc-800 dark:bg-indigo-900 flex items-center justify-center shrink-0">
+            <Calendar size={22} className="text-indigo-400" />
           </div>
-        </Card>
-      </motion.div>
+          <div className="space-y-1">
+            <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">Deadlines</span>
+            <p className="text-[18px] font-black uppercase tracking-tight text-white">0 Pending</p>
+          </div>
+        </div>
+      </div>
 
       {/* Table Section */}
       {!compact && (
-        <motion.div variants={fadeInUp as any} className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <h3 className="font-serif text-2xl">Activity Registry</h3>
-            <div className="relative w-full md:w-[350px]">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                size={18}
-              />
-              <Input
-                placeholder="Search for a student..."
-                className="pl-12 rounded-full border-border/60 bg-muted/30 focus:bg-background transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+        <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[12px] shadow-none overflow-hidden">
+          <div className="p-[24px_32px] border-b border-zinc-50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-900/30">
+            <h2 className="text-[13px] font-bold uppercase tracking-[0.1em] text-zinc-500">Activity Registry</h2>
           </div>
           <div className="overflow-x-auto">
             {isLoading ? (
-              <div className="p-20 text-center animate-pulse text-muted-foreground font-serif text-lg">
+              <div className="p-10 text-center text-zinc-400 text-[13px]">
                 Loading data...
               </div>
             ) : (
               <Table>
-                <TableHeader className="bg-muted/30">
-                  <TableRow className="hover:bg-transparent border-border/40">
-                    <TableHead className="w-[120px] text-[10px] font-mono font-bold uppercase tracking-widest px-8 py-6 text-muted-foreground">
+                <TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/50">
+                  <TableRow className="hover:bg-transparent border-zinc-100 dark:border-zinc-800">
+                    <TableHead className="text-[11px] font-bold uppercase tracking-widest px-8 py-6 text-zinc-400">
                       Reference
                     </TableHead>
-                    <TableHead className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
                       Student
                     </TableHead>
-                    <TableHead className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
                       Role
                     </TableHead>
-                    <TableHead className="text-right px-8 text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="text-right px-8 text-[11px] font-bold uppercase tracking-widest text-zinc-400">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -170,18 +138,18 @@ export default function AdminSuiviStage({ compact = false }: { compact?: boolean
                   {filteredUsers?.map((user: any) => (
                     <TableRow
                       key={user.id}
-                      className="group cursor-pointer border-border/40 hover:bg-accent/[0.02] transition-colors"
+                      className="group cursor-pointer border-zinc-50 dark:border-zinc-800 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors"
                       onClick={() => setSelectedUser(user)}
                     >
-                      <TableCell className="font-mono text-[10px] text-muted-foreground px-8 py-6">
+                      <TableCell className="font-mono text-[11px] text-zinc-400 px-8 py-8">
                         #{user.id.slice(0, 8).toUpperCase()}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-foreground group-hover:text-accent transition-colors">
+                      <TableCell className="py-8">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[15px] font-bold text-zinc-900 dark:text-zinc-50">
                             {user.full_name || "Unknown Student"}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[12px] text-zinc-500 font-medium">
                             {user.email}
                           </span>
                         </div>
@@ -189,23 +157,18 @@ export default function AdminSuiviStage({ compact = false }: { compact?: boolean
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className="rounded-lg text-[9px] font-bold uppercase tracking-widest border-border/60 group-hover:border-accent/30 transition-colors"
+                          className="rounded-lg text-[9px] font-bold uppercase tracking-widest border-zinc-200 dark:border-zinc-800 text-zinc-500"
                         >
                           {user.role}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right px-8">
+                      <TableCell className="text-right px-8 py-8">
                         <Button
                           variant="ghost"
-                          className="rounded-full gap-2 text-muted-foreground group-hover:text-accent"
+                          size="sm"
+                          className="h-10 px-5 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 gap-3 text-[13px] font-bold uppercase tracking-wider"
                         >
-                          <span className="text-[10px] font-bold uppercase tracking-widest">
-                            Consult
-                          </span>
-                          <ArrowUpRight
-                            size={14}
-                            className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
-                          />
+                          Consult <ArrowUpRight size={14} />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -214,7 +177,7 @@ export default function AdminSuiviStage({ compact = false }: { compact?: boolean
               </Table>
             )}
           </div>
-        </motion.div>
+        </Card>
       )}
 
       {selectedUser && !compact && (
@@ -224,6 +187,6 @@ export default function AdminSuiviStage({ compact = false }: { compact?: boolean
           onClose={() => setSelectedUser(null)}
         />
       )}
-    </motion.div>
+    </div>
   )
 }

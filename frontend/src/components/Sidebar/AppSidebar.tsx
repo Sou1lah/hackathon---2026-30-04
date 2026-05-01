@@ -13,6 +13,7 @@ import {
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
+import { useTranslation } from "react-i18next"
 import {
   Sidebar,
   SidebarContent,
@@ -37,6 +38,7 @@ export function AppSidebar() {
     items.push({
       icon: LayoutDashboard,
       title: "Dashboard",
+      key: "dashboard",
       path: "/dashboard",
     })
   }
@@ -45,12 +47,14 @@ export function AppSidebar() {
     items.push({
       icon: FilePlus2,
       title: "Add Internship",
+      key: "add_internship",
       path: "/stages",
     })
   } else if (currentUser?.can_apply_internship) {
     items.push({
       icon: FilePlus2,
       title: "Internship Request",
+      key: "internship_request",
       path: "/stages",
     })
   }
@@ -62,6 +66,9 @@ export function AppSidebar() {
         currentUser?.is_superuser || currentUser?.can_review_applications
           ? "Application Management"
           : "Internship Convention",
+      key: currentUser?.is_superuser || currentUser?.can_review_applications
+        ? "application_management"
+        : "internship_convention",
       path: "/convention",
     })
   }
@@ -70,6 +77,7 @@ export function AppSidebar() {
     items.push({
       icon: Activity,
       title: "Internship Tracking",
+      key: "internship_tracking",
       path: "/suivi-stage",
     })
   }
@@ -78,6 +86,7 @@ export function AppSidebar() {
     items.push({
       icon: ListChecks,
       title: "All Internships",
+      key: "all_internships",
       path: "/admin/internships",
     })
   }
@@ -86,39 +95,44 @@ export function AppSidebar() {
   items.push({
     icon: Compass,
     title: "Mobility",
+    key: "mobility",
     path: "/mobilite",
     subItems: [
       {
         icon: MapPinned,
         title: "National Mobility",
-        path: "/mobilite",
-        search: { type: "nationale" },
+        key: "national_mobility",
+        path: "/mobility",
+        search: { type: "national" },
       },
       {
         icon: Plane,
         title: "International Mobility",
-        path: "/mobilite",
-        search: { type: "internationale" },
+        key: "international_mobility",
+        path: "/mobility",
+        search: { type: "international" },
       },
     ],
   })
 
+  const { t } = useTranslation()
+
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-4 py-10 flex items-center justify-center group-data-[collapsible=icon]:px-0">
-        <Logo variant="responsive" />
+      <SidebarHeader className="px-6 py-8">
+        <Logo variant="full" />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-2">
         <Main items={items} />
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="p-4 gap-4">
         <SidebarAppearance />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="User Settings" asChild>
+            <SidebarMenuButton tooltip={t("user_settings")} asChild>
               <RouterLink to="/settings">
-                <Settings className="size-4" />
-                <span>User Settings</span>
+                <Settings className="size-5" />
+                <span className="text-base font-bold">{t("user_settings")}</span>
               </RouterLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

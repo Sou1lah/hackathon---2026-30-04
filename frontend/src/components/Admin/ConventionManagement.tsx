@@ -174,7 +174,7 @@ export function ConventionManagement() {
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="border-border/40 hover:bg-transparent">
-              <TableHead className="w-[350px] font-mono text-[10px] uppercase tracking-widest py-6 px-8 text-muted-foreground">
+              <TableHead className="w-[350px] font-mono text-[11px] uppercase tracking-widest py-8 px-10 text-muted-foreground">
                 Document / Student
               </TableHead>
               <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -218,16 +218,16 @@ export function ConventionManagement() {
                   key={conv.id}
                   className="border-border/40 group hover:bg-muted/20 transition-colors"
                 >
-                  <TableCell className="py-6 px-8">
+                  <TableCell className="py-8 px-10">
                     <div className="flex items-center gap-4">
-                      <div className="size-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:bg-accent/10 group-hover:text-accent transition-all shadow-sm">
-                        <FileText size={22} />
+                      <div className="size-14 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:bg-accent/10 group-hover:text-accent transition-all shadow-sm">
+                        <FileText size={26} />
                       </div>
                       <div className="flex flex-col max-w-[200px] sm:max-w-[300px]">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="font-bold text-sm text-foreground tracking-tight truncate text-left">
+                              <span className="font-bold text-base text-foreground tracking-tight truncate text-left">
                                 {conv.document_name}
                               </span>
                             </TooltipTrigger>
@@ -282,16 +282,16 @@ export function ConventionManagement() {
                       })}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right px-8">
+                  <TableCell className="text-right px-10">
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleViewDetails(conv)}
-                        className="h-9 px-3 rounded-xl border border-transparent hover:border-border/40 hover:bg-white dark:hover:bg-zinc-900 group/btn shadow-sm transition-all"
+                        className="h-11 px-5 rounded-xl border border-transparent hover:border-border/40 hover:bg-white dark:hover:bg-zinc-900 group/btn shadow-sm transition-all"
                       >
                         <ExternalLink
-                          size={14}
+                          size={16}
                           className="mr-2 text-muted-foreground group-hover/btn:text-accent"
                         />
                         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover/btn:text-foreground">
@@ -310,9 +310,9 @@ export function ConventionManagement() {
                             deleteMutation.mutate(conv.id)
                           }
                         }}
-                        className="h-9 w-9 rounded-xl border border-border/20 hover:bg-destructive/10 hover:border-destructive/30 hover:text-destructive group-hover:border-border/40 transition-colors"
+                        className="h-11 w-11 rounded-xl border border-border/20 hover:bg-destructive/10 hover:border-destructive/30 hover:text-destructive group-hover:border-border/40 transition-colors"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </Button>
                     </div>
                   </TableCell>

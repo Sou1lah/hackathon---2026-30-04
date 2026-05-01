@@ -114,24 +114,23 @@ export default function SuiviStageFeature() {
       initial="hidden"
       animate="visible"
       variants={stagger as any}
-      className="container max-w-6xl py-12 space-y-12"
+      className="container max-w-[1400px] py-20 space-y-24"
     >
       {/* Header Section */}
       <motion.div
         variants={fadeInUp as any}
-        className="flex flex-col md:flex-row md:items-end justify-between gap-8"
+        className="flex flex-col items-center text-center gap-8 max-w-4xl mx-auto"
       >
-        <div className="space-y-4">
-          <Badge variant="section" className="px-4 py-1.5 text-[10px]">
-            <span className="flex h-1.5 w-1.5 rounded-full bg-accent animate-pulse mr-2" />
-            Operational Tracking
+        <div className="space-y-6">
+          <Badge variant="section" className="px-6 py-2 text-[12px] rounded-full mx-auto">
+            <span className="flex h-2 w-2 rounded-full bg-accent animate-pulse mr-3" />
+            Operational Tracking System
           </Badge>
-          <h1 className="text-5xl md:text-6xl font-serif tracking-tight text-foreground leading-[1.1]">
-            Internship <span className="gradient-text">Log</span>
+          <h1 className="text-7xl md:text-8xl font-serif tracking-tight text-foreground leading-tight">
+            Internship <span className="gradient-text">Logbook</span>
           </h1>
-          <p className="text-muted-foreground text-xl max-w-2xl leading-relaxed">
-            Record your daily activities and maintain fluid communication with
-            your academic tutor.
+          <p className="text-muted-foreground text-2xl leading-relaxed max-w-3xl">
+            Record your daily professional milestones and maintain high-fidelity communication with your academic mentorship team.
           </p>
         </div>
 
@@ -139,11 +138,11 @@ export default function SuiviStageFeature() {
           <DialogTrigger asChild>
             <Button
               size="lg"
-              className="rounded-full px-8 gap-3 bg-accent hover:bg-accent/90 text-white shadow-xl shadow-accent/20 transition-all hover:scale-105 active:scale-95"
+              className="h-20 rounded-full px-12 gap-4 bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-2xl transition-all hover:scale-105 active:scale-95 border-8 border-white dark:border-zinc-950"
             >
-              <Plus size={20} />
-              <span className="font-bold uppercase tracking-widest text-[10px]">
-                New Activity
+              <Plus size={28} />
+              <span className="font-bold uppercase tracking-[0.2em] text-[12px]">
+                Create New Activity Log
               </span>
             </Button>
           </DialogTrigger>
@@ -233,49 +232,49 @@ export default function SuiviStageFeature() {
       {/* Stats Quick Look */}
       <motion.div
         variants={fadeInUp as any}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-3 gap-8"
       >
-        <Card className="p-6 border-border/50 bg-muted/20">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-accent/10 rounded-2xl text-accent">
-              <History size={20} />
+        <Card className="p-10 border-border/50 bg-white dark:bg-zinc-950 shadow-sm rounded-[2rem]">
+          <div className="flex items-center gap-6">
+            <div className="p-5 bg-accent/10 rounded-2xl text-accent">
+              <History size={28} />
             </div>
             <div>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                Activities
+              <p className="text-[12px] font-mono text-muted-foreground uppercase tracking-widest font-bold">
+                Logged Activities
               </p>
-              <p className="text-2xl font-serif text-foreground">
+              <p className="text-5xl font-serif text-foreground">
                 {logsData?.count || 0}
               </p>
             </div>
           </div>
         </Card>
-        <Card className="p-6 border-border/50 bg-muted/20">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
-              <TrendingUp size={20} />
+        <Card className="p-10 border-border/50 bg-white dark:bg-zinc-950 shadow-sm rounded-[2rem]">
+          <div className="flex items-center gap-6">
+            <div className="p-5 bg-emerald-500/10 rounded-2xl text-emerald-500">
+              <TrendingUp size={28} />
             </div>
             <div>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                Feedback
+              <p className="text-[12px] font-mono text-muted-foreground uppercase tracking-widest font-bold">
+                Mentorship Feedback
               </p>
-              <p className="text-2xl font-serif text-foreground">
+              <p className="text-5xl font-serif text-foreground">
                 {feedbacks?.length || 0}
               </p>
             </div>
           </div>
         </Card>
-        <Card className="p-6 border-foreground text-background bg-foreground relative overflow-hidden">
-          <div className="absolute inset-0 dot-pattern opacity-[0.03]" />
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="p-3 bg-white/10 rounded-2xl text-white">
-              <Clock size={20} />
+        <Card className="p-10 border-foreground text-background bg-foreground relative overflow-hidden rounded-[2rem] shadow-2xl">
+          <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
+          <div className="flex items-center gap-6 relative z-10">
+            <div className="p-5 bg-white/10 rounded-2xl text-white">
+              <Clock size={28} />
             </div>
             <div>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                Progress
+              <p className="text-[12px] font-mono text-zinc-400 uppercase tracking-widest font-bold">
+                Internship Phase
               </p>
-              <p className="text-2xl font-serif text-white">In Progress</p>
+              <p className="text-4xl font-serif text-white italic">Ongoing</p>
             </div>
           </div>
         </Card>
@@ -284,11 +283,11 @@ export default function SuiviStageFeature() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Timeline Content */}
         <div className="lg:col-span-8 space-y-8">
-          <div className="flex items-center gap-4">
-            <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">
-              Activity Timeline
+          <div className="flex items-center gap-8 mb-12">
+            <h3 className="text-[14px] font-mono font-black uppercase tracking-[0.4em] text-muted-foreground">
+              Activity History
             </h3>
-            <div className="h-px flex-1 bg-border/50" />
+            <div className="h-px flex-1 bg-border/40" />
           </div>
 
           <div className="space-y-6">
@@ -301,39 +300,39 @@ export default function SuiviStageFeature() {
                 const fb = getFeedbackForLog(log.id)
                 return (
                   <motion.div key={log.id} variants={fadeInUp as any}>
-                    <Card className="group hover:border-accent/30 transition-all duration-300 border-border/50 overflow-hidden">
-                      <div className="flex flex-col md:flex-row">
-                        <div className="md:w-32 bg-muted/30 p-6 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-border/40">
-                          <span className="text-3xl font-serif text-foreground">
+                    <Card className="group hover:border-accent/30 transition-all duration-500 border-border/50 overflow-hidden rounded-[2.5rem] bg-white dark:bg-zinc-950 shadow-sm hover:shadow-2xl">
+                      <div className="flex flex-col md:flex-row min-h-[280px]">
+                        <div className="md:w-48 bg-zinc-50 dark:bg-zinc-900/50 p-10 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-zinc-100 dark:border-zinc-900">
+                          <span className="text-6xl font-serif text-foreground group-hover:scale-110 transition-transform">
                             {new Date(log.date).getDate()}
                           </span>
-                          <span className="text-[10px] font-mono uppercase font-bold text-muted-foreground">
+                          <span className="text-[14px] font-mono uppercase font-black tracking-widest text-muted-foreground mt-2">
                             {new Intl.DateTimeFormat("en-US", {
-                              month: "short",
+                              month: "long",
                             }).format(new Date(log.date))}
                           </span>
                         </div>
-                        <div className="flex-1 p-6 md:p-8 space-y-4">
+                        <div className="flex-1 p-12 space-y-6">
                           <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-serif text-foreground group-hover:text-accent transition-colors">
+                            <h3 className="text-3xl font-serif text-foreground group-hover:text-accent transition-colors leading-tight">
                               {log.title}
                             </h3>
                             {log.attachment_url && (
-                              <Button variant="ghost" size="icon-sm" asChild>
+                              <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl" asChild>
                                 <a
                                   href={log.attachment_url}
                                   target="_blank"
                                   rel="noreferrer"
                                 >
                                   <Paperclip
-                                    size={16}
+                                    size={20}
                                     className="text-muted-foreground hover:text-accent"
                                   />
                                 </a>
                               </Button>
                             )}
                           </div>
-                          <p className="text-muted-foreground leading-relaxed">
+                          <p className="text-lg text-muted-foreground leading-relaxed">
                             {log.content}
                           </p>
 
@@ -425,20 +424,21 @@ export default function SuiviStageFeature() {
             </CardContent>
           </Card>
 
-          <Card className="bg-accent text-white border-none p-8 space-y-6 shadow-2xl shadow-accent/20 relative overflow-hidden">
+          <Card className="bg-accent text-white border-none p-12 space-y-8 shadow-2xl shadow-accent/30 rounded-[2.5rem] relative overflow-hidden">
             <div className="absolute inset-0 dot-pattern opacity-[0.1]" />
-            <div className="relative z-10 space-y-4">
-              <FileText size={32} className="text-white/80" />
-              <h3 className="text-2xl font-serif">Internship Report</h3>
-              <p className="text-white/70 text-sm leading-relaxed">
-                Once your internship is complete, you will need to submit your
-                final report for validation by the jury.
+            <div className="relative z-10 space-y-6">
+              <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center">
+                <FileText size={36} className="text-white" />
+              </div>
+              <h3 className="text-3xl font-serif leading-tight">Internship Final Report</h3>
+              <p className="text-white/80 text-base leading-relaxed">
+                Upon completion of your tenure, you are required to formalize your learnings into a comprehensive final report for academic validation.
               </p>
               <Button
                 variant="secondary"
-                className="w-full rounded-xl py-6 font-bold uppercase tracking-widest text-[10px] bg-white text-accent hover:bg-white/90"
+                className="w-full h-16 rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] bg-white text-accent hover:bg-white/95 shadow-xl transition-all"
               >
-                Coming Soon
+                Submission Portal Opening Soon
               </Button>
             </div>
           </Card>

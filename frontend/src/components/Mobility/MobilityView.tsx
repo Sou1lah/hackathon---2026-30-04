@@ -2,7 +2,6 @@ import {
   ArrowRight,
   Building2,
   CheckCircle2,
-  CreditCard,
   FileText,
   Globe,
   Layers,
@@ -11,6 +10,7 @@ import {
   Plane,
   ShieldCheck,
   Sparkles,
+  CreditCard,
 } from "lucide-react"
 import { motion } from "motion/react"
 import { useState } from "react"
@@ -39,10 +39,10 @@ import {
 import { cn } from "@/lib/utils"
 
 interface MobilityViewProps {
-  type: "nationale" | "internationale"
+  type: "national" | "international"
 }
 
-const fadeInUp = {
+const fadeInUp: any = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -51,7 +51,7 @@ const fadeInUp = {
   },
 }
 
-const stagger = {
+const stagger: any = {
   visible: { transition: { staggerChildren: 0.1 } },
 }
 
@@ -59,7 +59,7 @@ const stagger = {
 const TransferAnimation = ({
   type,
 }: {
-  type: "nationale" | "internationale"
+  type: "national" | "international"
 }) => {
   return (
     <div className="relative h-32 w-full flex items-center justify-between px-12 md:px-24 mb-12">
@@ -108,10 +108,10 @@ const TransferAnimation = ({
         className="relative z-10 flex flex-col items-center gap-2"
       >
         <div className="size-16 rounded-2xl bg-accent text-white flex items-center justify-center shadow-2xl shadow-accent/20">
-          {type === "nationale" ? <Building2 size={28} /> : <Globe size={28} />}
+          {type === "national" ? <Building2 size={28} /> : <Globe size={28} />}
         </div>
         <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-accent">
-          {type === "nationale" ? "Host Univ." : "International"}
+          {type === "national" ? "Host Univ." : "International"}
         </span>
       </motion.div>
     </div>
@@ -119,7 +119,7 @@ const TransferAnimation = ({
 }
 
 export default function MobilityView({ type }: MobilityViewProps) {
-  const isNational = type === "nationale"
+  const isNational = type === "national"
   const [selectedStudent, setSelectedStudent] = useState<any>(null)
 
   const content = isNational

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import {
   AlertCircle,
@@ -10,11 +10,12 @@ import {
   FileText,
   Loader2,
   ShieldCheck,
+  Sparkles,
   Upload,
   User,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -122,6 +123,15 @@ export default function DemandeStage() {
   const handleSubmit = () => {
     mutation.mutate(formData)
   }
+
+  const { data: offersData, isLoading: offersLoading } = useQuery({
+    queryKey: ["internship-offers-compact"],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/v1/internships/?limit=3`)
+      if (!response.ok) throw new Error("Failed to fetch offers")
+      return response.json()
+    }
+  })
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-20 p-2">
@@ -463,6 +473,69 @@ export default function DemandeStage() {
           Error: {mutation.error.message}
         </p>
       )}
+
+      {/* Recommended Cards */}
+      <div className="pt-20 border-t border-zinc-100 dark:border-zinc-900">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-3">
+             <div className="size-10 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+                <Sparkles className="size-5 text-zinc-900 dark:text-zinc-50" />
+             </div>
+             <div>
+                <h2 className="text-xl font-bold">Suggested Opportunities</h2>
+                <p className="text-sm text-muted-foreground">Based on current trends and popular destinations.</p>
+             </div>
+          </div>
+          <Button variant="outline" className="rounded-full text-[10px] font-bold uppercase tracking-widest" asChild>
+            <a href="/stages">Explore All</a>
+          </Button>
+        </div>
+
+        {offersLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 rounded-[2rem] bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {(offersData?.data || []).map((item: any) => (
+              <Card key={item.id} className="overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-500 group rounded-[2rem] bg-white dark:bg-zinc-950">
+                 <div className="h-40 bg-zinc-50 dark:bg-zinc-900/50 flex items-center justify-center relative overflow-hidden">
+                    {item.university_logo ? (
+                      <img src={item.university_logo} alt={item.university_name || ""} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                    ) : (
+                      <span className="text-8xl opacity-10 group-hover:opacity-30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700 select-none">
+                        {item.country_flag || "🏢"}
+                      </span>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <Badge variant="secondary" className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm text-[8px] font-bold tracking-widest uppercase border-zinc-200 dark:border-zinc-800">
+                        {item.mobility_type}
+                      </Badge>
+                    </div>
+                 </div>
+                 <CardContent className="p-6">
+                    <h3 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-1">{item.title}</h3>
+                    <p className="text-xs text-muted-foreground mb-4 line-clamp-1">{item.university_name || item.country}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(item.keywords || []).slice(0, 3).map((tag: string) => (
+                        <Badge key={tag} variant="outline" className="text-[8px] px-1.5 py-0 border-zinc-200 dark:border-zinc-800 font-mono">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                 </CardContent>
+                 <CardFooter className="p-6 pt-0">
+                    <Button variant="ghost" className="w-full rounded-xl text-[10px] font-bold uppercase tracking-widest group-hover:bg-zinc-900 group-hover:text-zinc-50 dark:group-hover:bg-zinc-50 dark:group-hover:text-zinc-900 transition-all border border-zinc-100 dark:border-zinc-900">
+                      Learn More
+                    </Button>
+                 </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

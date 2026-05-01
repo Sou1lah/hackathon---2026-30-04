@@ -27,14 +27,14 @@ interface UserInfoProps {
 function UserInfo({ fullName, email }: UserInfoProps) {
   return (
     <div className="flex items-center gap-2.5 w-full min-w-0">
-      <Avatar className="size-8 border-2 border-primary/20 transition-all duration-300 group-hover:scale-105">
-        <AvatarFallback className="bg-gradient-to-br from-primary to-accent-secondary text-white text-[10px] font-bold">
+      <Avatar className="size-11 border-2 border-primary/20 transition-all duration-300 group-hover:scale-105">
+        <AvatarFallback className="bg-gradient-to-br from-primary to-accent-secondary text-white text-xs font-bold">
           {getInitials(fullName || "User")}
         </AvatarFallback>
       </Avatar>
       <div className="flex flex-col items-start min-w-0">
-        <p className="text-sm font-medium truncate w-full">{fullName}</p>
-        <p className="text-xs text-muted-foreground truncate w-full">{email}</p>
+        <p className="text-base font-bold truncate w-full">{fullName}</p>
+        <p className="text-sm text-muted-foreground truncate w-full">{email}</p>
       </div>
     </div>
   )

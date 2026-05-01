@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { ConventionManagement } from "@/components/Admin/ConventionManagement"
 import AccessDenied from "@/components/Common/AccessDenied"
-import ConventionStage from "@/components/Mobility/ConventionStage"
+import StaticConvention from "@/components/Mobility/StaticConvention"
 import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/convention")({
@@ -39,5 +39,5 @@ function ConventionPage() {
     )
   }
 
-  return <ConventionStage />
+  return <StaticConvention />
 }

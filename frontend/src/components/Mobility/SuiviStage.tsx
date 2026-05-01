@@ -73,7 +73,7 @@ export default function SuiviStage({
   const effectiveId = internshipId || internships?.data?.[0]?.id
 
   // 2. Fetch summary for the active internship
-  const { data: summary, isLoading: isLoadingSummary } = useQuery({
+  const { data: summary } = useQuery({
     queryKey: ["internship-summary", effectiveId],
     queryFn: () => MobilityService.readInternshipSummary({ id: effectiveId! }),
     enabled: !!effectiveId,
@@ -192,484 +192,241 @@ export default function SuiviStage({
   }
 
   return (
-    <div className="space-y-10 pb-20 p-2">
-      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-zinc-100 dark:border-zinc-900 pb-8 gap-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Internship Tracking
+    <div className="p-[24px] space-y-[12px] bg-white dark:bg-zinc-950 min-h-screen">
+      {/* ── Header Row ── */}
+      <div className="flex flex-row justify-between items-start mb-6">
+        <div className="space-y-1">
+          <h1 className="text-[22px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Internship Log
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-1">
-            {summary?.mission_title || "Loading..."} @ {summary?.company_name}
+          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 max-w-[520px] leading-relaxed">
+            {summary?.mission_title || "Tracking and activity history for your current internship."}
           </p>
-          <div className="flex items-center gap-2 mt-3">
-            <Badge
-              variant="outline"
-              className="text-[10px] font-mono tracking-widest uppercase bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-            >
-              {summary?.status}
-            </Badge>
-            <span className="text-[10px] font-mono text-zinc-400 uppercase">
-              Step {summary?.current_step}/8
-            </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {isViewingSelf && (
+            <Dialog open={isLogDialogOpen} onOpenChange={setIsLogDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-9 px-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-medium shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 gap-2 text-indigo-600 dark:text-indigo-400"
+                >
+                  <Plus size={14} /> Add activity
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] rounded-2xl border-zinc-200 dark:border-zinc-800">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold">New Activity</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-6 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="content" className="text-[11px] uppercase font-bold text-zinc-400 tracking-[0.06em]">
+                      Activity Description
+                    </Label>
+                    <Input
+                      id="content"
+                      placeholder="What did you accomplish?"
+                      className="rounded-xl border-zinc-200 dark:border-zinc-800"
+                      value={logContent}
+                      onChange={(e) => setLogContent(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="hours" className="text-[11px] uppercase font-bold text-zinc-400 tracking-[0.06em]">
+                      Hours completed
+                    </Label>
+                    <Input
+                      id="hours"
+                      type="number"
+                      className="rounded-xl border-zinc-200 dark:border-zinc-800"
+                      value={logHours}
+                      onChange={(e) => setLogHours(parseInt(e.target.value, 10))}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleAddLog} disabled={addLogMutation.isPending || !logContent} className="w-full rounded-xl font-bold uppercase tracking-widest text-[10px] py-6 bg-indigo-600 hover:bg-indigo-700 text-white border-none">
+                    Save entry
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+      </div>
+
+      {/* ── Top Stats Row ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[12px] mb-[12px]">
+        {/* Col 1: Activities */}
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-[14px_16px] flex flex-col justify-between h-[100px]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-400">Activities</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[22px] font-bold text-zinc-900 dark:text-zinc-50">{logs?.count || 0}</span>
+            <span className="text-[11px] text-zinc-400 font-medium">Logged</span>
           </div>
         </div>
-        <div className="flex items-center gap-0 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 shadow-sm self-start md:self-center">
-          <div className="flex flex-col items-center px-6 py-3 border-r border-zinc-200 dark:border-zinc-800">
-            <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-50 tracking-tighter">
-              {summary?.total_hours || 0}
-            </span>
-            <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">
-              Hours
-            </span>
+
+        {/* Col 2: Feedback */}
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-[14px_16px] flex flex-col justify-between h-[100px]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-400">Feedback</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[22px] font-bold text-zinc-900 dark:text-zinc-50">{summary?.reports?.filter((r:any)=>r.status === 'approved').length || 0}</span>
+            <span className="text-[11px] text-zinc-400 font-medium">Approved Reports</span>
           </div>
-          <div className="flex flex-col items-center px-6 py-3 bg-zinc-50 dark:bg-zinc-900/30">
-            <span className="text-2xl font-bold font-mono text-emerald-500 tracking-tighter">
-              {summary?.progress || 0}%
-            </span>
-            <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">
-              Progress
-            </span>
+        </div>
+
+        {/* Col 3: Status */}
+        <div className="bg-zinc-900 dark:bg-indigo-950 text-white rounded-xl p-[14px_16px] flex items-center gap-4 h-[100px]">
+          <div className="w-10 h-10 rounded-full bg-zinc-800 dark:bg-indigo-900 flex items-center justify-center shrink-0">
+            <Clock size={18} className="text-indigo-400" />
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">Current Status</span>
+            <p className="text-[14px] font-bold uppercase tracking-tight text-white">{summary?.status || "Active"}</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Activity Log */}
-        <div className="xl:col-span-2">
-          <Card className="border-zinc-200 dark:border-zinc-800 shadow-none h-full flex flex-col overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-zinc-50 dark:border-zinc-900 py-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <History size={18} className="text-zinc-400" />
-                <span className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">
-                  Logbook
-                </span>
-              </CardTitle>
-              {isViewingSelf && (
-                <Dialog
-                  open={isLogDialogOpen}
-                  onOpenChange={setIsLogDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      size="sm"
-                      className="h-8 rounded-lg bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 font-bold text-[10px] tracking-wider uppercase gap-2"
-                    >
-                      <Plus size={14} /> New Entry
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] rounded-2xl border-zinc-200 dark:border-zinc-800">
-                    <DialogHeader>
-                      <DialogTitle className="text-xl font-bold">
-                        New Entry
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-6 py-4">
-                      <div className="grid gap-2">
-                        <Label
-                          htmlFor="content"
-                          className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest"
-                        >
-                          Activity Description
-                        </Label>
-                        <Input
-                          id="content"
-                          placeholder="What did you accomplish today?"
-                          className="rounded-xl border-zinc-200 dark:border-zinc-800"
-                          value={logContent}
-                          onChange={(e) => setLogContent(e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label
-                          htmlFor="hours"
-                          className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest"
-                        >
-                          Hours completed
-                        </Label>
-                        <Input
-                          id="hours"
-                          type="number"
-                          min="1"
-                          max="24"
-                          className="rounded-xl border-zinc-200 dark:border-zinc-800"
-                          value={logHours}
-                          onChange={(e) =>
-                            setLogHours(parseInt(e.target.value, 10))
-                          }
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        onClick={handleAddLog}
-                        disabled={addLogMutation.isPending || !logContent}
-                        className="w-full rounded-xl font-bold uppercase tracking-widest text-[10px] py-6"
-                      >
-                        {addLogMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Save
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </CardHeader>
-            <CardContent className="p-0 flex-1">
+      {/* ── Main Content Grid ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-[12px]">
+        
+        {/* Left: Timeline Card */}
+        <div className="space-y-[12px]">
+          <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[12px] shadow-none overflow-hidden">
+            <div className="p-[16px] border-b border-zinc-50 dark:border-zinc-800/50">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.06em] text-zinc-400">Activity History</h2>
+            </div>
+            <CardContent className="p-0">
               {isLoadingLogs ? (
-                <div className="p-8 space-y-4">
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
+                <div className="p-6 space-y-4">
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
                 </div>
               ) : logs?.data && logs.data.length > 0 ? (
-                <div className="divide-y divide-zinc-50 dark:divide-zinc-900">
+                <div className="divide-y divide-zinc-50 dark:divide-zinc-800">
                   {logs.data.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="p-6 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors group"
-                    >
-                      <div className="flex gap-6">
-                        <div className="flex flex-col items-center gap-3 w-12 shrink-0">
-                          <div className="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 w-12 h-12 rounded-xl flex flex-col items-center justify-center border border-zinc-200 dark:border-zinc-800 font-mono">
-                            <span className="text-sm font-bold leading-none">
-                              {new Date(entry.date).getDate()}
-                            </span>
-                            <span className="text-[9px] uppercase font-bold text-zinc-400">
-                              {new Intl.DateTimeFormat("en-US", {
-                                month: "short",
-                              })
-                                .format(new Date(entry.date))
-                                .toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1 text-zinc-400 font-mono text-[10px] font-bold">
-                            <Clock size={10} />
-                            <span>{entry.hours}H</span>
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <Badge
-                              variant="outline"
-                              className="text-[9px] font-mono tracking-widest bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 uppercase"
-                            >
-                              Activity
-                            </Badge>
-                            {isViewingSelf && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-6 text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <MoreVertical size={14} />
-                              </Button>
-                            )}
-                          </div>
-                          <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
-                            {entry.content}
-                          </p>
+                    <div key={entry.id} className="p-[16px] flex gap-4 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center border border-zinc-200 dark:border-zinc-800 shrink-0">
+                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">{new Date(entry.date).getDate()}</span>
+                        <span className="text-[7px] uppercase font-bold text-zinc-400">
+                          {new Intl.DateTimeFormat("en-US", { month: "short" }).format(new Date(entry.date)).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex justify-between items-start">
+                          <p className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200 leading-snug">{entry.content}</p>
+                          <span className="text-[10px] font-mono text-zinc-400">{entry.hours}h</span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="p-20 text-center flex flex-col items-center opacity-50">
-                  <div className="bg-zinc-100 dark:bg-zinc-900 p-4 rounded-full mb-4">
-                    <History size={32} />
-                  </div>
-                  <p className="text-sm font-medium">No entry in the log.</p>
+                <div className="p-[40px] text-center flex flex-col items-center justify-center">
+                  <History size={36} className="text-zinc-200 dark:text-zinc-800 mb-2 opacity-25" />
+                  <p className="text-[13px] text-zinc-400 font-medium">No activity history available</p>
                 </div>
               )}
             </CardContent>
-            <CardFooter className="p-0 border-t border-zinc-50 dark:border-zinc-900">
-              <Button
-                variant="ghost"
-                className="w-full py-6 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 rounded-none"
-              >
-                Load full history
-              </Button>
-            </CardFooter>
+          </Card>
+
+          <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[12px] shadow-none">
+             <div className="p-[16px] border-b border-zinc-50 dark:border-zinc-800/50 flex items-center justify-between">
+                <h2 className="text-[11px] font-bold uppercase tracking-[0.06em] text-zinc-400">Deliverables</h2>
+                {isViewingSelf && (
+                   <Button variant="ghost" size="icon" onClick={()=>setIsReportDialogOpen(true)} className="size-6 text-zinc-400 hover:text-indigo-600">
+                     <Plus size={14} />
+                   </Button>
+                )}
+             </div>
+             <CardContent className="p-[16px] space-y-2">
+                {summary?.reports && summary.reports.length > 0 ? (
+                  summary.reports.map((report: any) => (
+                    <div key={report.id} className="flex items-center justify-between p-3 bg-zinc-50/50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileCheck size={14} className="text-indigo-500" />
+                        <span className="text-[13px] font-medium">{report.title}</span>
+                      </div>
+                      <Badge variant="outline" className="text-[9px] uppercase font-mono border-indigo-200 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400">
+                        {report.status}
+                      </Badge>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-[12px] text-zinc-400 italic">No reports submitted yet.</p>
+                )}
+             </CardContent>
           </Card>
         </div>
 
-        {/* Deliverables & Evaluation */}
-        <div className="space-y-8">
-          <Card className="border-zinc-200 dark:border-zinc-800 shadow-none">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <CardTitle className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
-                <FileCheck size={16} className="text-zinc-400" /> Required
-                Deliverables
-              </CardTitle>
-              {isViewingSelf && (
-                <Dialog
-                  open={isReportDialogOpen}
-                  onOpenChange={setIsReportDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50"
-                    >
-                      <Plus size={16} />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] rounded-2xl border-zinc-200 dark:border-zinc-800">
-                    <DialogHeader>
-                      <DialogTitle className="text-xl font-bold">
-                        Submit a Report
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-6 py-4">
-                      <div className="grid gap-2">
-                        <Label
-                          htmlFor="reportTitle"
-                          className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest"
-                        >
-                          Report Title
-                        </Label>
-                        <Input
-                          id="reportTitle"
-                          placeholder="Ex: First Milestone Report"
-                          className="rounded-xl border-zinc-200 dark:border-zinc-800"
-                          value={reportTitle}
-                          onChange={(e) => setReportTitle(e.target.value)}
-                        />
-                      </div>
-                      <div className="p-8 border-2 border-dashed border-zinc-100 dark:border-zinc-900 rounded-2xl text-center">
-                        <Upload
-                          size={24}
-                          className="mx-auto text-zinc-300 mb-2"
-                        />
-                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                          Click to upload PDF
-                        </p>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        onClick={handleAddReport}
-                        disabled={addReportMutation.isPending || !reportTitle}
-                        className="w-full rounded-xl font-bold uppercase tracking-widest text-[10px] py-6"
-                      >
-                        {addReportMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Submit
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {summary?.reports && summary.reports.length > 0 ? (
-                summary.reports.map((report: any) => (
-                  <div
-                    key={report.id}
-                    className="flex items-center justify-between p-3.5 bg-zinc-50/50 dark:bg-zinc-900/20 border border-zinc-100 dark:border-zinc-900 rounded-xl group hover:border-zinc-300 dark:hover:border-zinc-700 transition-all"
-                  >
-                    <div className="flex gap-4 items-center">
-                      <div
-                        className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center border transition-all",
-                          report.status === "approved"
-                            ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                            : report.status === "pending"
-                              ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                              : "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 border-zinc-200 dark:border-zinc-800",
-                        )}
-                      >
-                        {report.status === "approved" ? (
-                          <CheckCircle size={18} />
-                        ) : (
-                          <Upload size={18} />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50 leading-tight">
-                          {report.title}
-                        </p>
-                        <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-tighter mt-0.5">
-                          {report.status === "approved"
-                            ? "Approved"
-                            : "Under review"}{" "}
-                          • {new Date(report.submitted_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-6 bg-zinc-50/50 dark:bg-zinc-900/10 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 text-center">
-                  <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
-                    No documents submitted.
-                  </p>
-                </div>
-              )}
+        {/* Right: Sidebar Stack */}
+        <div className="space-y-[12px]">
+          <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[12px] shadow-none overflow-hidden">
+            <div className="p-[16px] border-b border-zinc-50 dark:border-zinc-800/50">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.06em] text-zinc-400">Internship Information</h2>
+            </div>
+            <CardContent className="p-[16px] space-y-4">
+              <div className="space-y-1">
+                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-400">Host organization</span>
+                <p className="text-[13px] font-bold text-zinc-900 dark:text-zinc-50">{summary?.company_name || "Not specified"}</p>
+              </div>
+              <div className="h-[0.5px] bg-zinc-100 dark:bg-zinc-800" />
+              <div className="space-y-1">
+                <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-400">Supervisor</span>
+                <p className="text-[13px] font-bold text-zinc-900 dark:text-zinc-50">{summary?.supervisor_name || "National Manager"}</p>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Tutor Evaluation - Vercel Style */}
-          <Card className="bg-zinc-950 text-zinc-50 border-none shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-3">
-              <Badge
-                variant="outline"
-                className="text-[8px] border-zinc-800 text-zinc-500 font-mono tracking-widest bg-zinc-900/50 uppercase"
-              >
-                Status: {summary?.evaluation ? "Finalized" : "Pending"}
-              </Badge>
+          <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[12px] shadow-none overflow-hidden">
+             <div className="p-[16px] border-b border-zinc-50 dark:border-zinc-800/50">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.06em] text-zinc-400">Internship Team</h2>
             </div>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
-                <Star size={14} className="text-amber-500 fill-amber-500" />{" "}
-                Tutor Evaluation
-              </CardTitle>
-              {isTutor && !isViewingSelf && (
-                <Dialog
-                  open={isEvalDialogOpen}
-                  onOpenChange={setIsEvalDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 rounded-lg text-zinc-400 hover:text-zinc-50"
-                    >
-                      <Plus size={16} />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] rounded-2xl border-zinc-200 dark:border-zinc-800">
-                    <DialogHeader>
-                      <DialogTitle className="text-xl font-bold">
-                        Evaluate the trainee
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-6 py-4">
-                      <div className="grid gap-2">
-                        <Label className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest">
-                          Rating (1 to 5)
-                        </Label>
-                        <div className="flex gap-2">
-                          {[1, 2, 3, 4, 5].map((i) => (
-                            <Star
-                              key={i}
-                              size={24}
-                              className={cn(
-                                "cursor-pointer transition-all",
-                                i <= evalRating
-                                  ? "text-amber-500 fill-amber-500"
-                                  : "text-zinc-200 dark:text-zinc-800",
-                              )}
-                              onClick={() => setEvalRating(i)}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label
-                          htmlFor="comment"
-                          className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest"
-                        >
-                          Comments
-                        </Label>
-                        <Input
-                          id="comment"
-                          placeholder="Strengths, areas for improvement..."
-                          className="rounded-xl border-zinc-200 dark:border-zinc-800"
-                          value={evalComment}
-                          onChange={(e) => setEvalComment(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        onClick={handleAddEval}
-                        disabled={addEvalMutation.isPending || !evalComment}
-                        className="w-full rounded-xl font-bold uppercase tracking-widest text-[10px] py-6"
-                      >
-                        {addEvalMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Save evaluation
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-[16px]">
               <div className="flex items-center gap-3">
-                <Avatar className="size-10 rounded-lg border border-zinc-800">
-                  <AvatarFallback className="bg-zinc-900 text-zinc-400 text-xs font-bold uppercase tracking-widest">
-                    TS
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-bold">Internship Manager</p>
-                  <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-tighter">
-                    Professional Evaluation
-                  </p>
+                <div className="w-[28px] h-[28px] rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-[10px] font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
+                  {summary?.supervisor_name?.split(' ').map((n:string)=>n[0]).join('').slice(0,2) || "IM"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-bold text-zinc-900 dark:text-zinc-50 truncate">{summary?.supervisor_name || "Internship Manager"}</p>
+                  <p className="text-[12px] text-zinc-500 truncate">Academic Tutor</p>
                 </div>
               </div>
-              {summary?.evaluation ? (
-                <>
-                  <div className="p-4 bg-zinc-900/50 rounded-xl border border-zinc-800/50 text-sm text-zinc-300 leading-relaxed font-medium italic">
+              <Button 
+                variant="secondary" 
+                className="w-full mt-[10px] h-8 text-[12px] font-medium border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-none hover:bg-zinc-50 dark:hover:bg-zinc-800 text-indigo-600 dark:text-indigo-400"
+              >
+                Contact team
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-zinc-900 dark:bg-zinc-950 text-white rounded-[12px] border-none shadow-none p-[16px]">
+             <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[11px] font-bold uppercase tracking-[0.06em] text-zinc-500">Evaluation</h2>
+                <Badge variant="outline" className="text-[8px] border-zinc-800 text-zinc-500 font-mono">
+                  {summary?.evaluation ? "FINALIZED" : "PENDING"}
+                </Badge>
+             </div>
+             {summary?.evaluation ? (
+                <div className="space-y-3">
+                  <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-800/50 text-[12px] text-zinc-400 italic">
                     "{summary.evaluation.comment}"
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <Star
-                          key={i}
-                          size={12}
-                          className={
-                            i <= summary.evaluation.rating
-                              ? "text-amber-500 fill-amber-500"
-                              : "text-zinc-800 fill-zinc-800"
-                          }
-                        />
-                      ))}
+                      {[1,2,3,4,5].map(i => <Star key={i} size={10} className={i <= summary.evaluation.rating ? "text-amber-500 fill-amber-500" : "text-zinc-800 fill-zinc-800"} />)}
                     </div>
-                    <Badge
-                      variant="outline"
-                      className="text-[8px] border-zinc-800 text-zinc-500 font-mono tracking-widest"
-                    >
-                      SCORE: {summary.evaluation.rating}/5
-                    </Badge>
+                    <span className="text-[10px] font-mono text-zinc-500">SCORE: {summary.evaluation.rating}/5</span>
                   </div>
-                </>
-              ) : (
-                <div className="p-10 text-center bg-zinc-900/30 rounded-xl border border-dashed border-zinc-800">
-                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest leading-relaxed">
-                    The evaluation will be available once completed by your
-                    tutor.
-                  </p>
                 </div>
-              )}
-            </CardContent>
+             ) : (
+                <p className="text-[11px] text-zinc-500 leading-relaxed text-center py-4 border border-dashed border-zinc-800 rounded-lg">
+                  Evaluation available once completed by your tutor.
+                </p>
+             )}
           </Card>
-
-          {summary?.alerts && summary.alerts.length > 0 && (
-            <div className="space-y-3">
-              {summary.alerts.map((alert: any, i: number) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "p-4 rounded-xl flex gap-3 text-[11px] font-medium leading-relaxed border",
-                    alert.type === "critical"
-                      ? "bg-red-500/10 border-red-500/20 text-red-500"
-                      : "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500",
-                  )}
-                >
-                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                  <p>{alert.message}</p>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>

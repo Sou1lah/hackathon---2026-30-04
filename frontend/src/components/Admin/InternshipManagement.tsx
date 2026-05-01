@@ -33,6 +33,10 @@ interface Offer {
   required_level: string | null
   required_language: string | null
   gpa_requirement: number | null
+  university_name: string | null
+  university_logo: string | null
+  country: string | null
+  country_flag: string | null
 }
 
 const API = import.meta.env.VITE_API_URL || ""
@@ -130,7 +134,7 @@ function EditModal({ offer, onClose }: { offer: Offer; onClose: () => void }) {
               <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Required Level</Label>
               <select className={SELECT_CLASS} value={form.required_level ?? ""} onChange={(e) => set("required_level", e.target.value || null)}>
                 <option value="">Any</option>
-                {["L1","L2","L3","M1","M2","PhD"].map(l => <option key={l} value={l}>{l}</option>)}
+                {["L1", "L2", "L3", "M1", "M2", "PhD"].map(l => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
             <div className="space-y-1.5">
@@ -140,6 +144,25 @@ function EditModal({ offer, onClose }: { offer: Offer; onClose: () => void }) {
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Min GPA</Label>
               <Input type="number" step="0.01" value={form.gpa_requirement ?? ""} onChange={(e) => set("gpa_requirement", e.target.value ? parseFloat(e.target.value) : null)} className="border-zinc-200 dark:border-zinc-800" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">University</Label>
+              <Input value={form.university_name ?? ""} onChange={(e) => set("university_name", e.target.value)} className="border-zinc-200 dark:border-zinc-800" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Logo URL</Label>
+              <Input value={form.university_logo ?? ""} onChange={(e) => set("university_logo", e.target.value)} className="border-zinc-200 dark:border-zinc-800" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Country</Label>
+              <Input value={form.country ?? ""} onChange={(e) => set("country", e.target.value)} className="border-zinc-200 dark:border-zinc-800" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Flag</Label>
+              <Input value={form.country_flag ?? ""} onChange={(e) => set("country_flag", e.target.value)} className="border-zinc-200 dark:border-zinc-800" />
             </div>
           </div>
 
@@ -209,8 +232,9 @@ export default function InternshipManagement() {
 
   const offers = (data?.data ?? []).filter((o) => {
     const matchSearch = o.title.toLowerCase().includes(search.toLowerCase()) ||
-      (o.specialty ?? "").toLowerCase().includes(search.toLowerCase())
-    const matchFilter = filter === "all" || o.mobility_type === filter
+      (o.specialty ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (o.university_name ?? "").toLowerCase().includes(search.toLowerCase())
+    const matchFilter = filter === "all" || (o.mobility_type ?? "").toLowerCase() === filter.toLowerCase()
     return matchSearch && matchFilter
   })
 
@@ -268,75 +292,91 @@ export default function InternshipManagement() {
           <p className="font-medium">No offers found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-12">
           {offers.map((offer) => (
-            <Card key={offer.id} className="border-zinc-200 dark:border-zinc-800 shadow-none hover:shadow-md transition-shadow flex flex-col">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <Badge variant={offer.mobility_type === "international" ? "default" : "secondary"}
-                    className="text-[9px] uppercase tracking-wider rounded-full px-2.5 shrink-0">
-                    <Globe size={9} className="mr-1" />{offer.mobility_type}
-                  </Badge>
-                  {offer.target_audience && (
-                    <Badge variant="outline" className="text-[9px] uppercase tracking-wider border-zinc-200 dark:border-zinc-800 text-zinc-500">
-                      {offer.target_audience}
-                    </Badge>
-                  )}
-                </div>
-                <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-50 leading-snug line-clamp-2">
-                  {offer.title}
-                </h3>
-              </CardHeader>
-
-              <CardContent className="flex-1 space-y-3 pb-3">
-                {offer.description && (
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                    {offer.description}
-                  </p>
+            <Card key={offer.id} className="border-zinc-200 dark:border-zinc-800 shadow-none hover:shadow-2xl transition-all duration-500 flex flex-col md:flex-row overflow-hidden min-h-[400px] rounded-[2.5rem] bg-white dark:bg-zinc-950 group">
+              <div className="w-full md:w-[320px] shrink-0 bg-zinc-50 dark:bg-zinc-900/50 relative overflow-hidden flex items-center justify-center border-r border-zinc-100 dark:border-zinc-900">
+                {offer.university_logo ? (
+                  <img src={offer.university_logo} alt={offer.university_name ?? ""} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                ) : (
+                  <span className="text-[120px] opacity-10 group-hover:opacity-30 transition-opacity transform group-hover:rotate-12">{offer.country_flag || "🏛️"}</span>
                 )}
-                <div className="flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
-                  {offer.specialty && <span className="bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded">📚 {offer.specialty}</span>}
-                  {offer.required_level && <span className="bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded">🎓 {offer.required_level}</span>}
-                  {offer.required_language && <span className="bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded">🌐 {offer.required_language}</span>}
-                  {offer.gpa_requirement && <span className="bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded">⭐ GPA ≥ {offer.gpa_requirement}</span>}
+                <div className="absolute top-4 left-4">
+                  <Badge variant={offer.mobility_type === "international" ? "default" : "secondary"}
+                    className="text-[10px] uppercase tracking-[0.15em] rounded-full px-4 py-1.5 shadow-lg backdrop-blur-md">
+                    <Globe size={11} className="mr-2" />{offer.mobility_type}
+                  </Badge>
                 </div>
-                {offer.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {offer.keywords.slice(0, 4).map((kw) => (
-                      <span key={kw} className="flex items-center gap-1 text-[10px] bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded px-2 py-0.5 text-zinc-500">
-                        <Tag size={9} />{kw}
-                      </span>
-                    ))}
-                    {offer.keywords.length > 4 && (
-                      <span className="text-[10px] text-zinc-400">+{offer.keywords.length - 4}</span>
+              </div>
+
+              <div className="flex-1 flex flex-col">
+                <CardHeader className="p-10 pb-4">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{offer.country_flag}</span>
+                      <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">{offer.country || "Global"}</span>
+                    </div>
+                    {offer.target_audience && (
+                      <Badge variant="outline" className="text-[10px] uppercase tracking-widest border-zinc-200 dark:border-zinc-800 text-zinc-500 px-3">
+                        {offer.target_audience}
+                      </Badge>
                     )}
                   </div>
-                )}
-              </CardContent>
+                  <h3 className="font-bold text-3xl text-zinc-900 dark:text-zinc-50 leading-tight tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    {offer.title}
+                  </h3>
+                  {offer.university_name && (
+                    <p className="text-sm font-medium text-zinc-400 mt-2 font-mono uppercase tracking-wider">{offer.university_name}</p>
+                  )}
+                </CardHeader>
 
-              <CardFooter className="pt-3 border-t border-zinc-100 dark:border-zinc-900 gap-2">
-                <Button variant="outline" size="sm" onClick={() => setEditing(offer)}
-                  className="flex-1 gap-2 border-zinc-200 dark:border-zinc-800 text-xs font-bold uppercase tracking-wider">
-                  <Edit2 size={13} /> Edit
-                </Button>
-                {deletingId === offer.id ? (
-                  <div className="flex gap-1.5 flex-1">
-                    <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(offer.id)}
-                      disabled={deleteMutation.isPending}
-                      className="flex-1 text-xs font-bold uppercase tracking-wider gap-1.5">
-                      {deleteMutation.isPending ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />} Confirm
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setDeletingId(null)} className="px-2">
-                      <X size={14} />
-                    </Button>
+                <CardContent className="flex-1 space-y-6 p-10 pt-0">
+                  {offer.description && (
+                    <p className="text-base text-zinc-500 dark:text-zinc-400 line-clamp-3 leading-relaxed max-w-2xl">
+                      {offer.description}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-3 text-[11px] font-mono text-zinc-500">
+                    {offer.specialty && <span className="bg-zinc-100 dark:bg-zinc-900 px-3 py-1 rounded-lg">📚 {offer.specialty}</span>}
+                    {offer.required_level && <span className="bg-zinc-100 dark:bg-zinc-900 px-3 py-1 rounded-lg">🎓 {offer.required_level}</span>}
+                    {offer.required_language && <span className="bg-zinc-100 dark:bg-zinc-900 px-3 py-1 rounded-lg">🌐 {offer.required_language}</span>}
+                    {offer.gpa_requirement && <span className="bg-zinc-100 dark:bg-zinc-900 px-3 py-1 rounded-lg">⭐ GPA ≥ {offer.gpa_requirement}</span>}
                   </div>
-                ) : (
-                  <Button variant="ghost" size="sm" onClick={() => setDeletingId(offer.id)}
-                    className="text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors px-2.5">
-                    <Trash2 size={15} />
+                  {offer.keywords.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {offer.keywords.slice(0, 6).map((kw) => (
+                        <span key={kw} className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-full px-4 py-1 text-zinc-400">
+                          <Tag size={10} />{kw}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+
+                <CardFooter className="p-10 pt-6 border-t border-zinc-100 dark:border-zinc-900 gap-4">
+                  <Button variant="outline" size="lg" onClick={() => setEditing(offer)}
+                    className="flex-1 h-14 gap-3 border-zinc-200 dark:border-zinc-800 text-sm font-bold uppercase tracking-widest rounded-2xl">
+                    <Edit2 size={16} /> Edit Details
                   </Button>
-                )}
-              </CardFooter>
+                  {deletingId === offer.id ? (
+                    <div className="flex gap-2 flex-1">
+                      <Button size="lg" variant="destructive" onClick={() => deleteMutation.mutate(offer.id)}
+                        disabled={deleteMutation.isPending}
+                        className="flex-1 h-14 text-sm font-bold uppercase tracking-widest gap-3 rounded-2xl">
+                        {deleteMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Confirm
+                      </Button>
+                      <Button size="lg" variant="ghost" onClick={() => setDeletingId(null)} className="px-4 h-14 rounded-2xl">
+                        <X size={20} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button variant="ghost" size="lg" onClick={() => setDeletingId(offer.id)}
+                      className="text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all px-6 h-14 rounded-2xl">
+                      <Trash2 size={20} />
+                    </Button>
+                  )}
+                </CardFooter>
+              </div>
             </Card>
           ))}
         </div>

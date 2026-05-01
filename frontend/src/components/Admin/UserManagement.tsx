@@ -29,10 +29,10 @@ function UsersTableContent() {
 
 export function UserManagement() {
   return (
-    <div className="space-y-8 p-2 animate-in fade-in duration-700">
+    <div className="space-y-12 p-8 animate-in fade-in duration-700 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-black italic tracking-tighter text-primary">
+          <h1 className="text-5xl font-black italic tracking-tighter text-primary">
             User Management
           </h1>
           <p className="text-muted-foreground italic font-medium">
@@ -44,7 +44,7 @@ export function UserManagement() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border/50 overflow-hidden">
+      <div className="rounded-[2.5rem] border border-border/50 overflow-hidden shadow-2xl bg-white dark:bg-zinc-950">
         <Suspense fallback={<PendingUsers />}>
           <UsersTableContent />
         </Suspense>

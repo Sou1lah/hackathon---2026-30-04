@@ -39,64 +39,62 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: #fafafa;
+  --radius: 0.5rem;
+  --background: #f8fafc;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --primary: #0052ff;
+  --primary: #4f46e5;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
+  --secondary: #f8fafc;
   --secondary-foreground: #0f172a;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #0052ff;
-  --accent-secondary: #4d7cff;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #dc2626;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #0052ff;
-  --sidebar-background: var(--background);
-  --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: var(--secondary);
-  --sidebar-accent-foreground: var(--secondary-foreground);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
+  --ring: #4f46e5;
+  --sidebar-background: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #2563eb;
 }
 
 .dark {
   --background: #0f172a;
-  --foreground: #fafafa;
+  --foreground: #f8fafc;
   --card: #1e293b;
-  --card-foreground: #fafafa;
+  --card-foreground: #f8fafc;
   --popover: #1e293b;
-  --popover-foreground: #fafafa;
-  --primary: #0052ff;
+  --popover-foreground: #f8fafc;
+  --primary: #6366f1;
   --primary-foreground: #ffffff;
-  --secondary: #1e293b;
-  --secondary-foreground: #fafafa;
+  --secondary: #0f172a;
+  --secondary-foreground: #f8fafc;
   --muted: #1e293b;
   --muted-foreground: #94a3b8;
-  --accent: #0052ff;
-  --accent-secondary: #4d7cff;
-  --accent-foreground: #ffffff;
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
   --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #0052ff;
-  --sidebar-background: var(--background);
-  --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: var(--secondary);
-  --sidebar-accent-foreground: var(--secondary-foreground);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
+  --border: #334155;
+  --input: #334155;
+  --ring: #6366f1;
+  --sidebar-background: #1e293b;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #334155;
+  --sidebar-ring: #3b82f6;
 }
 
 @layer base {
@@ -108,14 +106,16 @@
     @apply bg-background text-foreground font-sans;
     overflow-x: hidden;
     max-width: 100vw;
+    font-size: 16px;
   }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-serif;
+  h1 {
+    @apply text-[28px] font-bold tracking-tight;
+  }
+  h2 {
+    @apply text-[22px] font-semibold tracking-tight;
+  }
+  h3 {
+    @apply text-[18px] font-semibold tracking-tight;
   }
   button,
   [role="button"] {
@@ -125,27 +125,96 @@
 
 @layer utilities {
   .gradient-text {
-    @apply bg-gradient-to-r from-accent to-accent-secondary bg-clip-text text-transparent;
+    @apply text-primary;
   }
 
   .dot-pattern {
-    background-image: radial-gradient(
-      circle,
-      currentColor 1px,
-      transparent 1px
-    );
-    background-size: 32px 32px;
+    display: none;
   }
 
-  .gradient-border {
+  /* Enhanced card shadows */
+  .card-shadow {
+    @apply shadow-[0_1px_3px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.04)];
+  }
+
+  .card-shadow-lg {
+    @apply shadow-[0_4px_12px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.08)];
+  }
+
+  .card-shadow-hover {
+    @apply hover:shadow-[0_8px_24px_rgba(0,0,0,0.12),0_12px_32px_rgba(0,0,0,0.08)] transition-shadow duration-300;
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)];
+  }
+
+  /* Gradient backgrounds */
+  .gradient-primary {
+    @apply bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-blue-950/30 dark:via-zinc-950 dark:to-indigo-950/30;
+  }
+
+  .gradient-success {
+    @apply bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-emerald-950/30 dark:via-zinc-950 dark:to-green-950/30;
+  }
+
+  .gradient-warning {
+    @apply bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-orange-950/30 dark:via-zinc-950 dark:to-amber-950/30;
+  }
+
+  /* Text effects */
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent;
+  }
+
+  /* Focus states */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400;
+  }
+
+  /* Smooth scrolling */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  /* Animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -1200px 0; }
+    100% { background-position: 1200px 0; }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1200px 100%;
+  }
+
+  /* Better backkdrop blur */
+  .backdrop-blur-xl {
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+  }
+
+  /* Smooth gradients for borders */
+  .border-gradient {
     position: relative;
-    border-radius: var(--radius);
-    padding: 2px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+    border: 1px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(90deg, #dbeafe, #e5e7eb) border-box;
   }
 
-  .gradient-border-content {
-    background: var(--card);
-    border-radius: calc(var(--radius) - 2px);
+  .dark .border-gradient {
+    background: linear-gradient(#1e293b, #1e293b) padding-box,
+                linear-gradient(90deg, #1e40af, #475569) border-box;
   }
 }

@@ -20,5 +20,5 @@ function IndexPage() {
     return <Navigate to="/stages" replace />
   }
 
-  return <Navigate to="/mobilite" replace />
+  return <Navigate to="/mobilite" search={{ type: "nationale" }} replace />
 }
