@@ -78,7 +78,7 @@ class InternshipRequestBase(SQLModel):
     status: InternshipStatus = InternshipStatus.draft
     verification_status: VerificationStatus = VerificationStatus.idle
     progress: int = Field(default=0, ge=0, le=100)
-    current_step: int = Field(default=1, ge=1, le=8)
+    current_step: int = Field(default=1, ge=1, le=10)
     supervisor_name: str | None = Field(default=None, max_length=255)
 
 
@@ -100,7 +100,7 @@ class InternshipRequestUpdate(SQLModel):
     status: InternshipStatus | None = None
     verification_status: VerificationStatus | None = None
     progress: int | None = Field(default=None, ge=0, le=100)
-    current_step: int | None = Field(default=None, ge=1, le=8)
+    current_step: int | None = Field(default=None, ge=1, le=10)
     supervisor_name: str | None = Field(default=None, max_length=255)
 
 
@@ -156,7 +156,7 @@ class InternshipRequestsPublic(SQLModel):
 
 class ConventionBase(SQLModel):
     document_name: str = Field(max_length=255)
-    signature_step: int = Field(default=1, ge=1, le=8)
+    signature_step: int = Field(default=1, ge=1, le=10)
     status: str = Field(default="pending", max_length=50)
     approval_level: ApprovalLevel = Field(default=ApprovalLevel.N1)
     admin_status: str = Field(default="pending", max_length=50)
@@ -168,7 +168,7 @@ class ConventionCreate(ConventionBase):
 
 class ConventionUpdate(SQLModel):
     document_name: str | None = Field(default=None, max_length=255)
-    signature_step: int | None = Field(default=None, ge=1, le=8)
+    signature_step: int | None = Field(default=None, ge=1, le=10)
     status: str | None = Field(default=None, max_length=50)
     approval_level: ApprovalLevel | None = None
     admin_status: str | None = None
