@@ -38,7 +38,7 @@ def create_partnership_endpoint(
     """
     Create new partnership (Admin only).
     """
-    if not current_user.is_superuser:
+    if not (current_user.is_superuser or current_user.can_review_applications):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return create_partnership(session=session, partnership_in=partnership_in)
 
@@ -65,7 +65,7 @@ def update_partnership_endpoint(
     """
     Update a partnership (Admin only).
     """
-    if not current_user.is_superuser:
+    if not (current_user.is_superuser or current_user.can_review_applications):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     partnership = get_partnership(session=session, partnership_id=id)
     if not partnership:
@@ -81,7 +81,7 @@ def delete_partnership_endpoint(
     """
     Delete a partnership (Admin only).
     """
-    if not current_user.is_superuser:
+    if not (current_user.is_superuser or current_user.can_review_applications):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     partnership = get_partnership(session=session, partnership_id=id)
     if not partnership:

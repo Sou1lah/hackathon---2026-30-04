@@ -44,7 +44,16 @@ if settings.all_cors_origins:
         allow_headers=["*"],
     )
 
+from fastapi.staticfiles import StaticFiles
+import os
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Mount static files
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if not os.path.exists(static_dir):
+    os.makedirs(static_dir)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/health", tags=["health"])
 async def health():

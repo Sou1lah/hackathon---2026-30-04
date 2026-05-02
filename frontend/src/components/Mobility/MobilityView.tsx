@@ -108,16 +108,31 @@ const TransferAnimation = ({ type }: { type: "national" | "international" }) => 
       </motion.div>
 
       {/* Animated path */}
-      <div className="flex-1 relative h-px bg-gradient-to-r from-border via-primary/40 to-border mx-6">
-        {[0, 1, 2, 3].map((i) => (
+      <div className="flex-1 relative h-10 mx-6 flex items-center">
+        {/* Outgoing dots (Primary color) */}
+        {[0, 1, 2].map((i) => (
           <motion.div
-            key={i}
+            key={`outgoing-${i}`}
             initial={{ left: "0%", opacity: 0 }}
             animate={{ left: "100%", opacity: [0, 1, 1, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.6, ease: "linear" }}
-            className="absolute -top-1 size-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
+            transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: "linear" }}
+            className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
           />
         ))}
+
+        {/* Return dots (Slow Blue) */}
+        {[0, 1].map((i) => (
+          <motion.div
+            key={`return-${i}`}
+            initial={{ left: "100%", opacity: 0 }}
+            animate={{ left: "0%", opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 6, repeat: Infinity, delay: i * 3 + 1, ease: "linear" }}
+            className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]"
+          />
+        ))}
+        
+        {/* Central line */}
+        <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-border via-primary/20 to-border -translate-y-1/2" />
       </div>
 
       {/* Destination node */}

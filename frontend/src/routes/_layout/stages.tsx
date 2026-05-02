@@ -34,12 +34,12 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
         <div className="space-y-2">
           <button 
             onClick={onBack}
-            className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-indigo-500 hover:text-indigo-600 transition-colors mb-6"
+            className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-primary hover:opacity-80 transition-opacity mb-6"
           >
             <ArrowLeft size={14} /> Back to all offers
           </button>
-          <h1 className="text-[42px] font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-4 leading-[1.1]">
-            <Sparkles className="text-indigo-500 h-8 w-8" />
+          <h1 className="text-[42px] font-extrabold tracking-tight text-foreground flex items-center gap-4 leading-[1.1]">
+            <Sparkles className="text-primary h-8 w-8" />
             Personalized Matches
           </h1>
           <p className="text-lg text-zinc-500 dark:text-zinc-400 font-medium max-w-[600px] leading-relaxed">
@@ -69,7 +69,7 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
           >
-            <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all shadow-md hover:shadow-xl group bg-white dark:bg-zinc-950 flex flex-col overflow-hidden rounded-[1.5rem]">
+            <Card className="h-full border-border hover:border-primary/50 transition-all shadow-md hover:shadow-xl group bg-card flex flex-col overflow-hidden rounded-[1.5rem]">
               <div className="relative w-full h-[180px] shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
                 <img
                   src={`/flags/${(() => {
@@ -120,7 +120,7 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
                     {rec.offer.country}
                   </div>
                 </div>
-                <CardTitle className="text-xl leading-tight font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                <CardTitle className="text-xl leading-tight font-bold group-hover:text-primary transition-colors line-clamp-2">
                   {rec.offer.title}
                 </CardTitle>
               </CardHeader>
@@ -152,7 +152,7 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
                 <Button
                   onClick={() => applyMutation.mutate(rec.offer)}
                   disabled={applyMutation.isPending}
-                  className="flex-1 h-9 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white text-[9px] font-bold uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
+                  className="flex-1 h-9 rounded-lg text-[9px] font-bold uppercase tracking-widest"
                 >
                   {applyMutation.isPending ? "..." : "Apply"}
                 </Button>
@@ -234,7 +234,7 @@ function StagesPage() {
             
             <div className="w-full px-6 mt-20 border-t border-zinc-100 dark:border-zinc-900 pt-20">
                <div className="flex items-center gap-4 mb-10">
-                 <FileText className="text-indigo-500 h-8 w-8" />
+                 <FileText className="text-primary h-8 w-8" />
                  <h2 className="text-[32px] font-extrabold tracking-tight">Submit Manual Request</h2>
                </div>
                <DemandeStage />

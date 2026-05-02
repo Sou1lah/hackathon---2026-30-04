@@ -4,6 +4,7 @@ import {
   Calendar,
   Clock,
   FileText,
+  Eye,
   Plus,
   Search,
   ShieldCheck,
@@ -11,6 +12,7 @@ import {
   University,
 } from "lucide-react"
 import { useState } from "react"
+import { motion } from "motion/react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -157,7 +159,7 @@ export default function PartnershipsView() {
                 >
                   <TableCell className="py-4 px-6">
                     <div className="flex items-center gap-4">
-                      <div className="size-10 rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:bg-accent/10 group-hover:text-accent transition-all shadow-sm">
+                      <div className="size-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all shadow-sm">
                         {p.partner_type === "university" ? <University size={18} /> : <Building2 size={18} />}
                       </div>
                       <div>
@@ -201,6 +203,16 @@ export default function PartnershipsView() {
                   </TableCell>
                   <TableCell className="text-right px-6">
                     <div className="flex items-center justify-end gap-2">
+                      {p.document_url && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => window.open(`${import.meta.env.VITE_API_URL}${p.document_url}`, "_blank")}
+                          className="h-9 w-9 rounded-xl border border-border/20 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-colors"
+                        >
+                          <Eye size={16} />
+                        </Button>
+                      )}
                       {isAdmin && (
                         <Button
                           variant="ghost"
@@ -210,7 +222,7 @@ export default function PartnershipsView() {
                               deleteMutation.mutate(p.id)
                             }
                           }}
-                          className="h-9 w-9 rounded-xl border border-border/20 hover:bg-destructive/10 hover:border-destructive/30 hover:text-destructive group-hover:border-border/40 transition-colors"
+                          className="h-9 w-9 rounded-xl border border-border/20 hover:bg-destructive/10 hover:border-destructive/30 hover:text-destructive transition-colors"
                         >
                           <Trash2 size={16} />
                         </Button>

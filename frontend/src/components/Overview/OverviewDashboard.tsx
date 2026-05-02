@@ -163,7 +163,7 @@ export default function OverviewDashboard() {
     { name: t("on_time"), value: data.sla.on_time_count },
     { name: t("breached"), value: data.sla.breached_count },
   ]
-  const PIE_COLORS = ["#10b981", "#f43f5e"]
+  const PIE_COLORS = ["#10b981", "#ef4444"]
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -252,7 +252,7 @@ export default function OverviewDashboard() {
                 <CardDescription>Statistical breakdown of dossiers across the platform.</CardDescription>
               </CardHeader>
               <CardContent className="px-0 pt-4">
-                 <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                 <div className="p-6 rounded-3xl border border-border bg-card">
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={data.workflow_chart.length > 0 ? data.workflow_chart : []}>
                       <XAxis
@@ -295,10 +295,10 @@ export default function OverviewDashboard() {
                     whileHover={{ scale: 1.02 }}
                     className="group cursor-pointer"
                   >
-                    <Card className="overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-sm transition-all duration-300 rounded-2xl group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] group-hover:-translate-y-1">
+                  <Card className="overflow-hidden border-border shadow-sm transition-all duration-300 rounded-2xl group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] group-hover:-translate-y-1 bg-card">
                       <CardContent className="p-0">
                         <div className="flex gap-4 p-4">
-                          <div className="h-16 w-16 rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center shrink-0 overflow-hidden transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md">
+                          <div className="h-16 w-16 rounded-xl bg-muted flex items-center justify-center shrink-0 overflow-hidden transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md">
                              {offer.university_logo ? (
                                <img src={offer.university_logo} alt={offer.university_name || ""} className="w-full h-full object-cover" />
                              ) : offer.country_code ? (
@@ -315,10 +315,10 @@ export default function OverviewDashboard() {
                               {offer.university_name || offer.country || "Global Opportunity"}
                             </p>
                             <div className="flex gap-2 pt-1">
-                               <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-4 border-zinc-200 dark:border-zinc-800">
+                               <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-4 border-border">
                                  {new Date(offer.created_at).toLocaleDateString()}
                                </Badge>
-                               <Badge variant="secondary" className="text-[8px] px-1.5 py-0 h-4 bg-zinc-100 dark:bg-zinc-900">
+                               <Badge variant="secondary" className="text-[8px] px-1.5 py-0 h-4 bg-muted text-muted-foreground">
                                  {offer.country_flag} {offer.country}
                                </Badge>
                             </div>
@@ -341,7 +341,7 @@ export default function OverviewDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-0 pt-4">
-                <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                <div className="p-6 rounded-3xl border border-border bg-card">
                   <ResponsiveContainer width="100%" height={350}>
                     <AreaChart data={data.visitor_chart.length > 0 ? data.visitor_chart : []}>
                       <defs>
@@ -384,7 +384,7 @@ export default function OverviewDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-0 pt-4">
-                <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 space-y-6">
+                <div className="p-6 rounded-3xl border border-border bg-card space-y-6">
                   {data.alerts.slice(0, 5).map((alert) => (
                     <div key={alert.id} className="flex items-center gap-4 group/alert">
                       <div className={cn(
@@ -420,7 +420,7 @@ export default function OverviewDashboard() {
                  <CardDescription>Dossier processing SLA status.</CardDescription>
                </CardHeader>
                <CardContent className="px-0 pt-4">
-                 <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                 <div className="p-6 rounded-3xl border border-border bg-card">
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
                         <Pie

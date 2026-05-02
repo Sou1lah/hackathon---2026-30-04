@@ -25,13 +25,14 @@ api_router.include_router(internships.router)
 api_router.include_router(conventions.router)
 api_router.include_router(mobility.router)
 api_router.include_router(offers.router)
-from app.api.routes import overview, suivi_stage, partnerships
+from app.api.routes import overview, suivi_stage, partnerships, uploads
 
 api_router.include_router(activity_log.router)
 api_router.include_router(overview.router)
 api_router.include_router(recommendation.router)
 api_router.include_router(suivi_stage.router)
 api_router.include_router(partnerships.router)
+api_router.include_router(uploads.router)
 api_router.include_router(pdf.router)
 
 if settings.ENVIRONMENT == "local":

@@ -238,7 +238,7 @@ function ConventionDetailsModal({
                       <p className="text-[9px] text-zinc-400 uppercase font-mono">Digitally Signed PDF</p>
                     </div>
                   </div>
-                  <Button size="icon" variant="ghost" className="size-8 rounded-lg text-zinc-400 hover:text-blue-500">
+                  <Button size="icon" variant="ghost" className="size-8 rounded-lg text-muted-foreground hover:text-primary">
                     <Download size={16} />
                   </Button>
                 </div>
@@ -306,15 +306,15 @@ export default function StaticConvention() {
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-2 font-mono">
             UBMA · STUDENT PORTAL
           </p>
-          <h1 className="text-5xl font-serif tracking-tight font-bold text-zinc-900 dark:text-zinc-50 leading-tight">
-            Internship <span className="italic text-blue-600 dark:text-blue-400">Agreements</span>
+          <h1 className="text-5xl font-serif tracking-tight font-bold text-foreground leading-tight">
+            Internship <span className="italic text-primary">Agreements</span>
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 text-lg font-light leading-relaxed max-w-2xl">
             Track and manage your PAdES electronic signature workflow and institutional approvals.
           </p>
         </div>
-        <div className="flex items-center gap-4 px-6 py-4 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-3xl shadow-sm backdrop-blur">
-          <div className="size-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+        <div className="flex items-center gap-4 px-6 py-4 bg-muted/50 border border-border rounded-3xl shadow-sm backdrop-blur">
+          <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
             <ShieldCheck size={20} />
           </div>
           <div>
@@ -336,8 +336,8 @@ export default function StaticConvention() {
             <FileText size={64} className="opacity-20" />
           </div>
           <div className="space-y-3 max-w-sm">
-            <h2 className="text-3xl font-serif font-bold text-zinc-900 dark:text-zinc-50">
-              No active <span className="italic text-blue-600 dark:text-blue-400">agreements</span>
+            <h2 className="text-3xl font-serif font-bold text-foreground">
+              No active <span className="italic text-primary">agreements</span>
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm font-light leading-relaxed">
               When you apply for an internship, your official conventions will appear here for electronic signature.
@@ -379,11 +379,11 @@ export default function StaticConvention() {
                   >
                     <TableCell className="pl-10 py-8">
                       <div className="flex items-center gap-4">
-                        <div className="size-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all border border-zinc-200 dark:border-zinc-800">
+                        <div className="size-12 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all border border-border">
                           <FileText size={20} />
                         </div>
                         <div>
-                          <p className="font-bold text-base text-zinc-900 dark:text-zinc-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          <p className="font-bold text-base text-foreground group-hover:text-primary transition-colors">
                             {conv.document_name}
                           </p>
                           <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest mt-0.5">
