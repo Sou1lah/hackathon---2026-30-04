@@ -150,23 +150,23 @@ export default function UserDetailModal({
               <div className="space-y-[12px]">
                 {logsData.data.map((log: any) => (
                   <Card key={log.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-none overflow-hidden">
-                    <div className="p-[16px] flex gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-zinc-50 dark:bg-zinc-800 flex flex-col items-center justify-center border border-zinc-100 dark:border-zinc-800 shrink-0">
-                        <span className="text-[12px] font-bold text-indigo-600 dark:text-indigo-400">{new Date(log.date).getDate()}</span>
-                        <span className="text-[8px] uppercase font-bold text-zinc-400">
+                    <div className="flex gap-0 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors border-b border-zinc-50 dark:border-zinc-800 last:border-0">
+                      <div className="w-14 self-stretch bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col items-center justify-center border-r border-zinc-100 dark:border-zinc-800 shrink-0 py-4">
+                        <span className="text-[14px] font-black text-indigo-600 dark:text-indigo-400 leading-none">{new Date(log.date).getDate()}</span>
+                        <span className="text-[8px] uppercase font-black text-zinc-400 tracking-tighter">
                           {new Intl.DateTimeFormat("en-US", { month: "short" }).format(new Date(log.date)).toUpperCase()}
                         </span>
                       </div>
-                      <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex-1 p-[16px_20px] space-y-2">
                         <div className="flex justify-between items-start">
-                          <h4 className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-50">{log.title}</h4>
+                          <h4 className="text-[14px] font-bold text-zinc-900 dark:text-zinc-50">{log.title}</h4>
                           {log.attachment_url && (
                             <a href={log.attachment_url} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-700">
                               <Paperclip size={14} />
                             </a>
                           )}
                         </div>
-                        <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{log.content}</p>
+                        <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">{log.content}</p>
                         
                         {log.feedback && log.feedback.length > 0 && (
                           <div className="mt-3 p-3 bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/50 rounded-lg space-y-1">

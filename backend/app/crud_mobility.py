@@ -461,6 +461,20 @@ def get_activity_log_entries(
     items = session.exec(statement).all()
     return list(items), count
 
+def update_activity_log_entry(
+    *, session: Session, db_entry: ActivityLogEntry, entry_in: ActivityLogEntryCreate
+) -> ActivityLogEntry:
+    update_dict = entry_in.model_dump(exclude_unset=True)
+    db_entry.sqlmodel_update(update_dict)
+    session.add(db_entry)
+    session.commit()
+    session.refresh(db_entry)
+    return db_entry
+
+def delete_activity_log_entry(*, session: Session, db_entry: ActivityLogEntry) -> None:
+    session.delete(db_entry)
+    session.commit()
+
 
 # ---------- InternshipReport ----------
 

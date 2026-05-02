@@ -45,6 +45,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -53,6 +59,7 @@ import {
 import { cn } from "@/lib/utils"
 
 import { ConventionsService } from "@/client/sdk.gen"
+import { UserProfile } from "../Sidebar/UserProfile"
 
 export function ConventionManagement() {
   const queryClient = useQueryClient()
@@ -301,25 +308,33 @@ export function ConventionManagement() {
                  <p className="text-xs text-muted-foreground mt-1">Verification and approval pipeline</p>
               </div>
 
-              <ScrollArea className="flex-1">
-                <div className="p-8 space-y-8">
-                   <WorkflowTracker convention={selectedConvention} />
-                   
-                   <div className="space-y-4">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Student Info</h4>
-                      <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-900 space-y-2">
-                         <p className="text-sm font-bold">{selectedConvention?.owner?.full_name}</p>
-                         <p className="text-xs text-muted-foreground font-mono truncate">{selectedConvention?.owner?.email}</p>
-                      </div>
-                   </div>
+              <Tabs defaultValue="workflow" className="flex-1 flex flex-col min-h-0">
+                <div className="px-8 border-b border-zinc-100 dark:border-zinc-900">
+                  <TabsList className="bg-transparent gap-6 h-12 p-0 border-none justify-start">
+                    <TabsTrigger value="workflow" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-emerald-600 data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none h-full px-0 font-bold uppercase tracking-widest text-[10px]">
+                      Workflow
+                    </TabsTrigger>
+                    <TabsTrigger value="profile" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-emerald-600 data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none h-full px-0 font-bold uppercase tracking-widest text-[10px]">
+                      Applicant Profile
+                    </TabsTrigger>
+                  </TabsList>
                 </div>
-              </ScrollArea>
+
+                <ScrollArea className="flex-1">
+                  <TabsContent value="workflow" className="p-8 mt-0">
+                    <WorkflowTracker convention={selectedConvention} />
+                  </TabsContent>
+                  <TabsContent value="profile" className="p-8 mt-0">
+                    <UserProfile user={selectedConvention?.owner} />
+                  </TabsContent>
+                </ScrollArea>
+              </Tabs>
 
               <div className="p-8 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-3">
                  <div className="grid grid-cols-2 gap-3">
                     <Button 
                       variant="outline" 
-                      className="h-12 rounded-xl border-emerald-100 dark:border-emerald-900 text-emerald-600 hover:bg-emerald-50"
+                      className="h-12 rounded-xl border border-border text-emerald-600 hover:bg-muted/50"
                       onClick={() => setIsDetailsOpen(false)}
                     >
                       Keep Pending

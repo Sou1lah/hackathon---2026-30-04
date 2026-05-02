@@ -9,6 +9,7 @@ import {
   MapPinned,
   Plane,
   Settings,
+  UserCircle,
 } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -46,6 +47,7 @@ export function AppSidebar() {
       path: "/dashboard",
     })
   }
+
 
   if (currentUser?.is_superuser || currentUser?.can_review_applications) {
     items.push({
@@ -128,16 +130,6 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className={cn("gap-4 transition-all duration-300", isCollapsed ? "p-2" : "p-4")}>
         <SidebarAppearance />
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip={t("user_settings")} asChild>
-              <RouterLink to="/settings">
-                <Settings className="size-5" />
-                <span className="text-base font-bold">{t("user_settings")}</span>
-              </RouterLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
         <User user={currentUser} />
       </SidebarFooter>
     </Sidebar>

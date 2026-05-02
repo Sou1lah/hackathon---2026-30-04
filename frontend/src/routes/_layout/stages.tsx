@@ -186,7 +186,7 @@ function StagesPage() {
   if (isAdmin && showAdminForm) {
     return (
       <div className="relative">
-        <div className="max-w-5xl mx-auto px-4 pt-8 flex justify-end">
+        <div className="max-w-full mx-auto px-4 pt-8 flex justify-end">
           <Button 
             variant="outline" 
             onClick={() => setShowAdminForm(false)}
@@ -203,7 +203,7 @@ function StagesPage() {
   return (
     <div className="relative min-h-screen">
       {isAdmin && !showAdminForm && (
-        <div className="max-w-7xl mx-auto px-4 pt-8 flex justify-end absolute top-0 right-0 z-10">
+        <div className="max-w-full mx-auto px-4 pt-8 flex justify-end absolute top-0 right-0 z-10">
           <Button 
             onClick={() => setShowAdminForm(true)}
             className="rounded-full gap-2 font-bold text-[10px] uppercase tracking-widest bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 shadow-xl"

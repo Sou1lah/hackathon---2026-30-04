@@ -180,7 +180,7 @@ export default function StaticConvention() {
   const conventions = data?.data || []
 
   return (
-    <div className="space-y-12 max-w-7xl mx-auto p-8 pb-32 animate-in fade-in duration-700">
+    <div className="space-y-12 max-w-full p-8 pb-32 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-zinc-100 dark:border-zinc-900 pb-10 gap-6">
         <div className="space-y-2">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-2 font-mono">
@@ -245,24 +245,24 @@ export default function StaticConvention() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="overflow-x-auto border border-zinc-100 dark:border-zinc-900 rounded-[2rem] bg-white dark:bg-zinc-950 shadow-sm"
+            className="rounded-[2.5rem] border border-border/50 overflow-hidden shadow-2xl bg-white dark:bg-zinc-950"
           >
             <Table>
-              <TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/50">
-                <TableRow className="border-zinc-100 dark:border-zinc-900 hover:bg-transparent">
-                  <TableHead className="pl-10 py-8 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+              <TableHeader className="bg-muted/30">
+                <TableRow className="border-border/40 hover:bg-transparent">
+                  <TableHead className="w-[350px] font-mono text-[11px] uppercase tracking-widest py-8 px-10 text-muted-foreground">
                     Document Reference
                   </TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+                  <TableHead className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                     Internship Mission
                   </TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+                  <TableHead className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                     Workflow Progress
                   </TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+                  <TableHead className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                     Status
                   </TableHead>
-                  <TableHead className="pr-10 text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+                  <TableHead className="text-right px-10 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                     Action
                   </TableHead>
                 </TableRow>
@@ -275,39 +275,39 @@ export default function StaticConvention() {
                   return (
                     <TableRow
                       key={conv.id}
-                      className="border-zinc-100 dark:border-zinc-900 hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors cursor-pointer group"
+                      className="border-border/40 group hover:bg-zinc-100/40 dark:hover:bg-emerald-900/10 transition-colors cursor-pointer"
                       onClick={() => setSelected(conv)}
                     >
-                      <TableCell className="pl-10 py-8">
+                      <TableCell className="py-8 px-10">
                         <div className="flex items-center gap-4">
-                          <div className="size-12 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all border border-border">
-                            <FileText size={20} />
+                          <div className="size-14 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-200 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-600 transition-all shadow-sm border border-border/10">
+                            <FileText size={26} />
                           </div>
-                          <div>
-                            <p className="font-bold text-base text-foreground group-hover:text-primary transition-colors">
+                          <div className="flex flex-col">
+                            <p className="font-bold text-base text-foreground group-hover:text-emerald-600 transition-colors tracking-tight">
                               {conv.document_name}
                             </p>
-                            <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest mt-0.5">
+                            <p className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest mt-0.5">
                               REF: {conv.id.split("-")[0].toUpperCase()}
                             </p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium">
+                        <p className="text-sm text-foreground font-bold tracking-tight">
                           {conv.internship_request?.mission_title || "Untitled Mission"}
                         </p>
-                        <p className="text-[10px] text-zinc-400 uppercase tracking-widest mt-0.5">
+                        <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-0.5">
                           {conv.internship_request?.company_name || "N/A"}
                         </p>
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-2 min-w-[160px]">
-                          <div className="flex justify-between text-[9px] font-mono text-zinc-400 uppercase tracking-widest">
-                            <span>{done}/8 Signature Steps</span>
-                            <span className="font-bold text-zinc-900 dark:text-zinc-50">{pct}%</span>
+                        <div className="space-y-2 min-w-[180px]">
+                          <div className="flex justify-between text-[9px] font-mono text-muted-foreground uppercase tracking-widest font-bold">
+                            <span>{done}/8 Steps</span>
+                            <span className="text-foreground">{pct}%</span>
                           </div>
-                          <Progress value={pct} className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full" />
+                          <Progress value={pct} className="h-2 bg-muted dark:bg-zinc-900 rounded-full" />
                         </div>
                       </TableCell>
                       <TableCell>
@@ -321,17 +321,20 @@ export default function StaticConvention() {
                           {conv.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="pr-10 text-right">
+                      <TableCell className="px-10 text-right">
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-10 px-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-all"
+                          className="h-11 px-5 rounded-xl border border-transparent hover:border-border/40 hover:bg-zinc-100/50 dark:hover:bg-zinc-900 group/btn shadow-sm transition-all"
                           onClick={(e) => {
                             e.stopPropagation()
                             setSelected(conv)
                           }}
                         >
-                          <Eye size={14} className="mr-2" /> View Details
+                          <Eye size={16} className="mr-2 text-muted-foreground group-hover/btn:text-emerald-600" />
+                          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover/btn:text-foreground">
+                            Details
+                          </span>
                         </Button>
                       </TableCell>
                     </TableRow>

@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link as RouterLink } from "@tanstack/react-router"
+import { Button } from "@/components/ui/button"
 
 import AppearanceSettings from "@/components/UserSettings/AppearanceSettings"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
@@ -36,8 +37,21 @@ function UserSettings() {
       </div>
 
       {/* Profile */}
-      <section>
+      <section className="space-y-4">
         <UserInformation />
+        {currentUser && !currentUser.is_superuser && currentUser.role !== "admin" && (
+          <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+             <div>
+                <p className="text-sm font-bold">Academic Profile</p>
+                <p className="text-xs text-muted-foreground">View and manage your academic dossier and documents</p>
+             </div>
+             <RouterLink to="/profile">
+                <Button variant="outline" size="sm" className="rounded-full px-6">
+                   View Profile
+                </Button>
+             </RouterLink>
+          </div>
+        )}
       </section>
 
       <hr className="border-border" />

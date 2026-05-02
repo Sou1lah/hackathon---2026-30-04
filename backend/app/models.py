@@ -21,6 +21,13 @@ class UserRole(str, Enum):
     # DB permission flags (can_review_applications etc.), not by role values.
 
 
+class DocumentType(str, Enum):
+    CV = "cv"
+    CERTIFICATE = "certificate"
+    PHD_DOC = "phd_doc"
+    OTHER = "other"
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -112,6 +119,36 @@ class User(UserBase, table=True):
 
 
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    documents: list["UserDocument"] = Relationship(back_populates="owner", cascade_delete=True)
+
+
+class UserDocumentBase(SQLModel):
+    name: str = Field(max_length=255)
+    type: DocumentType = Field(default=DocumentType.OTHER)
+    url: str = Field(max_length=512)
+
+
+class UserDocument(UserDocumentBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    owner: User | None = Relationship(back_populates="documents")
+
+
+class UserDocumentPublic(UserDocumentBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+    created_at: datetime
+
+
+class UserDocumentsPublic(SQLModel):
+    data: list[UserDocumentPublic]
+    count: int
 
 
 # Properties to return via API, id is always required

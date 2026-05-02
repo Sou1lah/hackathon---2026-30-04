@@ -20,6 +20,20 @@ def create_activity_log(
     session.refresh(db_obj)
     return db_obj
 
+def update_activity_log(
+    *, session: Session, db_log: ActivityLog, log_in: ActivityLogCreate
+) -> ActivityLog:
+    update_dict = log_in.model_dump(exclude_unset=True)
+    db_log.sqlmodel_update(update_dict)
+    session.add(db_log)
+    session.commit()
+    session.refresh(db_log)
+    return db_log
+
+def delete_activity_log(*, session: Session, db_log: ActivityLog) -> None:
+    session.delete(db_log)
+    session.commit()
+
 def get_activity_logs(
     *, session: Session, internship_id: uuid.UUID, skip: int = 0, limit: int = 100
 ) -> Tuple[List[ActivityLog], int]:

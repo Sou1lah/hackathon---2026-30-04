@@ -34,8 +34,8 @@ function Layout() {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex-1 w-full">
-          <div className="w-full">
+        <main className="flex-1 w-full overflow-y-auto">
+          <div className="w-full px-6 md:px-10 py-6">
             <Outlet />
           </div>
         </main>

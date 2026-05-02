@@ -19,6 +19,7 @@ import { Route as LayoutSuiviStageRouteImport } from './routes/_layout/suivi-sta
 import { Route as LayoutSuiviRouteImport } from './routes/_layout/suivi'
 import { Route as LayoutStagesRouteImport } from './routes/_layout/stages'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutProfileRouteImport } from './routes/_layout/profile'
 import { Route as LayoutPartnershipsRouteImport } from './routes/_layout/partnerships'
 import { Route as LayoutMobiliteRouteImport } from './routes/_layout/mobilite'
 import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
@@ -76,6 +77,11 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutProfileRoute = LayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutPartnershipsRoute = LayoutPartnershipsRouteImport.update({
   id: '/partnerships',
   path: '/partnerships',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof LayoutDashboardRoute
   '/mobilite': typeof LayoutMobiliteRoute
   '/partnerships': typeof LayoutPartnershipsRoute
+  '/profile': typeof LayoutProfileRoute
   '/settings': typeof LayoutSettingsRoute
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof LayoutDashboardRoute
   '/mobilite': typeof LayoutMobiliteRoute
   '/partnerships': typeof LayoutPartnershipsRoute
+  '/profile': typeof LayoutProfileRoute
   '/settings': typeof LayoutSettingsRoute
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/_layout/dashboard': typeof LayoutDashboardRoute
   '/_layout/mobilite': typeof LayoutMobiliteRoute
   '/_layout/partnerships': typeof LayoutPartnershipsRoute
+  '/_layout/profile': typeof LayoutProfileRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/stages': typeof LayoutStagesRoute
   '/_layout/suivi': typeof LayoutSuiviRoute
@@ -181,6 +190,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/mobilite'
     | '/partnerships'
+    | '/profile'
     | '/settings'
     | '/stages'
     | '/suivi'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/mobilite'
     | '/partnerships'
+    | '/profile'
     | '/settings'
     | '/stages'
     | '/suivi'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/_layout/dashboard'
     | '/_layout/mobilite'
     | '/_layout/partnerships'
+    | '/_layout/profile'
     | '/_layout/settings'
     | '/_layout/stages'
     | '/_layout/suivi'
@@ -306,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/profile': {
+      id: '/_layout/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof LayoutProfileRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/partnerships': {
       id: '/_layout/partnerships'
       path: '/partnerships'
@@ -378,6 +397,7 @@ interface LayoutRouteChildren {
   LayoutDashboardRoute: typeof LayoutDashboardRoute
   LayoutMobiliteRoute: typeof LayoutMobiliteRoute
   LayoutPartnershipsRoute: typeof LayoutPartnershipsRoute
+  LayoutProfileRoute: typeof LayoutProfileRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutStagesRoute: typeof LayoutStagesRoute
   LayoutSuiviRoute: typeof LayoutSuiviRoute
@@ -391,6 +411,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDashboardRoute: LayoutDashboardRoute,
   LayoutMobiliteRoute: LayoutMobiliteRoute,
   LayoutPartnershipsRoute: LayoutPartnershipsRoute,
+  LayoutProfileRoute: LayoutProfileRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutStagesRoute: LayoutStagesRoute,
   LayoutSuiviRoute: LayoutSuiviRoute,

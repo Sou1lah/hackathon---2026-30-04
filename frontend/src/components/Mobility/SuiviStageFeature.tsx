@@ -12,6 +12,8 @@ import {
   TrendingUp,
   User as UserIcon,
   Globe,
+  Edit,
+  Trash2,
 } from "lucide-react"
 import { motion } from "motion/react"
 import { useState } from "react"
@@ -21,6 +23,7 @@ import UserDetailModal from "@/components/Admin/UserDetailModal"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Dialog,
   DialogContent,
@@ -34,6 +37,64 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import useAuth from "@/hooks/useAuth"
+import TrackingLocked from "./TrackingLocked"
+
+function ActivityCalendar({ logs }: { logs: any[] }) {
+  const today = new Date()
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+  
+  const loggedDays = new Set(
+    logs.map(log => new Date(log.date).getDate())
+  )
+
+  return (
+    <Card className="bg-white dark:bg-zinc-950 border border-border/50 rounded-[2.5rem] shadow-sm overflow-hidden mt-6">
+      <div className="p-8 border-b border-border/40 flex justify-between items-center">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Attendance Tracker</h2>
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+          {today.toLocaleString('default', { month: 'long' })}
+        </span>
+      </div>
+      <CardContent className="p-8">
+        <div className="grid grid-cols-7 gap-2">
+          {days.map(day => {
+            const isFuture = day > today.getDate()
+            const isLogged = loggedDays.has(day)
+            const isPast = day < today.getDate()
+            
+            let colorClass = "bg-orange-400" // Future
+            if (isLogged) colorClass = "bg-emerald-500" // Logged
+            else if (isPast) colorClass = "bg-rose-500" // Missed
+            
+            return (
+              <div key={day} className="flex flex-col items-center gap-1">
+                <div className={`size-3 rounded-full ${colorClass} shadow-sm transition-all hover:scale-125 cursor-help`} title={`Day ${day}`} />
+                <span className="text-[10px] font-bold text-muted-foreground">{day}</span>
+              </div>
+            )
+          })}
+        </div>
+        <div className="flex justify-between items-center mt-8 pt-6 border-t border-border/40">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <div className="size-2 rounded-full bg-emerald-500" />
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Logged</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="size-2 rounded-full bg-rose-500" />
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Missed</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="size-2 rounded-full bg-orange-400" />
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Future</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -88,6 +149,12 @@ export default function SuiviStageFeature() {
     enabled: !isTutor,
   })
 
+  const { data: summary } = useQuery({
+    queryKey: ["internship-summary", "mine"],
+    queryFn: () => fetchWithAuth("/api/v1/suivi-stage/my-internship/summary"),
+    enabled: !isTutor,
+  })
+
   const createLogMutation = useMutation({
     mutationFn: (data: any) =>
       fetchWithAuth("/api/v1/suivi-stage/my-internship/logs", {
@@ -114,6 +181,69 @@ export default function SuiviStageFeature() {
     })
   }
 
+  const [editingLog, setEditingLog] = useState<any | null>(null)
+
+  const handleDeleteLog = async (logId: string) => {
+    if (!confirm("Are you sure you want to delete this log entry?")) return
+    try {
+      await fetchWithAuth(`/api/v1/suivi-stage/my-internship/logs/${logId}`, {
+        method: "DELETE",
+      })
+      toast.success("Log entry deleted")
+      queryClient.invalidateQueries({ queryKey: ["suivi-logs"] })
+    } catch (error) {
+      toast.error("Failed to delete log")
+    }
+  }
+
+  const handleUpdateLog = async (data: any) => {
+    try {
+      await fetchWithAuth(`/api/v1/suivi-stage/my-internship/logs/${editingLog.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      })
+      toast.success("Log entry updated")
+      setEditingLog(null)
+      queryClient.invalidateQueries({ queryKey: ["suivi-logs"] })
+    } catch (error) {
+      toast.error("Failed to update log")
+    }
+  }
+
+  const { data: internships, isLoading: internshipsLoading } = useQuery({
+    queryKey: ["internship-requests", "mine"],
+    queryFn: () => fetchWithAuth("/api/v1/internship-requests/?limit=100"),
+    enabled: !isTutor,
+  })
+
+  const hasActiveInternship = isTutor || (internships?.data || []).some(
+    (req: any) => 
+      req.status === "active" || 
+      req.status === "completed" || 
+      req.status === "pending_signature" ||
+      req.progress >= 50
+  )
+
+  if (!isTutor && (internshipsLoading || logsLoading)) {
+    return (
+      <div className="p-8 space-y-8 container max-w-[1400px] py-20">
+        <div className="flex flex-col items-center gap-4">
+           <Skeleton className="h-16 w-96 rounded-full" />
+           <Skeleton className="h-24 w-[600px] rounded-2xl" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-20">
+          <Skeleton className="h-48 rounded-[2rem]" />
+          <Skeleton className="h-48 rounded-[2rem]" />
+          <Skeleton className="h-48 rounded-[2rem]" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!isTutor && !hasActiveInternship) {
+    return <TrackingLocked />
+  }
+
   const getFeedbackForLog = (log: any) => {
     if (log.feedback && log.feedback.length > 0) return log.feedback[0]
     return feedbacks?.find((f: any) => f.log_id === log.id)
@@ -137,10 +267,32 @@ export default function SuiviStageFeature() {
             Operational Tracking System
           </Badge>
           <h1 className="text-7xl md:text-8xl font-serif tracking-tight text-foreground leading-tight">
-            Internship <span className="gradient-text">Logbook</span>
+            {summary?.company_name || "Internship"} <span className="gradient-text">Logbook</span>
           </h1>
-          <p className="text-muted-foreground text-2xl leading-relaxed max-w-3xl">
-            Record your daily professional milestones and maintain high-fidelity communication with your academic mentorship team.
+          <div className="flex flex-wrap items-center justify-center gap-8 mt-6">
+            <div className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-zinc-950 border border-border/50 rounded-2xl shadow-sm">
+              <Globe size={18} className="text-accent" />
+              <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                {summary?.company_address?.split(',').pop()?.trim() || "National"}
+              </span>
+            </div>
+            <div className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-zinc-950 border border-border/50 rounded-2xl shadow-sm">
+              <Clock size={18} className="text-accent" />
+              <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                {(() => {
+                  if (!summary?.start_date || !summary?.end_date) return "Duration TBD"
+                  const start = new Date(summary.start_date)
+                  const end = new Date(summary.end_date)
+                  const diffTime = Math.abs(end.getTime() - start.getTime())
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+                  const months = Math.floor(diffDays / 30)
+                  return `${months > 0 ? months + ' months' : diffDays + ' days'}`
+                })()}
+              </span>
+            </div>
+          </div>
+          <p className="text-muted-foreground text-2xl leading-relaxed max-w-3xl mt-8">
+            {summary?.mission_title || "Record your daily professional milestones and maintain high-fidelity communication with your academic mentorship team."}
           </p>
         </div>
 
@@ -342,7 +494,7 @@ export default function SuiviStageFeature() {
                         </div>
                         <div className="flex-1 p-12 space-y-6">
                           <div className="flex items-center justify-between">
-                            <h3 className="text-3xl font-serif text-foreground group-hover:text-accent transition-colors leading-tight flex items-center gap-4 flex-wrap">
+                            <h3 className="text-3xl font-serif text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight flex items-center gap-4 flex-wrap">
                               {log.title}
                               {isTutor && log.owner && (
                                 <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest bg-muted/50 mt-1">
@@ -350,20 +502,48 @@ export default function SuiviStageFeature() {
                                 </Badge>
                               )}
                             </h3>
-                            {log.attachment_url && (
-                              <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl" asChild>
-                                <a
-                                  href={log.attachment_url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  <Paperclip
-                                    size={20}
-                                    className="text-muted-foreground hover:text-accent"
-                                  />
-                                </a>
-                              </Button>
-                            )}
+                            <div className="flex items-center gap-3">
+                              {!isTutor && (
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-10 rounded-2xl text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setEditingLog(log)
+                                    }}
+                                  >
+                                    <Edit size={18} />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-10 rounded-2xl text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleDeleteLog(log.id)
+                                    }}
+                                  >
+                                    <Trash2 size={18} />
+                                  </Button>
+                                </div>
+                              )}
+                              {log.attachment_url && (
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl" asChild>
+                                  <a
+                                    href={log.attachment_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    <Paperclip
+                                      size={20}
+                                      className="text-muted-foreground hover:text-emerald-600"
+                                    />
+                                  </a>
+                                </Button>
+                              )}
+                            </div>
                           </div>
                           <p className="text-lg text-muted-foreground leading-relaxed">
                             {log.content}
@@ -444,10 +624,10 @@ export default function SuiviStageFeature() {
                 <p className="text-lg font-serif">{isTutor ? "Global Activity Feed" : "Academic Team"}</p>
               </div>
               <div className="pt-6 border-t border-border/40 space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-accent/5 border border-accent/10">
-                  {isTutor ? <Globe size={18} className="text-accent" /> : <UserIcon size={18} className="text-accent" />}
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/20">
+                  {isTutor ? <Globe size={18} className="text-emerald-600" /> : <UserIcon size={18} className="text-emerald-600" />}
                   <div>
-                    <p className="text-[9px] font-mono font-bold text-accent uppercase tracking-widest">
+                    <p className="text-[9px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
                       {isTutor ? "Scope" : "Assigned Tutor"}
                     </p>
                     <p className="text-sm font-bold">{isTutor ? "Multiple Host Organizations" : "National Manager"}</p>
@@ -456,6 +636,7 @@ export default function SuiviStageFeature() {
               </div>
             </CardContent>
           </Card>
+          <ActivityCalendar logs={logsData?.data || []} />
 
           <Card className="bg-zinc-900 dark:bg-zinc-950 text-white border-none p-12 space-y-8 shadow-2xl shadow-zinc-900/20 rounded-[2.5rem] relative overflow-hidden group">
             <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
@@ -484,6 +665,72 @@ export default function SuiviStageFeature() {
           isOpen={isUserModalOpen}
           onClose={() => setIsUserModalOpen(false)}
         />
+      )}
+
+      {editingLog && (
+        <Dialog open={!!editingLog} onOpenChange={(open) => !open && setEditingLog(null)}>
+          <DialogContent className="sm:max-w-[600px] rounded-[3rem] p-0 overflow-hidden border-none shadow-2xl">
+            <div className="bg-zinc-950 p-12 text-white relative">
+              <div className="absolute inset-0 dot-pattern opacity-10" />
+              <div className="relative z-10">
+                <h2 className="text-4xl font-serif tracking-tight">Edit Log Entry</h2>
+                <p className="text-zinc-400 text-sm mt-2 uppercase font-bold tracking-[0.2em]">Refine your daily professional records</p>
+              </div>
+            </div>
+            <div className="p-12 space-y-8 bg-white dark:bg-zinc-950">
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Log Date</label>
+                      <Input 
+                        type="date" 
+                        defaultValue={editingLog.date}
+                        className="h-14 rounded-2xl border-border/50 bg-muted/30 font-bold px-6"
+                        id="edit-feature-date"
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Hours Worked</label>
+                      <Input 
+                        type="number" 
+                        defaultValue={editingLog.hours}
+                        className="h-14 rounded-2xl border-border/50 bg-muted/30 font-bold px-6"
+                        id="edit-feature-hours"
+                      />
+                   </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Activity Description</label>
+                  <Textarea 
+                    defaultValue={editingLog.content}
+                    className="min-h-[150px] rounded-2xl border-border/50 bg-muted/30 font-medium px-6 py-4 resize-none"
+                    id="edit-feature-content"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-4 pt-4">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 h-16 rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] border-border/50"
+                  onClick={() => setEditingLog(null)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 h-16 rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] bg-zinc-900 text-white hover:bg-zinc-800 shadow-xl transition-all"
+                  onClick={() => {
+                    const date = (document.getElementById('edit-feature-date') as HTMLInputElement).value
+                    const hours = (document.getElementById('edit-feature-hours') as HTMLInputElement).value
+                    const content = (document.getElementById('edit-feature-content') as HTMLTextAreaElement).value
+                    handleUpdateLog({ date, hours: parseInt(hours), content })
+                  }}
+                >
+                  Confirm Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </motion.div>
   )

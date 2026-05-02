@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Clock,
   FileCheck,
+  Globe,
   History,
   Loader2,
   Lock,
@@ -14,9 +15,10 @@ import {
   Plus,
   ShieldCheck,
   Star,
+  Trash2,
   Upload,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
   ActivityLogService,
@@ -46,6 +48,64 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import useAuth from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
+import TrackingLocked from "./TrackingLocked"
+
+function ActivityCalendar({ logs }: { logs: any[] }) {
+  const today = new Date()
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+  
+  const loggedDays = new Set(
+    logs.map(log => new Date(log.date).getDate())
+  )
+
+  return (
+    <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[12px] shadow-none overflow-hidden mt-4">
+      <div className="p-[16px] border-b border-zinc-50 dark:border-zinc-800/50 flex justify-between items-center">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.06em] text-zinc-400">Attendance Tracker</h2>
+        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+          {today.toLocaleString('default', { month: 'long' })}
+        </span>
+      </div>
+      <CardContent className="p-[16px]">
+        <div className="grid grid-cols-7 gap-2">
+          {days.map(day => {
+            const isFuture = day > today.getDate()
+            const isLogged = loggedDays.has(day)
+            const isPast = day < today.getDate()
+            
+            let colorClass = "bg-orange-400" // Future
+            if (isLogged) colorClass = "bg-emerald-500" // Logged
+            else if (isPast) colorClass = "bg-rose-500" // Missed
+            
+            return (
+              <div key={day} className="flex flex-col items-center gap-1">
+                <div className={`size-2.5 rounded-full ${colorClass} shadow-sm animate-in fade-in zoom-in duration-500`} />
+                <span className="text-[9px] font-bold text-zinc-400">{day}</span>
+              </div>
+            )
+          })}
+        </div>
+        <div className="flex justify-between items-center mt-6 pt-4 border-t border-zinc-50 dark:border-zinc-800/50">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <div className="size-2 rounded-full bg-emerald-500" />
+              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Logged</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="size-2 rounded-full bg-rose-500" />
+              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Missed</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="size-2 rounded-full bg-orange-400" />
+              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Future</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function SuiviStage({
   internshipId,
@@ -75,12 +135,21 @@ export default function SuiviStage({
   })
 
   const trackableInternships = (allInternships?.data || []).filter(
-    (req: any) => req.status === "active" || req.status === "completed"
+    (req: any) => 
+      req.status === "active" || 
+      req.status === "completed" || 
+      req.status === "pending_signature" ||
+      req.progress >= 50
   )
 
-  const [activeId, setActiveId] = useState<string | null>(
-    internshipId || (trackableInternships.length === 1 ? trackableInternships[0].id : null)
-  )
+  const [activeId, setActiveId] = useState<string | null>(internshipId || null)
+
+  // Auto-select if only one internship is trackable
+  useEffect(() => {
+    if (!activeId && trackableInternships.length === 1) {
+      setActiveId(trackableInternships[0].id)
+    }
+  }, [trackableInternships, activeId])
 
   const effectiveId = internshipId || activeId
 
@@ -168,6 +237,36 @@ export default function SuiviStage({
     addEvalMutation.mutate()
   }
 
+  const [editingLog, setEditingLog] = useState<any | null>(null)
+
+  const handleDeleteLog = async (logId: string) => {
+    if (!confirm("Are you sure you want to delete this log entry?")) return
+    try {
+      await ActivityLogService.deleteLog({ id: logId })
+      toast.success("Log entry deleted")
+      logs.refetch()
+    } catch (error) {
+      toast.error("Failed to delete log")
+    }
+  }
+
+  const handleUpdateLog = async (data: any) => {
+    try {
+      await ActivityLogService.updateLog({
+        id: editingLog.id,
+        requestBody: {
+          ...data,
+          internship_request_id: effectiveId
+        }
+      })
+      toast.success("Log entry updated")
+      setEditingLog(null)
+      logs.refetch()
+    } catch (error) {
+      toast.error("Failed to update log")
+    }
+  }
+
   if (isLoadingAll) {
     return (
       <div className="p-8 space-y-8">
@@ -198,37 +297,7 @@ export default function SuiviStage({
         </div>
 
         {trackableInternships.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center max-w-2xl mx-auto space-y-8 animate-in fade-in zoom-in duration-700">
-            <div className="relative">
-              <div className="absolute -inset-4 bg-emerald-500/10 rounded-full blur-2xl animate-pulse" />
-              <div className="relative bg-white dark:bg-zinc-900 size-32 rounded-full flex items-center justify-center shadow-2xl border border-zinc-100 dark:border-zinc-800">
-                <Lock size={48} className="text-zinc-300 dark:text-zinc-600" />
-              </div>
-              <div className="absolute -bottom-2 -right-2 bg-emerald-600 text-white p-2 rounded-xl shadow-lg border-2 border-white dark:border-zinc-900">
-                <ShieldCheck size={20} />
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <Badge variant="outline" className="px-4 py-1 text-[10px] uppercase font-black tracking-[0.2em] border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10">
-                Tracking Module Locked
-              </Badge>
-              <h2 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">No Active Internship Found</h2>
-              <p className="text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
-                The tracking portal is automatically unlocked once your internship application is approved and your convention is signed by the administration.
-              </p>
-            </div>
-
-            <div className="pt-8">
-              <Button 
-                variant="outline"
-                className="h-12 px-8 rounded-xl font-bold uppercase tracking-widest text-[10px] border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
-                onClick={() => window.location.href = '/stages'}
-              >
-                Go to Applications
-              </Button>
-            </div>
-          </div>
+          <TrackingLocked />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {trackableInternships.map((req: any) => (
@@ -295,11 +364,32 @@ export default function SuiviStage({
             <span className="size-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg">
                <History size={28} />
             </span>
-            Tracking: {summary?.company_name || "Dossier"}
+            {summary?.company_name || "Internship Tracking"}
           </h1>
-          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 max-w-[520px] leading-relaxed">
-            {summary?.mission_title || "Tracking and activity history for your current internship."}
-          </p>
+          <div className="flex flex-wrap items-center gap-4 mt-2">
+            <Badge variant="secondary" className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-none font-bold text-[10px] uppercase tracking-widest px-3">
+              {summary?.mission_title || "Generic Mission"}
+            </Badge>
+            <div className="size-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Globe size={12} className="text-emerald-500" />
+              {summary?.company_address?.split(',').pop()?.trim() || "National"}
+            </span>
+            <div className="size-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Calendar size={12} className="text-emerald-500" />
+              {(() => {
+                if (!summary?.start_date || !summary?.end_date) return "Duration TBD"
+                const start = new Date(summary.start_date)
+                const end = new Date(summary.end_date)
+                const diffTime = Math.abs(end.getTime() - start.getTime())
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+                const months = Math.floor(diffDays / 30)
+                const weeks = Math.floor((diffDays % 30) / 7)
+                return `${months > 0 ? `${months}m ` : ""}${weeks > 0 ? `${weeks}w` : diffDays + "d"}`
+              })()}
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {isViewingSelf && (
@@ -308,7 +398,7 @@ export default function SuiviStage({
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="h-10 px-6 rounded-xl border border-emerald-100 dark:border-emerald-900 bg-white dark:bg-zinc-900 text-[11px] font-bold uppercase tracking-widest shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/20 gap-2 text-emerald-600 dark:text-emerald-400 transition-all"
+                  className="h-10 px-6 rounded-xl border border-border bg-white dark:bg-zinc-900 text-[11px] font-bold uppercase tracking-widest shadow-sm hover:bg-muted/50 dark:hover:bg-muted/20 gap-2 text-emerald-600 dark:text-emerald-400 transition-all"
                 >
                   <Plus size={14} /> Add Log Entry
                 </Button>
@@ -404,17 +494,39 @@ export default function SuiviStage({
               ) : logs?.data && logs.data.length > 0 ? (
                 <div className="divide-y divide-zinc-50 dark:divide-zinc-800">
                   {logs.data.map((entry) => (
-                    <div key={entry.id} className="p-[16px] flex gap-4 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors">
-                      <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center border border-zinc-200 dark:border-zinc-800 shrink-0">
-                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">{new Date(entry.date).getDate()}</span>
-                        <span className="text-[7px] uppercase font-bold text-zinc-400">
+                    <div key={entry.id} className="group flex gap-0 hover:bg-muted/40 dark:hover:bg-muted/20 transition-colors border-b border-zinc-50 dark:border-zinc-800 last:border-0">
+                      <div className="w-14 self-stretch bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col items-center justify-center border-r border-zinc-100 dark:border-zinc-800 shrink-0 py-4">
+                        <span className="text-[14px] font-black text-indigo-600 dark:text-indigo-400 leading-none">{new Date(entry.date).getDate()}</span>
+                        <span className="text-[8px] uppercase font-black text-zinc-400 tracking-tighter">
                           {new Intl.DateTimeFormat("en-US", { month: "short" }).format(new Date(entry.date)).toUpperCase()}
                         </span>
                       </div>
-                      <div className="flex-1 space-y-1">
+                      <div className="flex-1 p-[16px_20px] space-y-1">
                         <div className="flex justify-between items-start">
-                          <p className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200 leading-snug">{entry.content}</p>
-                          <span className="text-[10px] font-mono text-zinc-400">{entry.hours}h</span>
+                          <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200 leading-relaxed max-w-[80%]">{entry.content}</p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-mono font-bold text-indigo-600/50 dark:text-indigo-400/50">{entry.hours}h</span>
+                            {isViewingSelf && (
+                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg"
+                                  onClick={() => setEditingLog(entry)}
+                                >
+                                  <Edit size={14} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg"
+                                  onClick={() => handleDeleteLog(entry.id)}
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -441,7 +553,7 @@ export default function SuiviStage({
              <CardContent className="p-[16px] space-y-2">
                 {summary?.reports && summary.reports.length > 0 ? (
                   summary.reports.map((report: any) => (
-                  <div className="flex items-center justify-between p-3 bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/50 rounded-xl transition-all hover:border-emerald-500/30">
+                  <div className="flex items-center justify-between p-3 bg-muted/40 dark:bg-muted/20 border border-border dark:border-zinc-800 rounded-xl transition-all hover:border-emerald-500/30">
                     <div className="flex items-center gap-3">
                       <FileCheck size={14} className="text-emerald-500" />
                       <span className="text-[13px] font-bold text-emerald-900 dark:text-emerald-50">{report.title}</span>
@@ -476,6 +588,7 @@ export default function SuiviStage({
               </div>
             </CardContent>
           </Card>
+          <ActivityCalendar logs={logs?.data || []} />
 
           <Card className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[12px] shadow-none overflow-hidden">
              <div className="p-[16px] border-b border-zinc-50 dark:border-zinc-800/50">
@@ -527,6 +640,68 @@ export default function SuiviStage({
           </Card>
         </div>
       </div>
+      {editingLog && (
+        <Dialog open={!!editingLog} onOpenChange={(open) => !open && setEditingLog(null)}>
+          <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+            <div className="bg-zinc-900 p-8 text-white">
+              <h2 className="text-2xl font-black italic tracking-tight">Edit Log Entry</h2>
+              <p className="text-zinc-400 text-sm mt-1 uppercase font-bold tracking-widest">Update your professional activities</p>
+            </div>
+            <div className="p-8 space-y-6 bg-white dark:bg-zinc-950">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Date</label>
+                      <Input 
+                        type="date" 
+                        defaultValue={editingLog.date}
+                        className="h-12 rounded-2xl border-zinc-100 bg-zinc-50 font-bold"
+                        id="edit-date"
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Hours</label>
+                      <Input 
+                        type="number" 
+                        defaultValue={editingLog.hours}
+                        className="h-12 rounded-2xl border-zinc-100 bg-zinc-50 font-bold"
+                        id="edit-hours"
+                      />
+                   </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Activity Content</label>
+                  <Textarea 
+                    defaultValue={editingLog.content}
+                    className="min-h-[120px] rounded-2xl border-zinc-100 bg-zinc-50 font-medium resize-none"
+                    id="edit-content"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px]"
+                  onClick={() => setEditingLog(null)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 h-12 rounded-2xl font-bold uppercase tracking-widest text-[10px] bg-zinc-900 text-white hover:bg-zinc-800 shadow-lg"
+                  onClick={() => {
+                    const date = (document.getElementById('edit-date') as HTMLInputElement).value
+                    const hours = (document.getElementById('edit-hours') as HTMLInputElement).value
+                    const content = (document.getElementById('edit-content') as HTMLTextAreaElement).value
+                    handleUpdateLog({ date, hours: parseInt(hours), content })
+                  }}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
