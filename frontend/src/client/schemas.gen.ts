@@ -350,6 +350,32 @@ export const Body_pdf_extract_pdf_dataSchema = {
     title: 'Body_pdf-extract_pdf_data'
 } as const;
 
+export const Body_uploads_upload_convention_pdfSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_uploads-upload_convention_pdf'
+} as const;
+
+export const Body_user_documents_upload_user_documentSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_user-documents-upload_user_document'
+} as const;
+
 export const ConventionCreateSchema = {
     properties: {
         document_name: {
@@ -624,6 +650,12 @@ export const DashboardOverviewResponseSchema = {
     title: 'DashboardOverviewResponse'
 } as const;
 
+export const DocumentTypeSchema = {
+    type: 'string',
+    enum: ['cv', 'certificate', 'phd_doc', 'other'],
+    title: 'DocumentType'
+} as const;
+
 export const DossierSummarySchema = {
     properties: {
         total_dossiers: {
@@ -641,10 +673,14 @@ export const DossierSummarySchema = {
         pending_dossiers: {
             type: 'integer',
             title: 'Pending Dossiers'
+        },
+        pending_verification: {
+            type: 'integer',
+            title: 'Pending Verification'
         }
     },
     type: 'object',
-    required: ['total_dossiers', 'active_dossiers', 'completed_dossiers', 'pending_dossiers'],
+    required: ['total_dossiers', 'active_dossiers', 'completed_dossiers', 'pending_dossiers', 'pending_verification'],
     title: 'DossierSummary'
 } as const;
 
@@ -3106,6 +3142,12 @@ export const TutorFeedbackPublicSchema = {
     title: 'TutorFeedbackPublic'
 } as const;
 
+export const TutorshipStatusSchema = {
+    type: 'string',
+    enum: ['pending', 'accepted', 'rejected'],
+    title: 'TutorshipStatus'
+} as const;
+
 export const UpdatePasswordSchema = {
     properties: {
         current_password: {
@@ -3242,6 +3284,62 @@ export const UserCreateSchema = {
     type: 'object',
     required: ['email', 'password'],
     title: 'UserCreate'
+} as const;
+
+export const UserDocumentPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Name'
+        },
+        type: {
+            '$ref': '#/components/schemas/DocumentType',
+            default: 'other'
+        },
+        url: {
+            type: 'string',
+            maxLength: 512,
+            title: 'Url'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'url', 'id', 'owner_id', 'created_at'],
+    title: 'UserDocumentPublic'
+} as const;
+
+export const UserDocumentsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/UserDocumentPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'UserDocumentsPublic'
 } as const;
 
 export const UserMinimalSchema = {

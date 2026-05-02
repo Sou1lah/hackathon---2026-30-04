@@ -10,6 +10,7 @@ import {
   Plane,
   Settings,
   UserCircle,
+  Users,
 } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -56,6 +57,13 @@ export function AppSidebar() {
       key: "add_internship",
       path: "/stages",
     })
+  } else if (currentUser?.role?.startsWith("prof")) {
+    items.push({
+      icon: FilePlus2,
+      title: "Internship Hub",
+      key: "internship_hub",
+      path: "/stages",
+    })
   } else if (currentUser?.can_apply_internship) {
     items.push({
       icon: FilePlus2,
@@ -80,6 +88,15 @@ export function AppSidebar() {
       title: "Internship Tracking",
       key: "internship_tracking",
       path: "/suivi-stage",
+    })
+  }
+
+  if (currentUser?.role?.startsWith("prof")) {
+    items.push({
+      icon: Users,
+      title: "Tutor",
+      key: "tutor",
+      path: "/tutor",
     })
   }
 

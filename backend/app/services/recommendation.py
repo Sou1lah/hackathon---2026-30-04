@@ -144,6 +144,11 @@ def match_internship_to_user(user: User, internship: InternshipOffer, request: S
         level = target_level.lower()
         if level in search_text:
             breakdown["level"] = 10.0
+        # Teacher-specific level matching
+        elif user.role_type == "teacher":
+            teacher_levels = ["professor", "researcher", "doctor", "lecturer", "enseignant", "maitre"]
+            if any(tl in search_text for tl in teacher_levels):
+                breakdown["level"] = 10.0
     else:
         warnings.append("User/Request is missing 'level'")
         
@@ -165,8 +170,14 @@ def match_internship_to_user(user: User, internship: InternshipOffer, request: S
         breakdown["role"] = 15.0
     elif user.role_type == internship.target_audience:
         breakdown["role"] = 15.0
+    # Boost if teacher and audience is teacher
+    if user.role_type == "teacher" and internship.target_audience == "teacher":
+        breakdown["role"] = 25.0 # Extra boost for dedicated teacher offers
+        score += 10.0 # Total boost
     else:
-        warnings.append(f"Role mismatch: user is {user.role_type}, internship wants {internship.target_audience}")
+        if user.role_type != internship.target_audience and internship.target_audience != "both":
+            warnings.append(f"Role mismatch: user is {user.role_type}, internship wants {internship.target_audience}")
+            score -= 20.0 # Penalty for mismatch
         
     score += breakdown["role"]
         

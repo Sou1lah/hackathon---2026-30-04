@@ -29,6 +29,7 @@ const formSchema = z.object({
     .min(1, { message: "Password is required" }),
 }) satisfies z.ZodType<AccessToken>
 
+
 type FormData = z.infer<typeof formSchema>
 
 export const Route = createFileRoute("/login")({

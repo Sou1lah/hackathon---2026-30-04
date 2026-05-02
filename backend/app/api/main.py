@@ -14,6 +14,7 @@ from app.api.routes import (
     recommendation,
     pdf,
     user_documents,
+    tutor,
 )
 from app.core.config import settings
 
@@ -36,6 +37,7 @@ api_router.include_router(suivi_stage.router)
 api_router.include_router(partnerships.router)
 api_router.include_router(uploads.router)
 api_router.include_router(pdf.router)
+api_router.include_router(tutor.router)
 
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)

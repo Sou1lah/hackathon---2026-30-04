@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ActivityLogReadActivityLogData, ActivityLogReadActivityLogResponse, ActivityLogCreateLogEntryData, ActivityLogCreateLogEntryResponse, ConventionsReadConventionsData, ConventionsReadConventionsResponse, ConventionsCreateConventionEndpointData, ConventionsCreateConventionEndpointResponse, ConventionsReadConventionData, ConventionsReadConventionResponse, ConventionsUpdateConventionEndpointData, ConventionsUpdateConventionEndpointResponse, ConventionsDeleteConventionEndpointData, ConventionsDeleteConventionEndpointResponse, ConventionsSignConventionData, ConventionsSignConventionResponse, ConventionsReadAllConventionsAdminData, ConventionsReadAllConventionsAdminResponse, ConventionsApproveConventionEndpointData, ConventionsApproveConventionEndpointResponse, ConventionsRejectConventionEndpointData, ConventionsRejectConventionEndpointResponse, ConventionsForwardConventionEndpointData, ConventionsForwardConventionEndpointResponse, HealthHealthResponse, InternshipsReadInternshipRequestsData, InternshipsReadInternshipRequestsResponse, InternshipsCreateInternshipData, InternshipsCreateInternshipResponse, InternshipsReadInternshipRequestData, InternshipsReadInternshipRequestResponse, InternshipsUpdateInternshipData, InternshipsUpdateInternshipResponse, InternshipsDeleteInternshipData, InternshipsDeleteInternshipResponse, InternshipsRefreshOffersResponse, InternshipsReadOffersData, InternshipsReadOffersResponse, InternshipsCreateOfferData, InternshipsCreateOfferResponse, InternshipsReadRecommendedOffersData, InternshipsReadRecommendedOffersResponse, InternshipsReadOfferData, InternshipsReadOfferResponse, InternshipsUpdateOfferData, InternshipsUpdateOfferResponse, InternshipsDeleteOfferData, InternshipsDeleteOfferResponse, InternshipsLogInteractionData, InternshipsLogInteractionResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MobilityReadMobilityFilesData, MobilityReadMobilityFilesResponse, MobilityCreateMobilityData, MobilityCreateMobilityResponse, MobilityReadMobilityFileData, MobilityReadMobilityFileResponse, MobilityUpdateMobilityData, MobilityUpdateMobilityResponse, MobilityDeleteMobilityData, MobilityDeleteMobilityResponse, MobilityReadInternshipSummaryData, MobilityReadInternshipSummaryResponse, MobilityReadReportsData, MobilityReadReportsResponse, MobilityCreateReportData, MobilityCreateReportResponse, MobilityReadEvaluationData, MobilityReadEvaluationResponse, MobilityCreateEvaluationData, MobilityCreateEvaluationResponse, OverviewGetOverviewDataResponse, PartnershipsReadPartnershipsData, PartnershipsReadPartnershipsResponse, PartnershipsCreatePartnershipEndpointData, PartnershipsCreatePartnershipEndpointResponse, PartnershipsReadPartnershipData, PartnershipsReadPartnershipResponse, PartnershipsUpdatePartnershipEndpointData, PartnershipsUpdatePartnershipEndpointResponse, PartnershipsDeletePartnershipEndpointData, PartnershipsDeletePartnershipEndpointResponse, PdfExtractPdfDataData, PdfExtractPdfDataResponse, PdfGetPdfExtractionsData, PdfGetPdfExtractionsResponse, PrivateCreateUserData, PrivateCreateUserResponse, RecommendationsReadUserProfileResponse, RecommendationsSubmitStageRequestData, RecommendationsSubmitStageRequestResponse, SuiviStageReadMyLogsData, SuiviStageReadMyLogsResponse, SuiviStageCreateMyLogData, SuiviStageCreateMyLogResponse, SuiviStageReadMyFeedbackResponse, SuiviStageReadAllLogsData, SuiviStageReadAllLogsResponse, SuiviStageReadUserLogsData, SuiviStageReadUserLogsResponse, SuiviStageReadUserInternshipSummaryData, SuiviStageReadUserInternshipSummaryResponse, SuiviStageCreateFeedbackData, SuiviStageCreateFeedbackResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ActivityLogReadActivityLogData, ActivityLogReadActivityLogResponse, ActivityLogCreateLogEntryData, ActivityLogCreateLogEntryResponse, ActivityLogUpdateLogData, ActivityLogUpdateLogResponse, ActivityLogDeleteLogData, ActivityLogDeleteLogResponse, ConventionsReadConventionsData, ConventionsReadConventionsResponse, ConventionsCreateConventionEndpointData, ConventionsCreateConventionEndpointResponse, ConventionsReadConventionData, ConventionsReadConventionResponse, ConventionsUpdateConventionEndpointData, ConventionsUpdateConventionEndpointResponse, ConventionsDeleteConventionEndpointData, ConventionsDeleteConventionEndpointResponse, ConventionsSignConventionData, ConventionsSignConventionResponse, ConventionsReadAllConventionsAdminData, ConventionsReadAllConventionsAdminResponse, ConventionsApproveConventionEndpointData, ConventionsApproveConventionEndpointResponse, ConventionsRejectConventionEndpointData, ConventionsRejectConventionEndpointResponse, ConventionsForwardConventionEndpointData, ConventionsForwardConventionEndpointResponse, HealthHealthResponse, InternshipsReadInternshipRequestsData, InternshipsReadInternshipRequestsResponse, InternshipsCreateInternshipData, InternshipsCreateInternshipResponse, InternshipsReadInternshipRequestData, InternshipsReadInternshipRequestResponse, InternshipsUpdateInternshipData, InternshipsUpdateInternshipResponse, InternshipsDeleteInternshipData, InternshipsDeleteInternshipResponse, InternshipsRefreshOffersResponse, InternshipsReadOffersData, InternshipsReadOffersResponse, InternshipsCreateOfferData, InternshipsCreateOfferResponse, InternshipsReadRecommendedOffersData, InternshipsReadRecommendedOffersResponse, InternshipsReadOfferData, InternshipsReadOfferResponse, InternshipsUpdateOfferData, InternshipsUpdateOfferResponse, InternshipsDeleteOfferData, InternshipsDeleteOfferResponse, InternshipsLogInteractionData, InternshipsLogInteractionResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MobilityReadMobilityFilesData, MobilityReadMobilityFilesResponse, MobilityCreateMobilityData, MobilityCreateMobilityResponse, MobilityReadMobilityFileData, MobilityReadMobilityFileResponse, MobilityUpdateMobilityData, MobilityUpdateMobilityResponse, MobilityDeleteMobilityData, MobilityDeleteMobilityResponse, MobilityReadInternshipSummaryData, MobilityReadInternshipSummaryResponse, MobilityReadReportsData, MobilityReadReportsResponse, MobilityCreateReportData, MobilityCreateReportResponse, MobilityReadEvaluationData, MobilityReadEvaluationResponse, MobilityCreateEvaluationData, MobilityCreateEvaluationResponse, OverviewGetOverviewDataResponse, PartnershipsReadPartnershipsData, PartnershipsReadPartnershipsResponse, PartnershipsCreatePartnershipEndpointData, PartnershipsCreatePartnershipEndpointResponse, PartnershipsReadPartnershipData, PartnershipsReadPartnershipResponse, PartnershipsUpdatePartnershipEndpointData, PartnershipsUpdatePartnershipEndpointResponse, PartnershipsDeletePartnershipEndpointData, PartnershipsDeletePartnershipEndpointResponse, PdfExtractPdfDataData, PdfExtractPdfDataResponse, PdfGetPdfExtractionsData, PdfGetPdfExtractionsResponse, PrivateCreateUserData, PrivateCreateUserResponse, RecommendationsReadUserProfileResponse, RecommendationsSubmitStageRequestData, RecommendationsSubmitStageRequestResponse, SuiviStageReadMyLogsData, SuiviStageReadMyLogsResponse, SuiviStageCreateMyLogData, SuiviStageCreateMyLogResponse, SuiviStageUpdateMyLogData, SuiviStageUpdateMyLogResponse, SuiviStageDeleteMyLogData, SuiviStageDeleteMyLogResponse, SuiviStageReadMyFeedbackResponse, SuiviStageReadMySummaryResponse, SuiviStageReadAllLogsData, SuiviStageReadAllLogsResponse, SuiviStageReadUserLogsData, SuiviStageReadUserLogsResponse, SuiviStageReadUserInternshipSummaryData, SuiviStageReadUserInternshipSummaryResponse, SuiviStageCreateFeedbackData, SuiviStageCreateFeedbackResponse, TutorSearchStudentsData, TutorSearchStudentsResponse, TutorSendTutorshipRequestData, TutorSendTutorshipRequestResponse, TutorGetTutorshipRequestsResponse, TutorHandleTutorshipRequestData, TutorHandleTutorshipRequestResponse, TutorGetMyStudentsResponse, TutorUpdateStudentRankData, TutorUpdateStudentRankResponse, TutorGetStudentLogsData, TutorGetStudentLogsResponse, TutorAddLogCommentData, TutorAddLogCommentResponse, UploadsUploadConventionPdfData, UploadsUploadConventionPdfResponse, UserDocumentsUploadUserDocumentData, UserDocumentsUploadUserDocumentResponse, UserDocumentsReadUserDocumentsData, UserDocumentsReadUserDocumentsResponse, UserDocumentsDeleteUserDocumentData, UserDocumentsDeleteUserDocumentResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ActivityLogService {
     /**
@@ -45,6 +45,51 @@ export class ActivityLogService {
             url: '/api/v1/activity-log/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Log
+     * Update an activity log entry.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns ActivityLogEntryPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateLog(data: ActivityLogUpdateLogData): CancelablePromise<ActivityLogUpdateLogResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/activity-log/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Log
+     * Delete an activity log entry.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteLog(data: ActivityLogDeleteLogData): CancelablePromise<ActivityLogDeleteLogResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/activity-log/{id}',
+            path: {
+                id: data.id
+            },
             errors: {
                 422: 'Validation Error'
             }
@@ -790,6 +835,7 @@ export class MobilityService {
     /**
      * Read Mobility Files
      * Retrieve mobility files, optionally filtered by type (nationale/internationale).
+     * Admins/superusers see ALL files; regular users see only their own.
      * @param data The data for the request.
      * @param data.mobilityType
      * @param data.skip
@@ -1289,6 +1335,51 @@ export class SuiviStageService {
     }
     
     /**
+     * Update My Log
+     * Update an activity log entry for the current user's internship.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns ActivityLogPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateMyLog(data: SuiviStageUpdateMyLogData): CancelablePromise<SuiviStageUpdateMyLogResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/suivi-stage/my-internship/logs/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete My Log
+     * Delete an activity log entry for the current user's internship.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteMyLog(data: SuiviStageDeleteMyLogData): CancelablePromise<SuiviStageDeleteMyLogResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/suivi-stage/my-internship/logs/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Read My Feedback
      * Retrieve feedback for the current user's internship logs.
      * @returns TutorFeedbackPublic Successful Response
@@ -1298,6 +1389,19 @@ export class SuiviStageService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/suivi-stage/my-internship/feedback'
+        });
+    }
+    
+    /**
+     * Read My Summary
+     * Retrieve summary data for the current user's internship.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static readMySummary(): CancelablePromise<SuiviStageReadMySummaryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/suivi-stage/my-internship/summary'
         });
     }
     
@@ -1386,6 +1490,269 @@ export class SuiviStageService {
             url: '/api/v1/suivi-stage/admin/feedback',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class TutorService {
+    /**
+     * Search Students
+     * Search for students to tutor.
+     * @param data The data for the request.
+     * @param data.query
+     * @returns UserPublic Successful Response
+     * @throws ApiError
+     */
+    public static searchStudents(data: TutorSearchStudentsData = {}): CancelablePromise<TutorSearchStudentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/tutor/search-students',
+            query: {
+                query: data.query
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Send Tutorship Request
+     * Send a tutorship request to a student.
+     * @param data The data for the request.
+     * @param data.studentId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static sendTutorshipRequest(data: TutorSendTutorshipRequestData): CancelablePromise<TutorSendTutorshipRequestResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/tutor/request',
+            query: {
+                student_id: data.studentId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Tutorship Requests
+     * Get pending tutorship requests for the current student.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getTutorshipRequests(): CancelablePromise<TutorGetTutorshipRequestsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/tutor/requests'
+        });
+    }
+    
+    /**
+     * Handle Tutorship Request
+     * Accept or reject a tutorship request.
+     * @param data The data for the request.
+     * @param data.tutorshipId
+     * @param data.status
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static handleTutorshipRequest(data: TutorHandleTutorshipRequestData): CancelablePromise<TutorHandleTutorshipRequestResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/tutor/request/{tutorship_id}',
+            path: {
+                tutorship_id: data.tutorshipId
+            },
+            query: {
+                status: data.status
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get My Students
+     * List accepted students for the current tutor with metrics.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getMyStudents(): CancelablePromise<TutorGetMyStudentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/tutor/my-students'
+        });
+    }
+    
+    /**
+     * Update Student Rank
+     * Update a student's rank (favorite stars).
+     * @param data The data for the request.
+     * @param data.studentId
+     * @param data.rank
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static updateStudentRank(data: TutorUpdateStudentRankData): CancelablePromise<TutorUpdateStudentRankResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/tutor/student/{student_id}/rank',
+            path: {
+                student_id: data.studentId
+            },
+            query: {
+                rank: data.rank
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Student Logs
+     * Access logs of a tutored student.
+     * @param data The data for the request.
+     * @param data.studentId
+     * @param data.skip
+     * @param data.limit
+     * @returns ActivityLogsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getStudentLogs(data: TutorGetStudentLogsData): CancelablePromise<TutorGetStudentLogsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/tutor/student/{student_id}/logs',
+            path: {
+                student_id: data.studentId
+            },
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Add Log Comment
+     * Add a comment to a student's log.
+     * @param data The data for the request.
+     * @param data.logId
+     * @param data.requestBody
+     * @returns TutorFeedbackPublic Successful Response
+     * @throws ApiError
+     */
+    public static addLogComment(data: TutorAddLogCommentData): CancelablePromise<TutorAddLogCommentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/tutor/log/{log_id}/comment',
+            path: {
+                log_id: data.logId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class UploadsService {
+    /**
+     * Upload Convention Pdf
+     * Upload an institutional convention PDF.
+     * @param data The data for the request.
+     * @param data.formData
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static uploadConventionPdf(data: UploadsUploadConventionPdfData): CancelablePromise<UploadsUploadConventionPdfResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/uploads/convention',
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class UserDocumentsService {
+    /**
+     * Upload User Document
+     * Upload a user document.
+     * @param data The data for the request.
+     * @param data.formData
+     * @param data.type
+     * @returns UserDocumentPublic Successful Response
+     * @throws ApiError
+     */
+    public static uploadUserDocument(data: UserDocumentsUploadUserDocumentData): CancelablePromise<UserDocumentsUploadUserDocumentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/user-documents/',
+            query: {
+                type: data.type
+            },
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read User Documents
+     * Retrieve user documents.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns UserDocumentsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readUserDocuments(data: UserDocumentsReadUserDocumentsData = {}): CancelablePromise<UserDocumentsReadUserDocumentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user-documents/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete User Document
+     * Delete a user document.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteUserDocument(data: UserDocumentsDeleteUserDocumentData): CancelablePromise<UserDocumentsDeleteUserDocumentResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/user-documents/{id}',
+            path: {
+                id: data.id
+            },
             errors: {
                 422: 'Validation Error'
             }

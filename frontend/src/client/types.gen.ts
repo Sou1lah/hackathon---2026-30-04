@@ -72,6 +72,14 @@ export type Body_pdf_extract_pdf_data = {
     files: Array<((Blob | File))>;
 };
 
+export type Body_uploads_upload_convention_pdf = {
+    file: (Blob | File);
+};
+
+export type Body_user_documents_upload_user_document = {
+    file: (Blob | File);
+};
+
 export type ConventionCreate = {
     document_name: string;
     signature_step?: number;
@@ -125,11 +133,14 @@ export type DashboardOverviewResponse = {
     timestamp: string;
 };
 
+export type DocumentType = 'cv' | 'certificate' | 'phd_doc' | 'other';
+
 export type DossierSummary = {
     total_dossiers: number;
     active_dossiers: number;
     completed_dossiers: number;
     pending_dossiers: number;
+    pending_verification: number;
 };
 
 export type HTTPValidationError = {
@@ -519,6 +530,8 @@ export type TutorFeedbackPublic = {
     created_at: string;
 };
 
+export type TutorshipStatus = 'pending' | 'accepted' | 'rejected';
+
 export type UpdatePassword = {
     current_password: string;
     new_password: string;
@@ -540,6 +553,20 @@ export type UserCreate = {
     can_view_tracking?: boolean;
     can_review_applications?: boolean;
     password: string;
+};
+
+export type UserDocumentPublic = {
+    name: string;
+    type?: DocumentType;
+    url: string;
+    id: string;
+    owner_id: string;
+    created_at: string;
+};
+
+export type UserDocumentsPublic = {
+    data: Array<UserDocumentPublic>;
+    count: number;
 };
 
 export type UserMinimal = {
@@ -632,6 +659,19 @@ export type ActivityLogCreateLogEntryData = {
 };
 
 export type ActivityLogCreateLogEntryResponse = (ActivityLogEntryPublic);
+
+export type ActivityLogUpdateLogData = {
+    id: string;
+    requestBody: ActivityLogEntryCreate;
+};
+
+export type ActivityLogUpdateLogResponse = (ActivityLogEntryPublic);
+
+export type ActivityLogDeleteLogData = {
+    id: string;
+};
+
+export type ActivityLogDeleteLogResponse = (Message);
 
 export type ConventionsReadConventionsData = {
     limit?: number;
@@ -990,7 +1030,24 @@ export type SuiviStageCreateMyLogData = {
 
 export type SuiviStageCreateMyLogResponse = (ActivityLogPublic);
 
+export type SuiviStageUpdateMyLogData = {
+    id: string;
+    requestBody: ActivityLogCreate;
+};
+
+export type SuiviStageUpdateMyLogResponse = (ActivityLogPublic);
+
+export type SuiviStageDeleteMyLogData = {
+    id: string;
+};
+
+export type SuiviStageDeleteMyLogResponse = (Message);
+
 export type SuiviStageReadMyFeedbackResponse = (Array<TutorFeedbackPublic>);
+
+export type SuiviStageReadMySummaryResponse = ({
+    [key: string]: unknown;
+});
 
 export type SuiviStageReadAllLogsData = {
     limit?: number;
@@ -1020,6 +1077,77 @@ export type SuiviStageCreateFeedbackData = {
 };
 
 export type SuiviStageCreateFeedbackResponse = (TutorFeedbackPublic);
+
+export type TutorSearchStudentsData = {
+    query?: (string | null);
+};
+
+export type TutorSearchStudentsResponse = (Array<UserPublic>);
+
+export type TutorSendTutorshipRequestData = {
+    studentId: string;
+};
+
+export type TutorSendTutorshipRequestResponse = (Message);
+
+export type TutorGetTutorshipRequestsResponse = (Array<unknown>);
+
+export type TutorHandleTutorshipRequestData = {
+    status: TutorshipStatus;
+    tutorshipId: string;
+};
+
+export type TutorHandleTutorshipRequestResponse = (Message);
+
+export type TutorGetMyStudentsResponse = (Array<unknown>);
+
+export type TutorUpdateStudentRankData = {
+    rank: number;
+    studentId: string;
+};
+
+export type TutorUpdateStudentRankResponse = (Message);
+
+export type TutorGetStudentLogsData = {
+    limit?: number;
+    skip?: number;
+    studentId: string;
+};
+
+export type TutorGetStudentLogsResponse = (ActivityLogsPublic);
+
+export type TutorAddLogCommentData = {
+    logId: string;
+    requestBody: TutorFeedbackCreate;
+};
+
+export type TutorAddLogCommentResponse = (TutorFeedbackPublic);
+
+export type UploadsUploadConventionPdfData = {
+    formData: Body_uploads_upload_convention_pdf;
+};
+
+export type UploadsUploadConventionPdfResponse = (unknown);
+
+export type UserDocumentsUploadUserDocumentData = {
+    formData: Body_user_documents_upload_user_document;
+    type?: DocumentType;
+};
+
+export type UserDocumentsUploadUserDocumentResponse = (UserDocumentPublic);
+
+export type UserDocumentsReadUserDocumentsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type UserDocumentsReadUserDocumentsResponse = (UserDocumentsPublic);
+
+export type UserDocumentsDeleteUserDocumentData = {
+    id: string;
+};
+
+export type UserDocumentsDeleteUserDocumentResponse = (Message);
 
 export type UsersReadUsersData = {
     limit?: number;

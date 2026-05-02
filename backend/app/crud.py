@@ -12,8 +12,9 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     db_obj = User.model_validate(
         user_create, update={"hashed_password": get_password_hash(user_create.password)}
     )
-    # Grant default student permissions if none are specified
-    if db_obj.role in [UserRole.student_national, UserRole.student_international]:
+    # Grant default student/prof permissions if none are specified
+    if db_obj.role in [UserRole.student_national, UserRole.student_international, 
+                       UserRole.prof_national, UserRole.prof_international]:
         if not any([db_obj.can_access_dashboard, db_obj.can_apply_internship, 
                     db_obj.can_view_convention, db_obj.can_view_tracking]):
             db_obj.can_access_dashboard = True

@@ -171,7 +171,7 @@ function StagesPage() {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   const [showAdminForm, setShowAdminForm] = useState(
-    user?.is_superuser || user?.can_review_applications || user?.role?.startsWith("prof_")
+    (user?.is_superuser || user?.can_review_applications) && !user?.role?.startsWith("prof_")
   )
 
   const handleResults = (data: RecommendationResponse) => {
@@ -181,9 +181,10 @@ function StagesPage() {
   }
 
   // Toggle for Admins
-  const isAdmin = user?.is_superuser || user?.can_review_applications || user?.role?.startsWith("prof_")
+  const isActualAdmin = user?.is_superuser || user?.can_review_applications
+  const isProf = user?.role?.startsWith("prof_")
 
-  if (isAdmin && showAdminForm) {
+  if (isActualAdmin && showAdminForm) {
     return (
       <div className="relative">
         <div className="max-w-full mx-auto px-4 pt-8 flex justify-end">
@@ -202,7 +203,7 @@ function StagesPage() {
 
   return (
     <div className="relative min-h-screen">
-      {isAdmin && !showAdminForm && (
+      {isActualAdmin && !showAdminForm && (
         <div className="max-w-full mx-auto px-4 pt-8 flex justify-end absolute top-0 right-0 z-10">
           <Button 
             onClick={() => setShowAdminForm(true)}
@@ -210,6 +211,13 @@ function StagesPage() {
           >
             <Plus size={14} /> Back to Admin Console
           </Button>
+        </div>
+      )}
+      {isProf && (
+        <div className="max-w-full mx-auto px-4 pt-8 flex justify-end absolute top-0 right-0 z-10">
+          <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest">
+            Teacher Hub
+          </Badge>
         </div>
       )}
       <AnimatePresence mode="wait">

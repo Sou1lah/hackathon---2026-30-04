@@ -28,6 +28,13 @@ class DocumentType(str, Enum):
     OTHER = "other"
 
 
+class TutorshipStatus(str, Enum):
+    pending = "pending"
+    accepted = "accepted"
+    rejected = "rejected"
+
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -120,6 +127,41 @@ class User(UserBase, table=True):
 
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     documents: list["UserDocument"] = Relationship(back_populates="owner", cascade_delete=True)
+
+    # Tutorship relationships
+    tutored_students: list["Tutorship"] = Relationship(
+        sa_relationship_kwargs={"primaryjoin": "User.id == Tutorship.tutor_id"},
+        back_populates="tutor"
+    )
+    tutor_link: list["Tutorship"] = Relationship(
+        sa_relationship_kwargs={"primaryjoin": "User.id == Tutorship.student_id"},
+        back_populates="student"
+    )
+
+
+class Tutorship(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    tutor_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+    student_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+    status: TutorshipStatus = Field(default=TutorshipStatus.pending)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    favorite_rank: int = Field(default=0) # 0 to 5 stars
+
+    tutor: "User" = Relationship(
+        sa_relationship_kwargs={"primaryjoin": "Tutorship.tutor_id == User.id"},
+        back_populates="tutored_students"
+    )
+    student: "User" = Relationship(
+        sa_relationship_kwargs={"primaryjoin": "Tutorship.student_id == User.id"},
+        back_populates="tutor_link"
+    )
 
 
 class UserDocumentBase(SQLModel):

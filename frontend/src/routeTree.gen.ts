@@ -15,6 +15,7 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutTutorRouteImport } from './routes/_layout/tutor'
 import { Route as LayoutSuiviStageRouteImport } from './routes/_layout/suivi-stage'
 import { Route as LayoutSuiviRouteImport } from './routes/_layout/suivi'
 import { Route as LayoutStagesRouteImport } from './routes/_layout/stages'
@@ -55,6 +56,11 @@ const LayoutRoute = LayoutRouteImport.update({
 const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutTutorRoute = LayoutTutorRouteImport.update({
+  id: '/tutor',
+  path: '/tutor',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutSuiviStageRoute = LayoutSuiviStageRouteImport.update({
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
   '/suivi-stage': typeof LayoutSuiviStageRoute
+  '/tutor': typeof LayoutTutorRoute
   '/admin/internships': typeof LayoutAdminInternshipsRoute
   '/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
 }
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/stages': typeof LayoutStagesRoute
   '/suivi': typeof LayoutSuiviRoute
   '/suivi-stage': typeof LayoutSuiviStageRoute
+  '/tutor': typeof LayoutTutorRoute
   '/': typeof LayoutIndexRoute
   '/admin/internships': typeof LayoutAdminInternshipsRoute
   '/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_layout/stages': typeof LayoutStagesRoute
   '/_layout/suivi': typeof LayoutSuiviRoute
   '/_layout/suivi-stage': typeof LayoutSuiviStageRoute
+  '/_layout/tutor': typeof LayoutTutorRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/admin/internships': typeof LayoutAdminInternshipsRoute
   '/_layout/admin/suivi-stage': typeof LayoutAdminSuiviStageRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/stages'
     | '/suivi'
     | '/suivi-stage'
+    | '/tutor'
     | '/admin/internships'
     | '/admin/suivi-stage'
   fileRoutesByTo: FileRoutesByTo
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/stages'
     | '/suivi'
     | '/suivi-stage'
+    | '/tutor'
     | '/'
     | '/admin/internships'
     | '/admin/suivi-stage'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/_layout/stages'
     | '/_layout/suivi'
     | '/_layout/suivi-stage'
+    | '/_layout/tutor'
     | '/_layout/'
     | '/_layout/admin/internships'
     | '/_layout/admin/suivi-stage'
@@ -288,6 +300,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/tutor': {
+      id: '/_layout/tutor'
+      path: '/tutor'
+      fullPath: '/tutor'
+      preLoaderRoute: typeof LayoutTutorRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/suivi-stage': {
@@ -402,6 +421,7 @@ interface LayoutRouteChildren {
   LayoutStagesRoute: typeof LayoutStagesRoute
   LayoutSuiviRoute: typeof LayoutSuiviRoute
   LayoutSuiviStageRoute: typeof LayoutSuiviStageRoute
+  LayoutTutorRoute: typeof LayoutTutorRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
@@ -416,6 +436,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutStagesRoute: LayoutStagesRoute,
   LayoutSuiviRoute: LayoutSuiviRoute,
   LayoutSuiviStageRoute: LayoutSuiviStageRoute,
+  LayoutTutorRoute: LayoutTutorRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 

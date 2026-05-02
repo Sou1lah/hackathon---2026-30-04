@@ -17,8 +17,8 @@ function IndexPage() {
     return <Navigate to="/dashboard" replace />
   }
 
-  // Students default to the Internship Request page
-  if (user.role?.startsWith("student")) {
+  // Students and Teachers default to the Internship Request/Hub page
+  if (user.role?.startsWith("student") || user.role?.startsWith("prof")) {
     return <Navigate to="/stages" replace />
   }
 

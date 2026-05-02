@@ -197,7 +197,7 @@ def create_feedback(
     """
     Add tutor feedback to a log entry (Admin/Tutor only).
     """
-    if not current_user.is_superuser and not current_user.can_review_applications:
+    if not current_user.is_superuser and not current_user.can_review_applications and not current_user.role.startswith("prof_"):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     return create_tutor_feedback(
