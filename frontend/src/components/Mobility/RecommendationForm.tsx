@@ -76,13 +76,26 @@ export interface RecommendationResponse {
 
 const INTEREST_OPTIONS = [
   "AI",
-  "Networking",
-  "Software",
+  "Machine Learning",
   "Data Science",
-  "Security",
-  "Cloud",
-  "Mobile",
-  "UI/UX",
+  "Software Engineering",
+  "Web Development",
+  "Mobile Dev",
+  "UI/UX Design",
+  "Cybersecurity",
+  "Cloud Computing",
+  "DevOps",
+  "Embedded Systems",
+  "IoT",
+  "Networking",
+  "Medicine",
+  "Pharmacy",
+  "Biology",
+  "Marketing",
+  "Management",
+  "Finance",
+  "Mechanical Engineering",
+  "Electronics",
 ]
 
 interface RecommendationFormProps {
@@ -681,205 +694,205 @@ export default function RecommendationForm({ onResults }: RecommendationFormProp
 
       {/* Dedicated Results Area - only shown when no onResults callback (standalone mode) */}
       {!onResults && (
-      <AnimatePresence mode="wait">
-        {isFakingLoading ? (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="pt-8"
-          >
-            <RecommendationSkeleton />
-          </motion.div>
-        ) : isSubmitted && recommendations ? (
-          <motion.div
-            key="results"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 100 }}
-            className="pt-8 space-y-10"
-          >
-            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-900 pb-6">
-              <h2 className="text-3xl font-bold flex items-center gap-3 text-zinc-900 dark:text-zinc-50">
-                <Sparkles className="text-zinc-400" size={24} /> Matching
-                Results
-              </h2>
-              <Badge
-                variant="secondary"
-                className="px-4 py-1 font-mono text-xs tracking-widest bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-none"
-              >
-                {recommendations.results.length} MATCHES FOUND
-              </Badge>
-            </div>
-
-            {recommendations.is_fallback && (
-              <Card className="border-l-4 border-l-zinc-900 dark:border-l-zinc-50 bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 shadow-none">
-                <CardContent className="py-6">
-                  <h3 className="font-bold text-lg mb-1">
-                    No Internship Found
-                  </h3>
-                  <p className="text-sm text-zinc-500">
-                    {recommendations.message}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            {debugMode && (
-              <Card className="border-amber-200 dark:border-amber-900 bg-amber-50/30 dark:bg-amber-950/20 shadow-none">
-                <CardHeader>
-                  <CardTitle className="text-sm font-mono uppercase tracking-widest text-amber-700 dark:text-amber-500 flex items-center gap-2">
-                    <Sparkles size={14} /> Ground Truth Evaluation
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50">
-                      <div className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">
-                        Precision @ 5
-                      </div>
-                      <div className="text-2xl font-mono font-bold mt-1 text-zinc-900 dark:text-zinc-50">
-                        {(
-                          (recommendations.results
-                            .slice(0, 5)
-                            .filter((r) => r.score >= 50).length /
-                            Math.min(
-                              5,
-                              Math.max(1, recommendations.results.length),
-                            )) *
-                          100
-                        ).toFixed(0)}
-                        %
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50">
-                      <div className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">
-                        Precision @ 10
-                      </div>
-                      <div className="text-2xl font-mono font-bold mt-1 text-zinc-900 dark:text-zinc-50">
-                        {(
-                          (recommendations.results
-                            .slice(0, 10)
-                            .filter((r) => r.score >= 50).length /
-                            Math.min(
-                              10,
-                              Math.max(1, recommendations.results.length),
-                            )) *
-                          100
-                        ).toFixed(0)}
-                        %
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50">
-                      <div className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">
-                        Input Snapshot
-                      </div>
-                      <div className="text-[9px] mt-1 font-mono text-zinc-500 leading-tight">
-                        SPEC: {specialty || "N/A"} | LVL: {level || "N/A"}
-                        <br />
-                        LANG: {language || "N/A"} | GPA: {gpa || "N/A"}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recommendations.results.map((rec, i) => (
-                <motion.div
-                  key={rec.offer.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+        <AnimatePresence mode="wait">
+          {isFakingLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="pt-8"
+            >
+              <RecommendationSkeleton />
+            </motion.div>
+          ) : isSubmitted && recommendations ? (
+            <motion.div
+              key="results"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 100 }}
+              className="pt-8 space-y-10"
+            >
+              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-900 pb-6">
+                <h2 className="text-3xl font-bold flex items-center gap-3 text-zinc-900 dark:text-zinc-50">
+                  <Sparkles className="text-zinc-400" size={24} /> Matching
+                  Results
+                </h2>
+                <Badge
+                  variant="secondary"
+                  className="px-4 py-1 font-mono text-xs tracking-widest bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-none"
                 >
-                  <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all shadow-md hover:shadow-xl group bg-white dark:bg-zinc-950 flex flex-col">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start justify-between mb-4">
-                        <Badge
-                          variant="outline"
-                          className="font-mono text-[10px] px-2 py-0.5 bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50"
-                        >
-                          {Math.round(rec.score)}% MATCH
-                        </Badge>
-                        <Badge
-                          variant={
-                            rec.offer.mobility_type === "international"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className="text-[9px] uppercase tracking-wider rounded-full px-2"
-                        >
-                          {rec.offer.mobility_type}
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-xl leading-tight font-bold group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
-                        {rec.offer.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6 flex-1">
-                      <p className="text-sm text-zinc-500 line-clamp-3 leading-relaxed">
-                        {rec.offer.description}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {rec.offer.keywords?.slice(0, 4).map((k) => (
-                          <Badge
-                            key={k}
-                            variant="secondary"
-                            className="bg-zinc-50 dark:bg-zinc-900 border-none text-[10px] font-medium text-zinc-500 dark:text-zinc-400 px-2 py-0"
-                          >
-                            #{k}
-                          </Badge>
-                        ))}
-                      </div>
+                  {recommendations.results.length} MATCHES FOUND
+                </Badge>
+              </div>
 
-                      {debugMode && rec.breakdown && (
-                        <div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800 text-[10px] font-mono space-y-1">
-                          <div className="font-bold text-zinc-400 mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-1 uppercase tracking-widest">
-                            Score Breakdown
-                          </div>
-                          {Object.entries(rec.breakdown).map(([k, v]) => (
-                            <div key={k} className="flex justify-between">
-                              <span className="text-zinc-500">{k}:</span>
-                              <span
-                                className={
-                                  v > 0
-                                    ? "text-emerald-500 font-bold"
-                                    : "text-zinc-400"
-                                }
-                              >
-                                +{v}
-                              </span>
-                            </div>
+              {recommendations.is_fallback && (
+                <Card className="border-l-4 border-l-zinc-900 dark:border-l-zinc-50 bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 shadow-none">
+                  <CardContent className="py-6">
+                    <h3 className="font-bold text-lg mb-1">
+                      No Internship Found
+                    </h3>
+                    <p className="text-sm text-zinc-500">
+                      {recommendations.message}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {debugMode && (
+                <Card className="border-amber-200 dark:border-amber-900 bg-amber-50/30 dark:bg-amber-950/20 shadow-none">
+                  <CardHeader>
+                    <CardTitle className="text-sm font-mono uppercase tracking-widest text-amber-700 dark:text-amber-500 flex items-center gap-2">
+                      <Sparkles size={14} /> Ground Truth Evaluation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50">
+                        <div className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">
+                          Precision @ 5
+                        </div>
+                        <div className="text-2xl font-mono font-bold mt-1 text-zinc-900 dark:text-zinc-50">
+                          {(
+                            (recommendations.results
+                              .slice(0, 5)
+                              .filter((r) => r.score >= 50).length /
+                              Math.min(
+                                5,
+                                Math.max(1, recommendations.results.length),
+                              )) *
+                            100
+                          ).toFixed(0)}
+                          %
+                        </div>
+                      </div>
+                      <div className="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50">
+                        <div className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">
+                          Precision @ 10
+                        </div>
+                        <div className="text-2xl font-mono font-bold mt-1 text-zinc-900 dark:text-zinc-50">
+                          {(
+                            (recommendations.results
+                              .slice(0, 10)
+                              .filter((r) => r.score >= 50).length /
+                              Math.min(
+                                10,
+                                Math.max(1, recommendations.results.length),
+                              )) *
+                            100
+                          ).toFixed(0)}
+                          %
+                        </div>
+                      </div>
+                      <div className="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50">
+                        <div className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">
+                          Input Snapshot
+                        </div>
+                        <div className="text-[9px] mt-1 font-mono text-zinc-500 leading-tight">
+                          SPEC: {specialty || "N/A"} | LVL: {level || "N/A"}
+                          <br />
+                          LANG: {language || "N/A"} | GPA: {gpa || "N/A"}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {recommendations.results.map((rec, i) => (
+                  <motion.div
+                    key={rec.offer.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <Card className="h-full border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all shadow-md hover:shadow-xl group bg-white dark:bg-zinc-950 flex flex-col">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-start justify-between mb-4">
+                          <Badge
+                            variant="outline"
+                            className="font-mono text-[10px] px-2 py-0.5 bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50"
+                          >
+                            {Math.round(rec.score)}% MATCH
+                          </Badge>
+                          <Badge
+                            variant={
+                              rec.offer.mobility_type === "international"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className="text-[9px] uppercase tracking-wider rounded-full px-2"
+                          >
+                            {rec.offer.mobility_type}
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-xl leading-tight font-bold group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors">
+                          {rec.offer.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6 flex-1">
+                        <p className="text-sm text-zinc-500 line-clamp-3 leading-relaxed">
+                          {rec.offer.description}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {rec.offer.keywords?.slice(0, 4).map((k) => (
+                            <Badge
+                              key={k}
+                              variant="secondary"
+                              className="bg-zinc-50 dark:bg-zinc-900 border-none text-[10px] font-medium text-zinc-500 dark:text-zinc-400 px-2 py-0"
+                            >
+                              #{k}
+                            </Badge>
                           ))}
                         </div>
-                      )}
-                    </CardContent>
-                    <CardFooter className="border-t border-zinc-50 dark:border-zinc-900 pt-6 mt-auto gap-3">
-                      <a
-                        href={rec.offer.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all border border-zinc-200 dark:border-zinc-800"
-                      >
-                        Details <ArrowRight size={12} />
-                      </a>
-                      <Button
-                        onClick={() => applyMutation.mutate(rec.offer)}
-                        disabled={applyMutation.isPending}
-                        className="flex-1 h-10 rounded-lg bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
-                      >
-                        {applyMutation.isPending ? "Processing..." : "Apply"}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+
+                        {debugMode && rec.breakdown && (
+                          <div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800 text-[10px] font-mono space-y-1">
+                            <div className="font-bold text-zinc-400 mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-1 uppercase tracking-widest">
+                              Score Breakdown
+                            </div>
+                            {Object.entries(rec.breakdown).map(([k, v]) => (
+                              <div key={k} className="flex justify-between">
+                                <span className="text-zinc-500">{k}:</span>
+                                <span
+                                  className={
+                                    v > 0
+                                      ? "text-emerald-500 font-bold"
+                                      : "text-zinc-400"
+                                  }
+                                >
+                                  +{v}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                      <CardFooter className="border-t border-zinc-50 dark:border-zinc-900 pt-6 mt-auto gap-3">
+                        <a
+                          href={rec.offer.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all border border-zinc-200 dark:border-zinc-800"
+                        >
+                          Details <ArrowRight size={12} />
+                        </a>
+                        <Button
+                          onClick={() => applyMutation.mutate(rec.offer)}
+                          disabled={applyMutation.isPending}
+                          className="flex-1 h-10 rounded-lg bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
+                        >
+                          {applyMutation.isPending ? "Processing..." : "Apply"}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       )}
 
       <Dialog open={showExtractionModal} onOpenChange={setShowExtractionModal}>

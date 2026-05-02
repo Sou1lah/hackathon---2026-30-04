@@ -18,6 +18,11 @@ import {
   User,
   XCircle,
 } from "lucide-react"
+import {
+  statusColor,
+  FakePDF,
+  WorkflowTracker,
+} from "../Mobility/SharedConventionView"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -47,6 +52,8 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
+import { ConventionsService } from "@/client/sdk.gen"
+
 export function ConventionManagement() {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState("")
@@ -55,68 +62,26 @@ export function ConventionManagement() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-conventions"],
-    queryFn: async () => {
-      const token = localStorage.getItem("access_token")
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/conventions/admin/all`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
-      if (!response.ok) throw new Error("Failed to fetch")
-      return response.json()
-    },
+    queryFn: () => ConventionsService.readAllConventionsAdmin({ limit: 100 }),
   })
 
   const approveMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const token = localStorage.getItem("access_token")
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/conventions/${id}/approve`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
-      if (!response.ok) throw new Error("Failed to approve")
-      return response.json()
-    },
+    mutationFn: (id: string) => ConventionsService.approveConventionEndpoint({ id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-conventions"] })
     },
   })
 
   const rejectMutation = useMutation({
-    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      const token = localStorage.getItem("access_token")
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/conventions/${id}/reject?reason=${reason}`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
-      if (!response.ok) throw new Error("Failed to reject")
-      return response.json()
-    },
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      ConventionsService.rejectConventionEndpoint({ id, reason }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-conventions"] })
     },
   })
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const token = localStorage.getItem("access_token")
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/conventions/${id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
-      if (!response.ok) throw new Error("Failed to delete")
-      return response.json()
-    },
+    mutationFn: (id: string) => ConventionsService.deleteConventionEndpoint({ id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-conventions"] })
     },
@@ -170,7 +135,7 @@ export function ConventionManagement() {
           </Button>
         </div>
       </div>
-      <div className="overflow-x-auto">
+      <div className="rounded-[2.5rem] border border-border/50 overflow-hidden shadow-2xl bg-white dark:bg-zinc-950">
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="border-border/40 hover:bg-transparent">
@@ -321,205 +286,67 @@ export function ConventionManagement() {
             )}
           </TableBody>
         </Table>
-      </div>
-
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden rounded-2xl border-none shadow-2xl">
-          <DialogHeader className="p-8 pb-4 bg-zinc-50 dark:bg-zinc-900/50">
-            <div className="flex items-center gap-4">
-              <div className="size-14 rounded-2xl bg-white dark:bg-zinc-950 flex items-center justify-center text-accent shadow-sm ring-1 ring-border/40">
-                <FileText size={28} />
-              </div>
-              <div className="space-y-1">
-                <DialogTitle className="text-2xl font-serif break-all pr-6">
-                  {selectedConvention?.document_name}
-                </DialogTitle>
-                <DialogDescription className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Complete details of the approval file
-                </DialogDescription>
-              </div>
+      </div>      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-[1200px] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-2xl bg-zinc-50 dark:bg-zinc-950">
+          <div className="flex h-[85vh]">
+            {/* Left: PDF Preview */}
+            <div className="flex-1 overflow-y-auto p-12 bg-emerald-50/30 dark:bg-emerald-950/20 border-r border-emerald-100 dark:border-emerald-900">
+               <FakePDF convention={selectedConvention} />
             </div>
-          </DialogHeader>
 
-          <ScrollArea className="max-h-[80vh]">
-            <div className="p-8 pt-4 space-y-8">
-              {/* Student Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-accent">
-                  <User size={18} />
-                  <h3 className="text-xs font-bold uppercase tracking-widest">
-                    Student Information
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 gap-6 bg-muted/30 p-6 rounded-2xl border border-border/40">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                      Full Name
-                    </p>
-                    <p className="text-sm font-bold">
-                      {selectedConvention?.owner?.full_name}
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                      Email
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Mail size={12} className="text-muted-foreground" />
-                      <p className="text-sm font-medium">
-                        {selectedConvention?.owner?.email || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                      Specialty
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <GraduationCap
-                        size={12}
-                        className="text-muted-foreground"
-                      />
-                      <p className="text-sm font-medium">
-                        {selectedConvention?.owner?.specialty || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                      Average (GPA)
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Trophy size={12} className="text-muted-foreground" />
-                      <Badge variant="secondary" className="font-mono text-xs">
-                        {selectedConvention?.owner?.gpa || "0.00"}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
+            {/* Right: Sidebar Actions */}
+            <div className="w-[400px] flex flex-col bg-white dark:bg-zinc-950">
+              <div className="p-8 border-b border-zinc-100 dark:border-zinc-900">
+                 <h3 className="text-xl font-serif font-bold">Review Application</h3>
+                 <p className="text-xs text-muted-foreground mt-1">Verification and approval pipeline</p>
               </div>
 
-              {/* Internship Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-accent">
-                  <Building2 size={18} />
-                  <h3 className="text-xs font-bold uppercase tracking-widest">
-                    Internship Details
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 gap-6 bg-muted/30 p-6 rounded-2xl border border-border/40">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                        Company
-                      </p>
-                      <p className="text-sm font-bold">
-                        {selectedConvention?.internship_request?.company_name ||
-                          "N/A"}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                        Period
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Calendar size={12} className="text-muted-foreground" />
-                        <p className="text-xs font-medium">
-                          {selectedConvention?.internship_request?.start_date
-                            ? new Date(
-                                selectedConvention.internship_request
-                                  .start_date,
-                              ).toLocaleDateString()
-                            : "..."}
-                          {" - "}
-                          {selectedConvention?.internship_request?.end_date
-                            ? new Date(
-                                selectedConvention.internship_request.end_date,
-                              ).toLocaleDateString()
-                            : "..."}
-                        </p>
+              <ScrollArea className="flex-1">
+                <div className="p-8 space-y-8">
+                   <WorkflowTracker convention={selectedConvention} />
+                   
+                   <div className="space-y-4">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Student Info</h4>
+                      <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-900 space-y-2">
+                         <p className="text-sm font-bold">{selectedConvention?.owner?.full_name}</p>
+                         <p className="text-xs text-muted-foreground font-mono truncate">{selectedConvention?.owner?.email}</p>
                       </div>
-                    </div>
-                  </div>
-                  <Separator className="bg-border/40" />
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                      Mission
-                    </p>
-                    <p className="text-sm font-bold leading-tight break-words">
-                      {selectedConvention?.internship_request?.mission_title ||
-                        "Untitled"}
-                    </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed italic break-words">
-                      "
-                      {selectedConvention?.internship_request
-                        ?.mission_description || "No description provided."}
-                      "
-                    </p>
-                  </div>
+                   </div>
                 </div>
-              </div>
+              </ScrollArea>
 
-              {/* Workflow Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-accent">
-                  <Clock size={18} />
-                  <h3 className="text-xs font-bold uppercase tracking-widest">
-                    Workflow State
-                  </h3>
-                </div>
-                <div className="flex items-center justify-between p-6 bg-zinc-900 text-zinc-100 rounded-2xl shadow-xl">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
-                      Approval Level
-                    </p>
-                    <p className="text-lg font-serif italic">
-                      Level {selectedConvention?.approval_level}
-                    </p>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "h-10 px-6 font-mono text-xs uppercase tracking-[0.2em] text-zinc-300",
-                      selectedConvention?.status === "completed"
-                        ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                        : selectedConvention?.status === "rejected"
-                          ? "bg-destructive/10 text-destructive border-destructive/20"
-                          : "bg-zinc-800 border-zinc-700 text-zinc-300",
-                    )}
-                  >
-                    {selectedConvention?.status}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Footer Actions */}
-              <div className="flex items-center gap-3 pt-4 pb-8">
-                <Button
-                  className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-widest text-xs shadow-lg shadow-emerald-500/20"
-                  onClick={() => {
-                    approveMutation.mutate(selectedConvention.id)
-                    setIsDetailsOpen(false)
-                  }}
-                >
-                  <CheckCircle2 className="mr-2 size-4" /> Approve file
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="h-12 px-6 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-destructive/20"
-                  onClick={() => {
-                    rejectMutation.mutate({
-                      id: selectedConvention.id,
-                      reason: "Non conforme",
-                    })
-                    setIsDetailsOpen(false)
-                  }}
-                >
-                  <XCircle className="mr-2 size-4" /> Reject
-                </Button>
+              <div className="p-8 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-3">
+                 <div className="grid grid-cols-2 gap-3">
+                    <Button 
+                      variant="outline" 
+                      className="h-12 rounded-xl border-emerald-100 dark:border-emerald-900 text-emerald-600 hover:bg-emerald-50"
+                      onClick={() => setIsDetailsOpen(false)}
+                    >
+                      Keep Pending
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="h-12 rounded-xl border-red-100 dark:border-red-900 text-red-500 hover:bg-red-50"
+                      onClick={() => {
+                        rejectMutation.mutate({ id: selectedConvention.id, reason: "Rejected by admin" })
+                        setIsDetailsOpen(false)
+                      }}
+                    >
+                      Reject
+                    </Button>
+                 </div>
+                 <Button 
+                   className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-widest text-xs shadow-lg shadow-emerald-500/20"
+                   onClick={() => {
+                     approveMutation.mutate(selectedConvention.id)
+                     setIsDetailsOpen(false)
+                   }}
+                 >
+                    <CheckCircle2 className="mr-2 size-4" /> Approve & Advance Step
+                 </Button>
               </div>
             </div>
-          </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

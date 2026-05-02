@@ -246,7 +246,7 @@ export default function InternshipOffers() {
                   transition={{ delay: i * 0.05 }}
                   className="h-full"
                 >
-                  <Card className="h-full flex flex-col border-border hover:border-primary/50 shadow-none hover:shadow-2xl transition-all duration-500 group bg-card overflow-hidden min-h-[550px] rounded-[2rem]">
+                  <Card className="h-full flex flex-col border-border hover:border-primary/50 shadow-none hover:shadow-2xl transition-all duration-500 group bg-card overflow-hidden min-h-[550px] rounded-[2rem] p-0 gap-0">
                     {/* ── Top Photo with Fade ── */}
                     <div className="relative w-full h-[240px] shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
                       <img

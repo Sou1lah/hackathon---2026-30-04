@@ -1,13 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   AlertCircle,
+  ArrowLeft,
+  Building2,
+  Calendar,
   CheckCircle,
   Clock,
   FileCheck,
   History,
   Loader2,
+  Lock,
   MoreVertical,
   Plus,
+  ShieldCheck,
   Star,
   Upload,
 } from "lucide-react"
@@ -63,14 +68,21 @@ export default function SuiviStage({
   const isTutor = user?.can_review_applications || user?.is_superuser
   const isViewingSelf = !internshipId
 
-  // 1. Fetch internships to get the active one (if no ID provided)
-  const { data: internships, isLoading: isLoadingInternships } = useQuery({
-    queryKey: ["internship-requests"],
-    queryFn: () => InternshipsService.readInternshipRequests({ limit: 1 }),
-    enabled: isViewingSelf,
+  // 1. Fetch all internship requests to find the ones that are trackable (active or completed)
+  const { data: allInternships, isLoading: isLoadingAll } = useQuery({
+    queryKey: ["internship-requests", "all"],
+    queryFn: () => InternshipsService.readInternshipRequests({ limit: 100 }),
   })
 
-  const effectiveId = internshipId || internships?.data?.[0]?.id
+  const trackableInternships = (allInternships?.data || []).filter(
+    (req: any) => req.status === "active" || req.status === "completed"
+  )
+
+  const [activeId, setActiveId] = useState<string | null>(
+    internshipId || (trackableInternships.length === 1 ? trackableInternships[0].id : null)
+  )
+
+  const effectiveId = internshipId || activeId
 
   // 2. Fetch summary for the active internship
   const { data: summary } = useQuery({
@@ -156,48 +168,134 @@ export default function SuiviStage({
     addEvalMutation.mutate()
   }
 
-  if (isLoadingInternships && isViewingSelf) {
+  if (isLoadingAll) {
     return (
       <div className="p-8 space-y-8">
-        <Skeleton className="h-12 w-64" />
+        <div className="flex flex-col gap-2">
+           <Skeleton className="h-10 w-64" />
+           <Skeleton className="h-4 w-96" />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Skeleton className="h-40 col-span-2" />
-          <Skeleton className="h-40" />
+          <Skeleton className="h-64 rounded-[2rem]" />
+          <Skeleton className="h-64 rounded-[2rem]" />
+          <Skeleton className="h-64 rounded-[2rem]" />
         </div>
       </div>
     )
   }
 
+  // If no effective ID and multiple or zero trackable ones, show the list
   if (!effectiveId) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
-        <div className="bg-zinc-100 dark:bg-zinc-900 p-6 rounded-full mb-6">
-          <AlertCircle size={48} className="text-zinc-400" />
+      <div className="p-10 space-y-12 animate-in fade-in duration-1000">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50">
+            Internship Tracking
+          </h1>
+          <p className="text-zinc-500 dark:text-zinc-400 font-medium">
+            Select an active internship to manage your logbook and reports.
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-          No active internship found
-        </h2>
-        <p className="text-zinc-500 dark:text-zinc-400 mt-2 max-w-md">
-          {isViewingSelf
-            ? "You must have an approved internship request to access tracking."
-            : "The provided internship ID is invalid."}
-        </p>
-        {isViewingSelf && (
-          <Button className="mt-8 rounded-xl font-bold uppercase tracking-widest text-[10px] py-6 px-8">
-            Create a request
-          </Button>
+
+        {trackableInternships.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center max-w-2xl mx-auto space-y-8 animate-in fade-in zoom-in duration-700">
+            <div className="relative">
+              <div className="absolute -inset-4 bg-emerald-500/10 rounded-full blur-2xl animate-pulse" />
+              <div className="relative bg-white dark:bg-zinc-900 size-32 rounded-full flex items-center justify-center shadow-2xl border border-zinc-100 dark:border-zinc-800">
+                <Lock size={48} className="text-zinc-300 dark:text-zinc-600" />
+              </div>
+              <div className="absolute -bottom-2 -right-2 bg-emerald-600 text-white p-2 rounded-xl shadow-lg border-2 border-white dark:border-zinc-900">
+                <ShieldCheck size={20} />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <Badge variant="outline" className="px-4 py-1 text-[10px] uppercase font-black tracking-[0.2em] border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10">
+                Tracking Module Locked
+              </Badge>
+              <h2 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">No Active Internship Found</h2>
+              <p className="text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                The tracking portal is automatically unlocked once your internship application is approved and your convention is signed by the administration.
+              </p>
+            </div>
+
+            <div className="pt-8">
+              <Button 
+                variant="outline"
+                className="h-12 px-8 rounded-xl font-bold uppercase tracking-widest text-[10px] border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                onClick={() => window.location.href = '/stages'}
+              >
+                Go to Applications
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {trackableInternships.map((req: any) => (
+              <Card 
+                key={req.id} 
+                className="overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-2xl transition-all duration-500 group rounded-[2.5rem] bg-white dark:bg-zinc-950 flex flex-col"
+              >
+                <div className="h-32 bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center relative overflow-hidden">
+                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent" />
+                   <Building2 className="size-12 text-emerald-500/20 group-hover:scale-110 transition-transform duration-700" />
+                   <div className="absolute top-4 right-4">
+                      <Badge className="bg-emerald-500 text-white border-none text-[8px] font-bold tracking-widest uppercase">
+                        {req.status}
+                      </Badge>
+                   </div>
+                </div>
+                <CardContent className="p-8 flex-1">
+                   <h3 className="font-bold text-xl mb-1 group-hover:text-emerald-600 transition-colors line-clamp-1">{req.company_name}</h3>
+                   <p className="text-xs text-muted-foreground mb-4 font-medium line-clamp-1 italic">"{req.mission_title}"</p>
+                   
+                   <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                      <div className="flex items-center gap-1.5">
+                         <Calendar size={12} className="text-emerald-500" />
+                         {new Date(req.start_date).toLocaleDateString()}
+                      </div>
+                      <div className="size-1 rounded-full bg-zinc-200" />
+                      <div className="flex items-center gap-1.5">
+                         <Clock size={12} className="text-emerald-500" />
+                         {req.current_step}/8 Steps
+                      </div>
+                   </div>
+                </CardContent>
+                <CardFooter className="p-8 pt-0">
+                   <Button 
+                     onClick={() => setActiveId(req.id)}
+                     className="w-full h-12 rounded-xl bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-bold uppercase tracking-widest text-[10px] hover:opacity-90 transition-all shadow-lg"
+                   >
+                     Track Progress
+                   </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
     )
   }
 
   return (
-    <div className="p-[24px] space-y-[12px] bg-white dark:bg-zinc-950 min-h-screen">
-      {/* ── Header Row ── */}
-      <div className="flex flex-row justify-between items-start mb-6">
-        <div className="space-y-1">
-          <h1 className="text-[22px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Internship Log
+    <div className="p-10 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-2">
+          {isViewingSelf && (
+             <Button 
+               variant="ghost" 
+               size="sm" 
+               onClick={() => setActiveId(null)}
+               className="mb-4 -ml-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 flex items-center gap-2 font-bold uppercase tracking-widest text-[10px]"
+             >
+               <ArrowLeft size={14} /> Back to Overview
+             </Button>
+          )}
+          <h1 className="text-5xl font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50 flex items-center gap-4">
+            <span className="size-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg">
+               <History size={28} />
+            </span>
+            Tracking: {summary?.company_name || "Dossier"}
           </h1>
           <p className="text-[13px] text-zinc-500 dark:text-zinc-400 max-w-[520px] leading-relaxed">
             {summary?.mission_title || "Tracking and activity history for your current internship."}
@@ -210,9 +308,9 @@ export default function SuiviStage({
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="h-9 px-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-medium shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 gap-2 text-indigo-600 dark:text-indigo-400"
+                  className="h-10 px-6 rounded-xl border border-emerald-100 dark:border-emerald-900 bg-white dark:bg-zinc-900 text-[11px] font-bold uppercase tracking-widest shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/20 gap-2 text-emerald-600 dark:text-emerald-400 transition-all"
                 >
-                  <Plus size={14} /> Add activity
+                  <Plus size={14} /> Add Log Entry
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px] rounded-2xl border-zinc-200 dark:border-zinc-800">
@@ -246,8 +344,8 @@ export default function SuiviStage({
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAddLog} disabled={addLogMutation.isPending || !logContent} className="w-full rounded-xl font-bold uppercase tracking-widest text-[10px] py-6 bg-indigo-600 hover:bg-indigo-700 text-white border-none">
-                    Save entry
+                  <Button onClick={handleAddLog} disabled={addLogMutation.isPending || !logContent} className="w-full h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-lg shadow-emerald-500/20">
+                    Save entry to logbook
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -277,13 +375,13 @@ export default function SuiviStage({
         </div>
 
         {/* Col 3: Status */}
-        <div className="bg-zinc-900 dark:bg-indigo-950 text-white rounded-xl p-[14px_16px] flex items-center gap-4 h-[100px]">
-          <div className="w-10 h-10 rounded-full bg-zinc-800 dark:bg-indigo-900 flex items-center justify-center shrink-0">
-            <Clock size={18} className="text-indigo-400" />
+        <div className="bg-emerald-900 dark:bg-emerald-950 text-white rounded-2xl p-[20px] flex items-center gap-4 h-[110px] shadow-xl shadow-emerald-500/10">
+          <div className="size-12 rounded-full bg-emerald-800 dark:bg-emerald-900 flex items-center justify-center shrink-0 border border-emerald-700/50">
+            <Clock size={20} className="text-emerald-300" />
           </div>
           <div className="space-y-0.5">
-            <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">Current Status</span>
-            <p className="text-[14px] font-bold uppercase tracking-tight text-white">{summary?.status || "Active"}</p>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/80">Current Status</span>
+            <p className="text-[16px] font-black uppercase tracking-tight text-white">{summary?.status || "Active"}</p>
           </div>
         </div>
       </div>
@@ -343,15 +441,15 @@ export default function SuiviStage({
              <CardContent className="p-[16px] space-y-2">
                 {summary?.reports && summary.reports.length > 0 ? (
                   summary.reports.map((report: any) => (
-                    <div key={report.id} className="flex items-center justify-between p-3 bg-zinc-50/50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-800 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <FileCheck size={14} className="text-indigo-500" />
-                        <span className="text-[13px] font-medium">{report.title}</span>
-                      </div>
-                      <Badge variant="outline" className="text-[9px] uppercase font-mono border-indigo-200 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400">
-                        {report.status}
-                      </Badge>
+                  <div className="flex items-center justify-between p-3 bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/50 rounded-xl transition-all hover:border-emerald-500/30">
+                    <div className="flex items-center gap-3">
+                      <FileCheck size={14} className="text-emerald-500" />
+                      <span className="text-[13px] font-bold text-emerald-900 dark:text-emerald-50">{report.title}</span>
                     </div>
+                    <Badge variant="outline" className="text-[9px] uppercase font-mono border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 font-bold">
+                      {report.status}
+                    </Badge>
+                  </div>
                   ))
                 ) : (
                   <p className="text-[12px] text-zinc-400 italic">No reports submitted yet.</p>

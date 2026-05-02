@@ -69,11 +69,17 @@ class DashboardService:
             .where(InternshipRequest.status.in_([InternshipStatus.draft, InternshipStatus.pending_verification, InternshipStatus.pending_signature]))
         ).one()
         
+        pending_verification = self.session.exec(
+            select(func.count(InternshipRequest.id))
+            .where(InternshipRequest.status == InternshipStatus.pending_verification)
+        ).one()
+        
         return {
             "total_dossiers": total,
             "active_dossiers": active,
             "completed_dossiers": completed,
-            "pending_dossiers": pending
+            "pending_dossiers": pending,
+            "pending_verification": pending_verification
         }
 
     def get_sla_metrics(self) -> Dict[str, Any]:

@@ -18,6 +18,7 @@ class DossierSummary(BaseModel):
     active_dossiers: int
     completed_dossiers: int
     pending_dossiers: int
+    pending_verification: int
 
 class SLASummary(BaseModel):
     total_dossiers: int

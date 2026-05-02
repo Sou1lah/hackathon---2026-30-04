@@ -1,6 +1,7 @@
 import { Bell } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "@tanstack/react-router"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -49,8 +50,23 @@ export function Notifications() {
 
   const unreadCount = notifications.filter((n) => !n.isRead).length
 
+  const navigate = useNavigate()
+
   const markAllAsRead = () => {
     setNotifications(notifications.map((n) => ({ ...n, isRead: true })))
+  }
+
+  const handleNotificationClick = (notification: Notification) => {
+    // Mark as read
+    setNotifications(notifications.map((n) => 
+      n.id === notification.id ? { ...n, isRead: true } : n
+    ))
+
+    // Navigation logic
+    const content = (notification.title + " " + notification.description).toLowerCase()
+    if (content.includes("application") || content.includes("reviewed") || content.includes("convention")) {
+      navigate({ to: "/convention" })
+    }
   }
 
   return (
@@ -91,9 +107,10 @@ export function Notifications() {
               <DropdownMenuItem
                 key={notification.id}
                 className={cn(
-                  "flex flex-col items-start gap-1 p-3 focus:bg-accent",
+                  "flex flex-col items-start gap-1 p-3 focus:bg-accent cursor-pointer",
                   !notification.isRead && "bg-accent/50",
                 )}
+                onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex w-full items-center justify-between">
                   <span className="font-semibold text-sm">

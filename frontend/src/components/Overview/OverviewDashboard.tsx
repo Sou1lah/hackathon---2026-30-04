@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   ArrowUpRight,
   CheckSquare,
+  Clock,
   FileText,
   LayoutDashboard,
   ShieldAlert,
@@ -79,6 +80,7 @@ interface OverviewStats {
     active_dossiers: number
     completed_dossiers: number
     pending_dossiers: number
+    pending_verification: number
   }
   sla: {
     total_dossiers: number
@@ -190,55 +192,55 @@ export default function OverviewDashboard() {
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="cursor-pointer hover:border-primary/50 transition-colors duration-200" onClick={() => setIsPdfArchiveOpen(true)}>
+            <Card className="group cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 shadow-sm" onClick={() => setIsPdfArchiveOpen(true)}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
                   {t("total_dossiers")}
                 </CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
+                <FileText className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data.dossiers.total_dossiers}</div>
+                <div className="text-2xl font-bold group-hover:text-primary transition-colors">{data.dossiers.total_dossiers}</div>
                 <p className="text-xs text-muted-foreground">
                   +20.1% from last month
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="group cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
                   {t("active_dossiers")}
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data.dossiers.active_dossiers}</div>
+                <div className="text-2xl font-bold group-hover:text-primary transition-colors">{data.dossiers.active_dossiers}</div>
                 <p className="text-xs text-muted-foreground">
                   +180.1% from last month
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="group cursor-pointer bg-primary/5 border-primary/20 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t("internships_count")}</CardTitle>
-                <CheckSquare className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-bold text-primary">New Applications</CardTitle>
+                <Clock className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data.internships.total_internships}</div>
-                <p className="text-xs text-muted-foreground">
-                  +19% from last month
+                <div className="text-2xl font-bold text-primary">{data.dossiers.pending_verification}</div>
+                <p className="text-xs text-primary/60 font-medium">
+                  Awaiting administrative review
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="group cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium group-hover:text-primary transition-colors">
                   Compliance Rate
                 </CardTitle>
-                <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+                <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{100 - data.sla.breach_rate}%</div>
+                <div className="text-2xl font-bold group-hover:text-primary transition-colors">{100 - data.sla.breach_rate}%</div>
                 <p className="text-xs text-muted-foreground">
                   +201 since last hour
                 </p>
@@ -298,30 +300,10 @@ export default function OverviewDashboard() {
                   <Card className="overflow-hidden border-border shadow-sm transition-all duration-300 rounded-2xl group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] group-hover:-translate-y-1 bg-card">
                       <CardContent className="p-0">
                         <div className="flex gap-4 p-4">
-                          <div className="h-16 w-16 rounded-xl bg-muted flex items-center justify-center shrink-0 overflow-hidden transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md">
-                             {offer.university_logo ? (
-                               <img src={offer.university_logo} alt={offer.university_name || ""} className="w-full h-full object-cover" />
-                             ) : offer.country_code ? (
-                               <img src={`https://flagcdn.com/w320/${offer.country_code.toLowerCase()}.png`} alt={offer.country || "Flag"} className="w-full h-full object-cover" />
-                             ) : (
-                               <span className="text-2xl">{offer.country_flag || "🏢"}</span>
-                             )}
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex-1 min-w-0">
                             <h4 className="text-sm font-bold truncate group-hover:text-primary transition-colors">
                               {offer.title}
                             </h4>
-                            <p className="text-[10px] text-muted-foreground line-clamp-1">
-                              {offer.university_name || offer.country || "Global Opportunity"}
-                            </p>
-                            <div className="flex gap-2 pt-1">
-                               <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-4 border-border">
-                                 {new Date(offer.created_at).toLocaleDateString()}
-                               </Badge>
-                               <Badge variant="secondary" className="text-[8px] px-1.5 py-0 h-4 bg-muted text-muted-foreground">
-                                 {offer.country_flag} {offer.country}
-                               </Badge>
-                            </div>
                           </div>
                         </div>
                       </CardContent>

@@ -295,7 +295,7 @@ export default function InternshipManagement() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {offers.map((offer) => (
-            <Card key={offer.id} className="h-full flex flex-col border-zinc-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 shadow-none hover:shadow-2xl transition-all duration-500 group bg-white dark:bg-zinc-950 overflow-hidden min-h-[550px] rounded-[2rem]">
+            <Card key={offer.id} className="h-full flex flex-col border-zinc-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 shadow-none hover:shadow-2xl transition-all duration-500 group bg-white dark:bg-zinc-950 overflow-hidden min-h-[550px] rounded-[2rem] p-0 gap-0">
               {/* ── Top Photo with Fade ── */}
               <div className="relative w-full h-[240px] shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
                 <img

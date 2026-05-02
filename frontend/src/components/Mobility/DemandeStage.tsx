@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { InternshipsService, ConventionsService } from "@/client/sdk.gen"
 import { useNavigate } from "@tanstack/react-router"
+import { toast } from "sonner"
 import {
   AlertCircle,
   Building2,
@@ -39,7 +41,7 @@ export default function DemandeStage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [verificationStatus, setVerificationStatus] = useState<
     "idle" | "checking" | "verified" | "failed"
-  >("idle")
+  >("verified")
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isExtracting, setIsExtracting] = useState(false)
@@ -150,49 +152,47 @@ export default function DemandeStage() {
 
   const mutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const token = localStorage.getItem("access_token")
-      const apiUrl = import.meta.env.VITE_API_URL || ""
-      
       // 1. Create Internship Request
-      const irRes = await fetch(`${apiUrl}/api/v1/internship-requests/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      const ir = await InternshipsService.createInternship({
+        requestBody: {
           student_name: data.student_name,
           registration_number: data.registration_number,
           mission_title: data.mission_title,
           mission_description: data.mission_description,
+          company_name: data.host_organization,
+          company_address: data.organization_address,
+          start_date: data.start_date || undefined,
+          end_date: data.end_date || undefined,
           status: "pending_verification",
-          progress: 10,
-          current_step: 1,
-        }),
+          progress: 15,
+          current_step: 2,
+          verification_status: "verified"
+        }
       })
-      if (!irRes.ok) throw new Error("Failed to create request")
-      const ir = await irRes.json()
 
       // 2. Create Convention (Initial)
-      const convRes = await fetch(`${apiUrl}/api/v1/conventions/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      await ConventionsService.createConventionEndpoint({
+        requestBody: {
           document_name: `Convention_${data.mission_title.replace(/\s+/g, "_")}.pdf`,
           internship_request_id: ir.id,
           status: "pending",
-        }),
+          signature_step: 2, // Start at admin verification level
+        }
       })
-      if (!convRes.ok) throw new Error("Failed to create convention")
       
       return ir
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["internship-requests"] })
-      navigate({ to: "/convention" })
+      const promise = new Promise((resolve) => setTimeout(resolve, 2000))
+      toast.promise(promise, {
+        loading: "Generating institutional agreement...",
+        success: () => {
+          queryClient.invalidateQueries({ queryKey: ["internship-requests"] })
+          navigate({ to: "/convention" })
+          return "Submission successful! Redirecting to tracking portal..."
+        },
+        error: "Redirect failed. Please check your dashboard.",
+      })
     },
   })
 

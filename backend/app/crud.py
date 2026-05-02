@@ -8,9 +8,19 @@ from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
+    from app.models import UserRole
     db_obj = User.model_validate(
         user_create, update={"hashed_password": get_password_hash(user_create.password)}
     )
+    # Grant default student permissions if none are specified
+    if db_obj.role in [UserRole.student_national, UserRole.student_international]:
+        if not any([db_obj.can_access_dashboard, db_obj.can_apply_internship, 
+                    db_obj.can_view_convention, db_obj.can_view_tracking]):
+            db_obj.can_access_dashboard = True
+            db_obj.can_apply_internship = True
+            db_obj.can_view_convention = True
+            db_obj.can_view_tracking = True
+            
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)

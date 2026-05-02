@@ -32,7 +32,7 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
     <div className="w-full px-6 py-12 space-y-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-100 dark:border-zinc-900 pb-8">
         <div className="space-y-2">
-          <button 
+          <button
             onClick={onBack}
             className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-primary hover:opacity-80 transition-opacity mb-6"
           >

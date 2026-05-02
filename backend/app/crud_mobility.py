@@ -41,6 +41,27 @@ def create_internship_request(
         request_in, update={"owner_id": owner_id}
     )
     session.add(db_obj)
+    session.flush()  # Ensure ID is generated and record is visible to FK constraints
+    
+    # 1. Create Activity Log Entry
+    log_entry = ActivityLogEntry(
+        date=datetime.now(timezone.utc).date(),
+        content=f"Internship request submitted by {db_obj.student_name}.",
+        hours=0,
+        internship_request_id=db_obj.id,
+        owner_id=owner_id
+    )
+    session.add(log_entry)
+
+    # 2. Create Alert for Admin
+    alert = Alert(
+        type="NEW_REQUEST",
+        severity=AlertSeverity.info,
+        message=f"New internship request from {db_obj.student_name} ({db_obj.registration_number})",
+        dossier_id=db_obj.id
+    )
+    session.add(alert)
+    
     session.commit()
     session.refresh(db_obj)
     return db_obj
@@ -99,8 +120,9 @@ def delete_internship_request(
 def create_convention(
     *, session: Session, convention_in: ConventionCreate, owner_id: uuid.UUID
 ) -> Convention:
+    # Set initial step to 2 as submission is Stage 1
     db_obj = Convention.model_validate(
-        convention_in, update={"owner_id": owner_id}
+        convention_in, update={"owner_id": owner_id, "signature_step": 2}
     )
     session.add(db_obj)
     session.commit()
@@ -173,10 +195,10 @@ def get_conventions_for_admin(
     statement = select(Convention)
     count_statement = select(func.count()).select_from(Convention)
     
-    if approval_level:
-        statement = statement.where(Convention.approval_level == approval_level)
-        count_statement = count_statement.where(Convention.approval_level == approval_level)
-        
+    # For granular workflow, we show conventions that have been signed by the student (step >= 2)
+    statement = statement.where(Convention.signature_step >= 2)
+    count_statement = count_statement.where(Convention.signature_step >= 2)
+
     count = session.exec(count_statement).one()
     
     statement = (
@@ -193,25 +215,53 @@ def get_conventions_for_admin(
 def approve_convention(
     *, session: Session, db_convention: Convention, admin_id: uuid.UUID
 ) -> Convention:
-    # Logic: Force fully approve for the demo to enable immediate tracking
-    db_convention.approval_level = ApprovalLevel.N3
-    db_convention.status = "completed"
-    db_convention.signature_step = 8  # Completed
-    db_convention.admin_status = "approved_final"
+    # Logic: Increment steps instead of skipping to end
+    db_convention.signature_step += 1
+    if db_convention.signature_step >= 8:
+        db_convention.status = "completed"
+        db_convention.admin_status = "approved_final"
+        db_convention.approval_level = ApprovalLevel.N3
+    else:
+        db_convention.status = "pending"
+        db_convention.admin_status = f"approved_at_step_{db_convention.signature_step}"
+        # Advance approval level if necessary
+        if db_convention.signature_step == 4:
+            db_convention.approval_level = ApprovalLevel.N1
+        elif db_convention.signature_step == 5:
+            db_convention.approval_level = ApprovalLevel.N2
+        elif db_convention.signature_step >= 6:
+            db_convention.approval_level = ApprovalLevel.N3
+
     db_convention.updated_at = datetime.now(timezone.utc)
     
-    # Activate the internship request
+    # Activate/Progress the internship request
     req = session.get(InternshipRequest, db_convention.internship_request_id)
     if req:
-        req.status = InternshipStatus.active
+        # User requested: "go from 2 to 3"
+        if req.current_step == 2:
+            req.current_step = 3
+            req.progress = 30  # Advance progress
+            # Move status from verification to signature phase
+            if req.status == InternshipStatus.pending_verification:
+                req.status = InternshipStatus.pending_signature
+        
+        # If fully completed, set to active
+        if db_convention.status == "completed":
+            req.status = InternshipStatus.active
+            req.progress = 100
+        
         req.updated_at = datetime.now(timezone.utc)
         session.add(req)
         
         # Send Notification (Alert)
+        alert_msg = f"Your convention has been approved by the administration and advanced to Step {req.current_step}."
+        if req.status == InternshipStatus.active:
+            alert_msg = "Congratulations! Your internship application is fully approved and now active."
+
         alert = Alert(
-            type="Internship Approved",
+            type="Workflow Update",
             severity=AlertSeverity.info,
-            message="Your internship application has been fully approved! You can now access your logbook and track your progress.",
+            message=alert_msg,
             dossier_id=req.id
         )
         session.add(alert)
@@ -219,7 +269,7 @@ def approve_convention(
     # Audit log
     log = ActivityLogEntry(
         date=datetime.now(timezone.utc).date(),
-        content=f"Convention officially approved and internship activated by admin {admin_id}.",
+        content=f"Convention advanced to step {db_convention.signature_step} by admin {admin_id}.",
         hours=0,
         internship_request_id=db_convention.internship_request_id,
         owner_id=db_convention.owner_id
@@ -238,6 +288,22 @@ def reject_convention(
     db_convention.admin_status = "rejected"
     db_convention.updated_at = datetime.now(timezone.utc)
     
+    # Update Internship Request status
+    req = session.get(InternshipRequest, db_convention.internship_request_id)
+    if req:
+        req.status = InternshipStatus.blocked
+        req.updated_at = datetime.now(timezone.utc)
+        session.add(req)
+        
+        # Send Notification (Alert)
+        alert = Alert(
+            type="Application Rejected",
+            severity=AlertSeverity.critical,
+            message=f"Your internship application was rejected. Reason: {reason or 'Administrative decision'}",
+            dossier_id=req.id
+        )
+        session.add(alert)
+
     # Audit log
     log = ActivityLogEntry(
         date=datetime.now(timezone.utc).date(),

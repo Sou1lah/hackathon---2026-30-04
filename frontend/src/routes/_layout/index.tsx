@@ -12,10 +12,20 @@ function IndexPage() {
     return null // Wait for user to be fetched
   }
 
-  if (user.can_access_dashboard || user.is_superuser) {
+  // Admins go to Dashboard
+  if (user.is_superuser) {
     return <Navigate to="/dashboard" replace />
   }
 
-  // Students and teachers default to the Internship Request page
+  // Students default to the Internship Request page
+  if (user.role?.startsWith("student")) {
+    return <Navigate to="/stages" replace />
+  }
+
+  // Fallback for others
+  if (user.can_access_dashboard) {
+    return <Navigate to="/dashboard" replace />
+  }
+  
   return <Navigate to="/stages" replace />
 }

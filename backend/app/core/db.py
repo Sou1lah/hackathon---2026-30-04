@@ -47,5 +47,17 @@ def init_db(session: Session) -> None:
             email="test@example.com",
             password="changethis123",
             role=UserRole.student_national,
+            can_access_dashboard=True,
+            can_apply_internship=True,
+            can_view_convention=True,
+            can_view_tracking=True,
         )
         crud.create_user(session=session, user_create=test_user_in)
+    else:
+        # Ensure existing test user has permissions
+        test_user.can_access_dashboard = True
+        test_user.can_apply_internship = True
+        test_user.can_view_convention = True
+        test_user.can_view_tracking = True
+        session.add(test_user)
+        session.commit()
