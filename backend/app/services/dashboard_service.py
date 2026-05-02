@@ -14,6 +14,7 @@ from app.models_mobility import (
     AlertCreate
 )
 from app.models_scraper import InternshipOffer
+from app.models_suivi import ActivityLog
 from app.utils import get_datetime_utc
 
 class DashboardService:
@@ -220,12 +221,41 @@ class DashboardService:
 
     def get_system_health(self) -> List[Dict[str, Any]]:
         """Check system health status."""
-        # In a real app, these would ping actual services
         return [
             {"name": "PROGRES Integration", "status": "ok", "latency": "45ms"},
             {"name": "Payment System (SATIM/Dahabia)", "status": "ok", "latency": "120ms"},
             {"name": "Document Archive System", "status": "degraded", "latency": "850ms"},
         ]
+
+    def get_chart_data(self) -> List[Dict[str, Any]]:
+        """Generate workflow chart data grouped by month."""
+        dossiers = self.session.exec(select(InternshipRequest)).all()
+        now = get_datetime_utc()
+        months = [(now.replace(day=1) - timedelta(days=30 * i)).strftime("%b") for i in range(5, -1, -1)]
+        
+        counts = {m: 0 for m in months}
+        for d in dossiers:
+            if d.created_at:
+                m = d.created_at.strftime("%b")
+                if m in counts:
+                    counts[m] += 1
+                    
+        return [{"name": k, "total": v} for k, v in counts.items()]
+
+    def get_visitor_data(self) -> List[Dict[str, Any]]:
+        """Generate visitor chart data based on activity logs."""
+        logs = self.session.exec(select(ActivityLog)).all()
+        now = get_datetime_utc()
+        months = [(now.replace(day=1) - timedelta(days=30 * i)).strftime("%b") for i in range(5, -1, -1)]
+        
+        counts = {m: 0 for m in months}
+        for log in logs:
+            if log.created_at:
+                m = log.created_at.strftime("%b")
+                if m in counts:
+                    counts[m] += 1
+                    
+        return [{"month": k, "visitors": v} for k, v in counts.items()]
 
     def get_full_overview(self) -> Dict[str, Any]:
         """Compile all metrics into a single overview response."""
@@ -236,5 +266,7 @@ class DashboardService:
             "signature": self.get_signature_metrics(),
             "alerts": self.get_all_alerts(),
             "system_health": self.get_system_health(),
+            "workflow_chart": self.get_chart_data(),
+            "visitor_chart": self.get_visitor_data(),
             "timestamp": get_datetime_utc().isoformat()
         }

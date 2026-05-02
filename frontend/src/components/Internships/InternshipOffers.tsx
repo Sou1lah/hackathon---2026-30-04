@@ -10,6 +10,9 @@ import {
   Zap,
 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import useAuth from "@/hooks/useAuth"
+import { cn } from "@/lib/utils"
 import { OpenAPI } from "@/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -89,6 +92,8 @@ export default function InternshipOffers() {
   })
 
   const applyMutation = useApplyInternship()
+  const { user } = useAuth()
+  const isAdmin = user?.is_superuser || user?.can_review_applications || false
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState<"all" | "national" | "international">("all")
 
@@ -107,80 +112,101 @@ export default function InternshipOffers() {
   })
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
+    <div className="w-full px-6 space-y-[12px] bg-white dark:bg-zinc-950 min-h-screen">
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-100 dark:border-zinc-900 pb-8">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-2 font-mono">
+      <div className="flex flex-row justify-between items-start mb-6">
+        <div className="space-y-2">
+          <p className="text-sm font-black uppercase tracking-[0.3em] text-indigo-500 mb-2 font-mono">
             UBMA · GLOBAL MOBILITY
           </p>
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Internship Opportunities
+          <h1 className="text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
+            Internship Hub
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-base">
-            Discover internships from top Algerian and international universities.
+          <p className="text-lg text-zinc-500 dark:text-zinc-400 max-w-[600px] leading-relaxed font-medium">
+            Discover and track internships from top Algerian and international universities.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <Badge
-            variant="outline"
-            className="px-4 py-1.5 font-mono text-[10px] tracking-widest bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800"
-          >
-            {data?.count ?? 0} OFFERS
-          </Badge>
+        <div className="flex items-center gap-2">
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={() => refetch()}
             disabled={isLoading}
-            className="text-zinc-500 gap-2"
+            className="h-9 px-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[13px] font-medium shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 gap-2 text-indigo-600 dark:text-indigo-400"
           >
-            <RefreshCcw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
+            <RefreshCcw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh List
           </Button>
         </div>
       </div>
 
-      {/* ── AI Hint Banner ── */}
-      <div className="flex items-center gap-4 p-4 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/40">
-        <div className="h-10 w-10 rounded-full bg-zinc-900 dark:bg-zinc-50 flex items-center justify-center shrink-0">
-          <Zap className="h-5 w-5 text-white dark:text-zinc-900" fill="currentColor" />
+      {/* ── Stats Row ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[12px] mb-[24px]">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-[14px_16px] flex flex-col justify-between h-[100px]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-400">Total Offers</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[22px] font-bold text-zinc-900 dark:text-zinc-50">{data?.count ?? 0}</span>
+            <span className="text-[11px] text-zinc-400 font-medium">Available</span>
+          </div>
         </div>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          <span className="font-semibold text-zinc-900 dark:text-zinc-50">Intelligent Matchmaking:</span>{" "}
-          View internships tailored to your profile in the{" "}
-          <span className="inline-flex items-center gap-1 font-bold text-zinc-900 dark:text-zinc-50">
-            <Sparkles className="h-3.5 w-3.5" /> Smart Match
-          </span>{" "}
-          section.
-        </p>
+
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-[14px_16px] flex flex-col justify-between h-[100px]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-400">International</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[22px] font-bold text-indigo-600 dark:text-indigo-400">
+              {data?.data.filter(o => o.mobility_type === 'international').length ?? 0}
+            </span>
+            <span className="text-[11px] text-zinc-400 font-medium">Global Scope</span>
+          </div>
+        </div>
+
+        <div className="bg-zinc-900 dark:bg-indigo-950 text-white rounded-xl p-[14px_16px] flex items-center gap-4 h-[100px]">
+          <div className="w-10 h-10 rounded-full bg-zinc-800 dark:bg-indigo-900 flex items-center justify-center shrink-0">
+            <Zap size={18} className="text-indigo-400" fill="currentColor" />
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">Quick Match</span>
+            <p className="text-[13px] font-medium text-white leading-tight">Use AI to find your fit</p>
+          </div>
+        </div>
       </div>
 
-      {/* ── Search & Filters ── */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-          <Input
-            placeholder="Search by title, university, or keywords..."
-            className="pl-11 h-12 border-zinc-200 dark:border-zinc-800 rounded-xl"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl w-fit">
+      {/* ── Filters & Search ── */}
+      <div className="flex flex-col items-center gap-8 py-8">
+        {/* Navigation Filters */}
+        <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1.5 rounded-[1.25rem] w-fit shadow-inner border border-zinc-200/50 dark:border-zinc-800/50">
           {(["all", "national", "international"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === f
-                  ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-sm"
-                  : "bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+              className={`px-8 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all duration-300 ${filter === f
+                ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-lg scale-[1.02]"
+                : "bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
                 }`}
             >
-              {f === "all" ? "All" : f === "national" ? "National" : "International"}
+              {f === "all" ? "All" : f}
             </button>
           ))}
+        </div>
+
+        {/* Big Middle Search Bar */}
+        <div className="relative w-full max-w-3xl group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2rem] opacity-20 blur transition duration-1000 group-hover:opacity-40 group-hover:duration-200"></div>
+          <div className="relative">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-zinc-400 transition-colors group-focus-within:text-indigo-500" />
+            <Input
+              placeholder="Search by title, university, or keywords..."
+              className="pl-16 h-20 text-xl border-zinc-200 dark:border-zinc-800 rounded-[2rem] bg-white dark:bg-zinc-950 shadow-2xl focus-visible:ring-offset-0 focus-visible:ring-indigo-500/20"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              <Badge variant="secondary" className="px-3 py-1 text-[10px] uppercase font-mono tracking-tighter opacity-50">
+                ESC TO CLEAR
+              </Badge>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -237,23 +263,23 @@ export default function InternshipOffers() {
                         alt={offer.country ?? "Flag"}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                       />
-                      
+
                       {/* The Fade Below */}
                       <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-zinc-950 via-transparent to-transparent z-10" />
-                      
+
                       {/* Overlays */}
                       <div className="absolute top-4 left-4 z-20">
-                         <div className="flex items-center gap-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-full px-3 py-1.5 shadow-xl">
-                            <span className="text-lg">{offer.country_flag}</span>
-                            <span className="text-[9px] font-bold text-zinc-900 dark:text-white uppercase tracking-[0.2em]">{offer.mobility_type}</span>
-                         </div>
+                        <div className="flex items-center gap-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-full px-3 py-1.5 shadow-xl">
+                          <span className="text-lg">{offer.country_flag}</span>
+                          <span className="text-[9px] font-bold text-zinc-900 dark:text-white uppercase tracking-[0.2em]">{offer.mobility_type}</span>
+                        </div>
                       </div>
 
                       {offer.university_logo && (
                         <div className="absolute bottom-4 right-4 z-20 h-12 w-12 rounded-xl bg-white dark:bg-zinc-800 p-1.5 shadow-xl border border-zinc-200 dark:border-zinc-800">
-                          <img 
-                            src={offer.university_logo} 
-                            alt={offer.university_name ?? ""} 
+                          <img
+                            src={offer.university_logo}
+                            alt={offer.university_name ?? ""}
                             className="w-full h-full object-contain"
                           />
                         </div>
@@ -264,8 +290,8 @@ export default function InternshipOffers() {
                     <div className="flex-1 p-8 pt-2 flex flex-col relative z-20">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1.5">
-                           <Calendar className="h-3.5 w-3.5 text-indigo-500" />
-                           {offer.published_date
+                          <Calendar className="h-3.5 w-3.5 text-indigo-500" />
+                          {offer.published_date
                             ? new Date(offer.published_date).toLocaleDateString("en-US", { day: 'numeric', month: 'short' })
                             : "New"}
                         </span>
@@ -275,9 +301,9 @@ export default function InternshipOffers() {
                         </div>
                       </div>
 
-                      <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 leading-tight tracking-tight mb-4 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                      <CardTitle className="text-xl leading-tight font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
                         {offer.title}
-                      </h3>
+                      </CardTitle>
 
                       <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 mb-6 leading-relaxed flex-grow">
                         {offer.description}
@@ -295,21 +321,26 @@ export default function InternshipOffers() {
                         )}
 
                         <div className="flex gap-2 pt-6 border-t border-zinc-100 dark:border-zinc-900">
-                           <Button
-                              onClick={() => applyMutation.mutate(offer)}
-                              disabled={applyMutation.isPending}
-                              className="h-12 flex-1 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white font-bold uppercase tracking-widest text-[10px] hover:bg-indigo-700 dark:hover:bg-indigo-400 transition-all shadow-lg shadow-indigo-500/20"
-                           >
-                              {applyMutation.isPending ? "..." : "Apply"}
-                           </Button>
-                           <a
-                              href={offer.source_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center transition-all border border-zinc-200 dark:border-zinc-800"
-                           >
-                              <ExternalLink size={18} />
-                           </a>
+                          <Button
+                            onClick={() => applyMutation.mutate(offer)}
+                            disabled={applyMutation.isPending || isAdmin}
+                            className={cn(
+                              "h-12 flex-1 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all",
+                              isAdmin 
+                                ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 cursor-not-allowed hover:bg-zinc-100 dark:hover:bg-zinc-900 shadow-none border border-zinc-200 dark:border-zinc-800" 
+                                : "bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-400 shadow-lg shadow-indigo-500/20"
+                            )}
+                          >
+                            {isAdmin ? "Admin View" : applyMutation.isPending ? "..." : "Apply"}
+                          </Button>
+                          <a
+                            href={offer.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="h-12 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center transition-all border border-zinc-200 dark:border-zinc-800"
+                          >
+                            <ExternalLink size={18} />
+                          </a>
                         </div>
                       </div>
                     </div>

@@ -9,6 +9,7 @@ from app.crud_mobility import (
     delete_mobility_file,
     get_mobility_file,
     get_mobility_files,
+    get_mobility_files_all,
     update_mobility_file,
     get_internship_summary_data,
     create_internship_report,
@@ -45,14 +46,23 @@ def read_mobility_files(
 ) -> Any:
     """
     Retrieve mobility files, optionally filtered by type (nationale/internationale).
+    Admins/superusers see ALL files; regular users see only their own.
     """
-    items, count = get_mobility_files(
-        session=session,
-        owner_id=current_user.id,
-        mobility_type=mobility_type,
-        skip=skip,
-        limit=limit,
-    )
+    if current_user.is_superuser or current_user.can_review_applications:
+        items, count = get_mobility_files_all(
+            session=session,
+            mobility_type=mobility_type,
+            skip=skip,
+            limit=limit,
+        )
+    else:
+        items, count = get_mobility_files(
+            session=session,
+            owner_id=current_user.id,
+            mobility_type=mobility_type,
+            skip=skip,
+            limit=limit,
+        )
     return MobilityFilesPublic(
         data=[MobilityFilePublic.model_validate(i) for i in items], count=count
     )

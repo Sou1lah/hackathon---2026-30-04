@@ -22,13 +22,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
+import { cn } from "@/lib/utils"
 import { type Item, Main } from "./Main"
 import { User } from "./User"
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
+  const { state } = useSidebar()
+  const isCollapsed = state === "collapsed"
 
   // Build the navigation list dynamically from DB-driven permission flags.
   // No roles, no enums — only what the backend says the user can access.
@@ -62,13 +66,8 @@ export function AppSidebar() {
   if (currentUser?.can_view_convention || currentUser?.is_superuser) {
     items.push({
       icon: FileSignature,
-      title:
-        currentUser?.is_superuser || currentUser?.can_review_applications
-          ? "Application Management"
-          : "Internship Convention",
-      key: currentUser?.is_superuser || currentUser?.can_review_applications
-        ? "application_management"
-        : "internship_convention",
+      title: "Conventions & Contracts",
+      key: "conventions_and_contracts",
       path: "/convention",
     })
   }
@@ -91,41 +90,43 @@ export function AppSidebar() {
     })
   }
 
-  // Mobility browsing is available to all authenticated users (no specific flag required)
-  items.push({
-    icon: Compass,
-    title: "Mobility",
-    key: "mobility",
-    path: "/mobilite",
-    subItems: [
-      {
-        icon: MapPinned,
-        title: "National Mobility",
-        key: "national_mobility",
-        path: "/mobility",
-        search: { type: "national" },
-      },
-      {
-        icon: Plane,
-        title: "International Mobility",
-        key: "international_mobility",
-        path: "/mobility",
-        search: { type: "international" },
-      },
-    ],
-  })
+  // Mobility management is admin-only
+  if (currentUser?.is_superuser || currentUser?.can_review_applications) {
+    items.push({
+      icon: Compass,
+      title: "Mobility",
+      key: "mobility",
+      path: "/mobilite",
+      subItems: [
+        {
+          icon: MapPinned,
+          title: "National Mobility",
+          key: "national_mobility",
+          path: "/mobilite",
+          search: { type: "national" },
+        },
+        {
+          icon: Plane,
+          title: "International Mobility",
+          key: "international_mobility",
+          path: "/mobilite",
+          search: { type: "international" },
+        },
+      ],
+    })
+  }
 
   const { t } = useTranslation()
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-6 py-8">
-        <Logo variant="full" />
+      <SidebarHeader className={cn("transition-all duration-300", isCollapsed ? "px-2 py-4" : "px-6 py-8")}>
+        <Logo variant={isCollapsed ? "icon" : "full"} />
       </SidebarHeader>
       <SidebarContent className="px-2">
         <Main items={items} />
       </SidebarContent>
-      <SidebarFooter className="p-4 gap-4">
+      <SidebarFooter className={cn("gap-4 transition-all duration-300", isCollapsed ? "p-2" : "p-4")}>
         <SidebarAppearance />
         <SidebarMenu>
           <SidebarMenuItem>

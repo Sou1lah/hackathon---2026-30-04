@@ -23,6 +23,8 @@ from app.models_mobility import (
     ReportStatus,
     TutorEvaluation,
     TutorEvaluationCreate,
+    Alert,
+    AlertSeverity,
     MobilityFile,
     MobilityFileCreate,
     MobilityFileUpdate,
@@ -191,26 +193,33 @@ def get_conventions_for_admin(
 def approve_convention(
     *, session: Session, db_convention: Convention, admin_id: uuid.UUID
 ) -> Convention:
-    # Logic: N1 -> N2 -> N3 -> Completed
-    if db_convention.approval_level == ApprovalLevel.N1:
-        db_convention.approval_level = ApprovalLevel.N2
-        db_convention.signature_step = 5  # Moving to Dean's turn
-        db_convention.admin_status = "approved_l1"
-    elif db_convention.approval_level == ApprovalLevel.N2:
-        db_convention.approval_level = ApprovalLevel.N3
-        db_convention.signature_step = 6  # Moving to Vice-Rectorate's turn
-        db_convention.admin_status = "approved_l2"
-    elif db_convention.approval_level == ApprovalLevel.N3:
-        db_convention.status = "completed"
-        db_convention.signature_step = 8  # Completed
-        db_convention.admin_status = "approved_final"
-    
+    # Logic: Force fully approve for the demo to enable immediate tracking
+    db_convention.approval_level = ApprovalLevel.N3
+    db_convention.status = "completed"
+    db_convention.signature_step = 8  # Completed
+    db_convention.admin_status = "approved_final"
     db_convention.updated_at = datetime.now(timezone.utc)
+    
+    # Activate the internship request
+    req = session.get(InternshipRequest, db_convention.internship_request_id)
+    if req:
+        req.status = InternshipStatus.active
+        req.updated_at = datetime.now(timezone.utc)
+        session.add(req)
+        
+        # Send Notification (Alert)
+        alert = Alert(
+            type="Internship Approved",
+            severity=AlertSeverity.info,
+            message="Your internship application has been fully approved! You can now access your logbook and track your progress.",
+            dossier_id=req.id
+        )
+        session.add(alert)
     
     # Audit log
     log = ActivityLogEntry(
         date=datetime.now(timezone.utc).date(),
-        content=f"Convention approved by admin {admin_id} at level {db_convention.approval_level}",
+        content=f"Convention officially approved and internship activated by admin {admin_id}.",
         hours=0,
         internship_request_id=db_convention.internship_request_id,
         owner_id=db_convention.owner_id
@@ -325,6 +334,28 @@ def update_mobility_file(
 def delete_mobility_file(*, session: Session, db_file: MobilityFile) -> None:
     session.delete(db_file)
     session.commit()
+
+
+def get_mobility_files_all(
+    *,
+    session: Session,
+    mobility_type: MobilityType | None = None,
+    skip: int = 0,
+    limit: int = 100,
+) -> tuple[list[MobilityFile], int]:
+    """Return all mobility files (admin view — no owner filter)."""
+    base = select(MobilityFile)
+    count_base = select(func.count()).select_from(MobilityFile)
+    if mobility_type:
+        base = base.where(MobilityFile.mobility_type == mobility_type)
+        count_base = count_base.where(MobilityFile.mobility_type == mobility_type)
+
+    count = session.exec(count_base).one()
+    statement = (
+        base.order_by(col(MobilityFile.created_at).desc()).offset(skip).limit(limit)
+    )
+    items = session.exec(statement).all()
+    return list(items), count
 
 
 # ---------- ActivityLogEntry ----------

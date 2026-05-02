@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { Zap, Sparkles, FileText, ArrowLeft } from "lucide-react"
+import { Zap, Sparkles, FileText, ArrowLeft, Globe, Plus } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 
 import AddInternshipForm from "@/components/Admin/AddInternshipForm"
@@ -29,20 +29,20 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
   const applyMutation = useApplyInternship()
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
+    <div className="w-full px-6 py-12 space-y-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-100 dark:border-zinc-900 pb-8">
-        <div className="space-y-1">
+        <div className="space-y-2">
           <button 
             onClick={onBack}
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors mb-4"
+            className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-indigo-500 hover:text-indigo-600 transition-colors mb-6"
           >
             <ArrowLeft size={14} /> Back to all offers
           </button>
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-4">
-            <Sparkles className="text-zinc-400" />
+          <h1 className="text-[42px] font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-4 leading-[1.1]">
+            <Sparkles className="text-indigo-500 h-8 w-8" />
             Personalized Matches
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 text-lg">
+          <p className="text-lg text-zinc-500 dark:text-zinc-400 font-medium max-w-[600px] leading-relaxed">
             Based on your profile and preferences, we found these opportunities for you.
           </p>
         </div>
@@ -120,12 +120,12 @@ function ResultsPanel({ data, onBack }: { data: RecommendationResponse; onBack: 
                     {rec.offer.country}
                   </div>
                 </div>
-                <CardTitle className="text-lg leading-tight font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                <CardTitle className="text-xl leading-tight font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
                   {rec.offer.title}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 flex-1 px-6">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                   {rec.offer.description}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -232,10 +232,10 @@ function StagesPage() {
           >
             <InternshipOffers />
             
-            <div className="max-w-7xl mx-auto px-4 mt-20 border-t border-zinc-100 dark:border-zinc-900 pt-20">
-               <div className="flex items-center gap-3 mb-10">
-                 <FileText className="text-zinc-400" />
-                 <h2 className="text-2xl font-bold">Submit Manual Request</h2>
+            <div className="w-full px-6 mt-20 border-t border-zinc-100 dark:border-zinc-900 pt-20">
+               <div className="flex items-center gap-4 mb-10">
+                 <FileText className="text-indigo-500 h-8 w-8" />
+                 <h2 className="text-[32px] font-extrabold tracking-tight">Submit Manual Request</h2>
                </div>
                <DemandeStage />
             </div>

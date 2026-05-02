@@ -69,8 +69,10 @@ export default function PartnershipsView() {
     p.partner_name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const isAdmin = user?.is_superuser || user?.can_review_applications
+
   return (
-    <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
@@ -97,7 +99,7 @@ export default function PartnershipsView() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {user?.is_superuser && (
+          {isAdmin && (
             <Button
               className="h-11 px-5 rounded-xl font-bold uppercase tracking-widest text-xs gap-2"
               onClick={() => setIsAddModalOpen(true)}
@@ -199,7 +201,7 @@ export default function PartnershipsView() {
                   </TableCell>
                   <TableCell className="text-right px-6">
                     <div className="flex items-center justify-end gap-2">
-                      {user?.is_superuser && (
+                      {isAdmin && (
                         <Button
                           variant="ghost"
                           size="icon"

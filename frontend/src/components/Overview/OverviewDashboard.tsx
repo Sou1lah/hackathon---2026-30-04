@@ -24,6 +24,7 @@ import {
 } from "recharts"
 import AdminSuiviStage from "@/components/Admin/AdminSuiviStage"
 import { UserManagement } from "@/components/Admin/UserManagement"
+import { DocumentArchiveModal } from "@/components/Overview/DocumentArchiveModal"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -47,6 +48,7 @@ interface InternshipOffer {
   created_at: string
   university_name?: string | null
   country?: string | null
+  country_code?: string | null
   country_flag?: string | null
   university_logo?: string | null
 }
@@ -91,32 +93,12 @@ interface OverviewStats {
   }
   alerts: AlertItem[]
   system_health: SystemHealthItem[]
+  workflow_chart: { name: string; total: number }[]
+  visitor_chart: { month: string; visitors: number }[]
   timestamp: string
 }
 
-const chartData = [
-  { name: "Jan", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Feb", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Apr", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "May", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Jun", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Jul", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Aug", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: "Dec", total: Math.floor(Math.random() * 5000) + 1000 },
-]
-
-const visitorData = [
-  { month: "Jan", visitors: 1500 },
-  { month: "Feb", visitors: 2200 },
-  { month: "Mar", visitors: 1800 },
-  { month: "Apr", visitors: 2400 },
-  { month: "May", visitors: 2100 },
-  { month: "Jun", visitors: 2800 },
-]
+// Remove mock data
 
 export default function OverviewDashboard() {
   const { t } = useTranslation()
@@ -124,6 +106,7 @@ export default function OverviewDashboard() {
   const [data, setData] = useState<OverviewStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isPdfArchiveOpen, setIsPdfArchiveOpen] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -207,7 +190,7 @@ export default function OverviewDashboard() {
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card className="cursor-pointer hover:border-primary/50 transition-colors duration-200" onClick={() => setIsPdfArchiveOpen(true)}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {t("total_dossiers")}
@@ -271,7 +254,7 @@ export default function OverviewDashboard() {
               <CardContent className="px-0 pt-4">
                  <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                   <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={chartData}>
+                    <BarChart data={data.workflow_chart.length > 0 ? data.workflow_chart : []}>
                       <XAxis
                         dataKey="name"
                         stroke="#888888"
@@ -312,12 +295,14 @@ export default function OverviewDashboard() {
                     whileHover={{ scale: 1.02 }}
                     className="group cursor-pointer"
                   >
-                    <Card className="overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all rounded-2xl">
+                    <Card className="overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-sm transition-all duration-300 rounded-2xl group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] group-hover:-translate-y-1">
                       <CardContent className="p-0">
                         <div className="flex gap-4 p-4">
-                          <div className="h-16 w-16 rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center shrink-0 overflow-hidden">
+                          <div className="h-16 w-16 rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center shrink-0 overflow-hidden transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md">
                              {offer.university_logo ? (
                                <img src={offer.university_logo} alt={offer.university_name || ""} className="w-full h-full object-cover" />
+                             ) : offer.country_code ? (
+                               <img src={`https://flagcdn.com/w320/${offer.country_code.toLowerCase()}.png`} alt={offer.country || "Flag"} className="w-full h-full object-cover" />
                              ) : (
                                <span className="text-2xl">{offer.country_flag || "🏢"}</span>
                              )}
@@ -358,7 +343,7 @@ export default function OverviewDashboard() {
               <CardContent className="px-0 pt-4">
                 <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                   <ResponsiveContainer width="100%" height={350}>
-                    <AreaChart data={visitorData}>
+                    <AreaChart data={data.visitor_chart.length > 0 ? data.visitor_chart : []}>
                       <defs>
                         <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
@@ -378,7 +363,7 @@ export default function OverviewDashboard() {
                         tickLine={false}
                         axisLine={false}
                       />
-                      <Tooltip />
+                      <Tooltip cursor={false} />
                       <Area 
                         type="monotone" 
                         dataKey="visitors" 
@@ -442,16 +427,23 @@ export default function OverviewDashboard() {
                           data={slaPieData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
+                          innerRadius={80}
+                          outerRadius={100}
                           paddingAngle={5}
                           dataKey="value"
+                          stroke="none"
                         >
                           {slaPieData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip />
+                        <text x="50%" y="45%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-4xl font-bold">
+                          {100 - data.sla.breach_rate}%
+                        </text>
+                        <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-muted-foreground text-[10px] uppercase tracking-widest">
+                          Compliance
+                        </text>
+                        <Tooltip cursor={false} />
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="flex justify-center gap-6 mt-4">
@@ -481,6 +473,10 @@ export default function OverviewDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+      <DocumentArchiveModal 
+        isOpen={isPdfArchiveOpen} 
+        onClose={() => setIsPdfArchiveOpen(false)} 
+      />
     </div>
   )
 }

@@ -6,6 +6,7 @@ from sqlalchemy import JSON, Column, DateTime
 from sqlmodel import Field, SQLModel
 
 from app.utils import get_datetime_utc
+from app.models import UserPublic
 
 
 class PDFExtractionBase(SQLModel):
@@ -29,6 +30,7 @@ class PDFExtractionPublic(PDFExtractionBase):
     id: uuid.UUID
     owner_id: uuid.UUID
     created_at: datetime
+    owner: UserPublic | None = None
 
 
 class PDFExtractionsPublic(SQLModel):

@@ -30,12 +30,18 @@ class TutorFeedbackPublic(TutorFeedbackBase):
     owner_id: uuid.UUID
     created_at: datetime.datetime
 
+class UserMinimal(SQLModel):
+    id: uuid.UUID
+    full_name: Optional[str] = None
+    email: str
+
 class ActivityLogPublic(ActivityLogBase):
     id: uuid.UUID
     internship_id: uuid.UUID
     owner_id: uuid.UUID
     created_at: datetime.datetime
     feedback: List[TutorFeedbackPublic] = []
+    owner: Optional[UserMinimal] = None
 
 class ActivityLogsPublic(SQLModel):
     data: List[ActivityLogPublic]

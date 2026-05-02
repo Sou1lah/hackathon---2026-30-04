@@ -15,12 +15,13 @@ import {
   User,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { FileUp } from "lucide-react"
 import useAuth from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
 
@@ -40,6 +41,10 @@ export default function DemandeStage() {
     "idle" | "checking" | "verified" | "failed"
   >("idle")
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isExtracting, setIsExtracting] = useState(false)
+  const [autoFilled, setAutoFilled] = useState<string[]>([])
+
   const [formData, setFormData] = useState({
     student_name: user?.full_name || "",
     registration_number: "",
@@ -53,6 +58,77 @@ export default function DemandeStage() {
 
   const updateForm = (key: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsExtracting(true)
+    setAutoFilled([])
+    try {
+      const form = new FormData()
+      form.append("files", file)
+      const token = localStorage.getItem("access_token")
+      const apiUrl = import.meta.env.VITE_API_URL || ""
+      
+      const resp = await fetch(`${apiUrl}/api/v1/pdf/extract`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      })
+      if (resp.ok) {
+        const { extracted } = await resp.json()
+        const filled: string[] = []
+        
+        if (extracted.student_name || extracted.full_name) {
+          updateForm("student_name", extracted.student_name || extracted.full_name)
+          filled.push("Name")
+        }
+        if (extracted.registration_number) {
+          updateForm("registration_number", extracted.registration_number)
+          filled.push("ID")
+        }
+        if (extracted.company_name) {
+          updateForm("host_organization", extracted.company_name)
+          filled.push("Company")
+        }
+        if (extracted.mission_title) {
+          updateForm("mission_title", extracted.mission_title)
+          filled.push("Mission")
+        }
+        
+        const parseDate = (dStr: string) => {
+           const parts = dStr.split(/[/-]/)
+           if (parts.length === 3) {
+             const day = parts[0].padStart(2, '0')
+             const month = parts[1].padStart(2, '0')
+             let year = parts[2]
+             if (year.length === 2) year = `20${year}`
+             return `${year}-${month}-${day}`
+           }
+           return dStr
+        }
+        
+        if (extracted.start_date) {
+          updateForm("start_date", parseDate(extracted.start_date))
+          filled.push("Start Date")
+        }
+        if (extracted.end_date) {
+          updateForm("end_date", parseDate(extracted.end_date))
+          filled.push("End Date")
+        }
+        
+        if (filled.length > 0) {
+           setAutoFilled(filled)
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsExtracting(false)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
   }
 
   const handleVerify = () => {
@@ -125,11 +201,28 @@ export default function DemandeStage() {
   }
 
   const { data: offersData, isLoading: offersLoading } = useQuery({
-    queryKey: ["internship-offers-compact"],
+    queryKey: ["internship-offers-compact", user?.id],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/v1/internships/?limit=3`)
-      if (!response.ok) throw new Error("Failed to fetch offers")
-      return response.json()
+      const payload = {
+         selected_mobility_type: "both",
+         selected_interests: [],
+         specialty: user?.specialty || undefined,
+         level: user?.level || undefined,
+         language: user?.language || undefined,
+         gpa: user?.gpa ? parseFloat(String(user.gpa)) : undefined,
+      }
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/v1/recommendations/stage-request?debug=false`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+        },
+        body: JSON.stringify(payload)
+      })
+      if (!response.ok) throw new Error("Failed to fetch recommendations")
+      const resData = await response.json()
+      // Extract top 3 offers
+      return { data: (resData.results || []).slice(0, 3).map((r: any) => r.offer) }
     }
   })
 
@@ -182,6 +275,31 @@ export default function DemandeStage() {
               Verify Identity
             </Button>
           )}
+
+          {/* AI Autofill Button */}
+          <div className="relative">
+            <input 
+               type="file" 
+               accept="application/pdf" 
+               ref={fileInputRef} 
+               onChange={handlePdfUpload} 
+               className="hidden" 
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={isExtracting}
+              onClick={() => fileInputRef.current?.click()}
+              className="h-8 rounded-full font-bold text-[10px] tracking-wider uppercase border-zinc-200 dark:border-zinc-800 gap-2 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:text-indigo-700 transition-colors"
+            >
+              {isExtracting ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <FileUp size={14} />
+              )}
+              {isExtracting ? "Extracting..." : "Autofill from CV"}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -238,7 +356,20 @@ export default function DemandeStage() {
       </div>
 
       {/* Form Content */}
-      <Card className="border-zinc-200 dark:border-zinc-800 shadow-none min-h-[500px] flex flex-col overflow-hidden bg-white dark:bg-zinc-950">
+      <Card className="border-zinc-200 dark:border-zinc-800 shadow-none min-h-[500px] flex flex-col overflow-hidden bg-white dark:bg-zinc-950 relative">
+        <AnimatePresence>
+          {autoFilled.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-white px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg flex items-center gap-2"
+            >
+              <Sparkles size={14} />
+              Autofilled: {autoFilled.join(", ")}
+            </motion.div>
+          )}
+        </AnimatePresence>
         <CardContent className="p-10 flex-1">
           <AnimatePresence mode="wait">
             {currentStep === 0 && (

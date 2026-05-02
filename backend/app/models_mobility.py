@@ -225,6 +225,10 @@ class MobilityFileBase(SQLModel):
     priority: Priority = Priority.medium
     tags: str = Field(default="", max_length=500)  # Comma-separated
     status: str = Field(default="pending", max_length=50)
+    origin_university: str | None = Field(default=None, max_length=255)
+    visa_status: str | None = Field(default=None, max_length=50)
+    file_transfer_status: str | None = Field(default="pending", max_length=50)
+
 
 
 class MobilityFileCreate(MobilityFileBase):
@@ -240,6 +244,10 @@ class MobilityFileUpdate(SQLModel):
     priority: Priority | None = None
     tags: str | None = Field(default=None, max_length=500)
     status: str | None = Field(default=None, max_length=50)
+    origin_university: str | None = Field(default=None, max_length=255)
+    visa_status: str | None = Field(default=None, max_length=50)
+    file_transfer_status: str | None = Field(default=None, max_length=50)
+
 
 
 class MobilityFile(MobilityFileBase, table=True):
@@ -263,6 +271,9 @@ class MobilityFilePublic(MobilityFileBase):
     owner_id: uuid.UUID
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    origin_university: str | None = None
+    visa_status: str | None = None
+    file_transfer_status: str | None = None
 
 
 class MobilityFilesPublic(SQLModel):

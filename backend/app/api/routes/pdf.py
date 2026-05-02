@@ -11,9 +11,13 @@ from typing import Any
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 
+from sqlmodel import select, func
+from sqlalchemy.orm import selectinload
+
 from app.api.deps import CurrentUser, SessionDep
 from app.services.pdf_extractor import extract_from_pdf
-from app.models_pdf import PDFExtraction
+from app.models_pdf import PDFExtraction, PDFExtractionsPublic
+from app.models import User
 
 router = APIRouter(prefix="/pdf", tags=["pdf"])
 
@@ -104,3 +108,25 @@ async def extract_pdf_data(
         "errors": errors,
         "files_processed": len(files) - len(errors),
     }
+
+@router.get("/", response_model=PDFExtractionsPublic)
+def get_pdf_extractions(
+    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+) -> Any:
+    """
+    Retrieve all PDF extraction records (Admin only).
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    statement = (
+        select(PDFExtraction)
+        .options(selectinload(PDFExtraction.owner))
+        .offset(skip)
+        .limit(limit)
+    )
+    items = session.exec(statement).all()
+    count_statement = select(func.count(PDFExtraction.id))
+    count = session.exec(count_statement).one()
+    
+    return PDFExtractionsPublic(data=items, count=count)

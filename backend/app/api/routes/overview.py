@@ -50,6 +50,8 @@ class DashboardOverviewResponse(BaseModel):
     signature: SignatureSummary
     alerts: List[AlertItem]
     system_health: List[SystemHealthItem]
+    workflow_chart: List[Dict[str, Any]]
+    visitor_chart: List[Dict[str, Any]]
     timestamp: str
 
 @router.get("/", response_model=DashboardOverviewResponse)

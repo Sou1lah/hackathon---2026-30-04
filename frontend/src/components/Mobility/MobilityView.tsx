@@ -1,16 +1,11 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { MobilityService, MobilityType, MobilityFilePublic } from "@/client"
 import {
   ArrowRight,
   Building2,
-  CheckCircle2,
-  FileText,
   Globe,
-  Layers,
-  Link,
   Map as MapIcon,
-  Plane,
-  ShieldCheck,
-  Sparkles,
-  CreditCard,
+  Loader2,
 } from "lucide-react"
 import { motion } from "motion/react"
 import { useState } from "react"
@@ -36,7 +31,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import useCustomToast from "@/hooks/useCustomToast"
 
 interface MobilityViewProps {
   type: "national" | "international"
@@ -55,136 +58,121 @@ const stagger: any = {
   visible: { transition: { staggerChildren: 0.1 } },
 }
 
-// Animation component for "Dots Transferring"
-const TransferAnimation = ({
-  type,
-}: {
-  type: "national" | "international"
-}) => {
+/* ---------- Status badge helper ---------- */
+function StatusBadge({ value }: { value: string }) {
+  const colorMap: Record<string, string> = {
+    // File transfer
+    pending: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/25",
+    requested: "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/25",
+    transferred: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/25",
+    // Visa
+    in_progress: "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/25",
+    approved: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/25",
+    rejected: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/25",
+    // Overall
+    active: "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/25",
+    completed: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/25",
+  }
+  const label = value.replace(/_/g, " ")
   return (
-    <div className="relative h-32 w-full flex items-center justify-between px-12 md:px-24 mb-12">
-      <div className="absolute inset-0 dot-pattern opacity-10" />
+    <Badge
+      variant="outline"
+      className={cn(
+        "text-[9px] font-bold uppercase tracking-widest px-3 py-1 capitalize",
+        colorMap[value] || colorMap.pending,
+      )}
+    >
+      {label}
+    </Badge>
+  )
+}
 
-      {/* Start Node */}
+/* ---------- Transfer animation ---------- */
+const TransferAnimation = ({ type }: { type: "national" | "international" }) => {
+  return (
+    <div className="relative h-28 w-full flex items-center justify-between px-8 md:px-20">
+      <div className="absolute inset-0 dot-pattern opacity-[0.06] dark:opacity-[0.12]" />
+
+      {/* Origin node */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="relative z-10 flex flex-col items-center gap-2"
       >
-        <div className="size-16 rounded-2xl bg-foreground text-background flex items-center justify-center shadow-xl border border-white/10">
-          <Building2 size={28} />
+        <div className="size-14 rounded-2xl bg-muted border border-border flex items-center justify-center shadow-sm">
+          <Building2 size={24} className="text-foreground" />
         </div>
         <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
-          Origin Univ.
+          Origin
         </span>
       </motion.div>
 
-      {/* Path & Moving Dots */}
-      <div className="flex-1 relative h-px bg-gradient-to-r from-border/10 via-accent/40 to-border/10 mx-6">
+      {/* Animated path */}
+      <div className="flex-1 relative h-px bg-gradient-to-r from-border via-primary/40 to-border mx-6">
         {[0, 1, 2, 3].map((i) => (
           <motion.div
             key={i}
             initial={{ left: "0%", opacity: 0 }}
-            animate={{
-              left: "100%",
-              opacity: [0, 1, 1, 0],
-            }}
-            transition={{
-              duration: 2.5,
-              repeat: Infinity,
-              delay: i * 0.6,
-              ease: "linear",
-            }}
-            className="absolute -top-1 size-2 rounded-full bg-accent shadow-[0_0_10px_rgba(var(--accent),0.5)]"
+            animate={{ left: "100%", opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.6, ease: "linear" }}
+            className="absolute -top-1 size-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
           />
         ))}
       </div>
 
-      {/* End Node */}
+      {/* Destination node */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.3 }}
         className="relative z-10 flex flex-col items-center gap-2"
       >
-        <div className="size-16 rounded-2xl bg-accent text-white flex items-center justify-center shadow-2xl shadow-accent/20">
-          {type === "national" ? <Building2 size={28} /> : <Globe size={28} />}
+        <div className="size-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-md">
+          {type === "national" ? <Building2 size={24} /> : <Globe size={24} />}
         </div>
-        <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-accent">
-          {type === "national" ? "Host Univ." : "International"}
+        <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary">
+          {type === "national" ? "Destination" : "International"}
         </span>
       </motion.div>
     </div>
   )
 }
 
+/* ---------- Main component ---------- */
 export default function MobilityView({ type }: MobilityViewProps) {
   const isNational = type === "national"
-  const [selectedStudent, setSelectedStudent] = useState<any>(null)
+  const backendType = isNational ? "nationale" : "internationale"
+  const [selectedStudent, setSelectedStudent] = useState<MobilityFilePublic | null>(null)
+
+  const queryClient = useQueryClient()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["mobility", backendType],
+    queryFn: () => MobilityService.readMobilityFiles({ mobilityType: backendType as MobilityType }),
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: (variables: { id: string; data: any }) =>
+      MobilityService.updateMobility({ id: variables.id, requestBody: variables.data }),
+    onSuccess: (updatedData) => {
+      queryClient.invalidateQueries({ queryKey: ["mobility", backendType] })
+      setSelectedStudent(updatedData)
+      showSuccessToast("The mobility record has been updated.")
+    },
+    onError: () => {
+      showErrorToast("There was an error updating the record.")
+    },
+  })
 
   const content = isNational
     ? {
         badge: "Inter-University Mobility",
-        title: "National Track",
-        desc: "Optimize your academic career by taking advantage of exchanges between the best universities in Algeria.",
-        steps: [
-          {
-            id: "01",
-            title: "Dossier",
-            icon: FileText,
-            detail:
-              "Preparation of the application file (Transcripts, CV, ML).",
-          },
-          {
-            id: "02",
-            title: "Process N1→N2",
-            icon: Layers,
-            detail: "Department validation then External Relations.",
-          },
-          {
-            id: "03",
-            title: "Convention",
-            icon: Link,
-            detail: "Tripartite agreement for study mobility.",
-          },
-          {
-            id: "04",
-            title: "Scholarship",
-            icon: CreditCard,
-            detail: "Financial aid and excellence scholarships.",
-          },
-        ],
+        desc: "Manage student exchanges between Algerian universities — track dossiers and file transfers across wilayas.",
       }
     : {
         badge: "International Programs",
-        title: "Global Reach",
-        desc: "Explore new academic horizons through our strategic partnerships around the world.",
-        steps: [
-          {
-            id: "01",
-            title: "Erasmus+ / Bilateral",
-            icon: Sparkles,
-            detail: "European exchanges and global agreements.",
-          },
-          {
-            id: "02",
-            title: "Process N3",
-            icon: CheckCircle2,
-            detail: "Rectorate validation and partner approval.",
-          },
-          {
-            id: "03",
-            title: "Visa & Travel",
-            icon: Plane,
-            detail: "Consular procedures and logistics.",
-          },
-          {
-            id: "04",
-            title: "Insurance & Health",
-            icon: ShieldCheck,
-            detail: "Mandatory international health coverage.",
-          },
-        ],
+        desc: "Manage international student mobility — track visa status, partner universities, and dossier transfers.",
       }
 
   return (
@@ -192,135 +180,155 @@ export default function MobilityView({ type }: MobilityViewProps) {
       initial="hidden"
       animate="visible"
       variants={stagger as any}
-      className="container max-w-6xl py-12 space-y-16"
+      className="w-full space-y-10 py-8 px-6 md:px-10"
     >
-      {/* Hero Section */}
-      <motion.div
-        variants={fadeInUp as any}
-        className="flex flex-col md:flex-row items-center gap-12"
-      >
-        <div className="flex-1 space-y-6 text-center md:text-left">
-          <Badge variant="section" className="px-4 py-1.5">
+      {/* ── Hero ── */}
+      <motion.div variants={fadeInUp as any} className="flex flex-col md:flex-row items-center gap-10">
+        <div className="flex-1 space-y-4">
+          <Badge variant="outline" className="px-3 py-1 text-xs font-semibold border-primary/30 text-primary">
             {content.badge}
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-serif tracking-tight leading-[1.1]">
+          <h1 className="text-4xl md:text-5xl font-serif tracking-tight leading-[1.15] text-foreground">
             {isNational ? "National" : "Global"}{" "}
-            <span className="gradient-text">
-              {isNational ? "Mobility" : "Horizons"}
-            </span>
+            <span className="text-primary">{isNational ? "Mobility" : "Horizons"}</span>
           </h1>
-          <p className="text-muted-foreground text-xl max-w-2xl leading-relaxed">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl leading-relaxed">
             {content.desc}
           </p>
         </div>
 
-        <div className="md:w-1/3 flex justify-center">
-          <div className="size-32 md:size-48 bg-accent/5 rounded-[2.5rem] border border-accent/10 flex items-center justify-center relative">
-            <div className="absolute inset-0 dot-pattern opacity-20" />
+        <div className="shrink-0 flex justify-center">
+          <div className="size-28 md:size-36 bg-primary/5 dark:bg-primary/10 rounded-3xl border border-primary/15 flex items-center justify-center">
             {isNational ? (
-              <MapIcon size={64} className="text-accent" />
+              <MapIcon size={52} className="text-primary" />
             ) : (
-              <Globe size={64} className="text-accent" />
+              <Globe size={52} className="text-primary" />
             )}
           </div>
         </div>
       </motion.div>
 
-      {/* Transfer Animation */}
+      {/* ── Transfer animation ── */}
       <motion.div variants={fadeInUp as any}>
         <TransferAnimation type={type} />
       </motion.div>
 
-      {/* Student Registry */}
-      <motion.div variants={fadeInUp as any} className="space-y-8">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-serif">Student Registry</h2>
-          <div className="h-px flex-1 bg-border/50" />
+      {/* ── Student registry table ── */}
+      <motion.div variants={fadeInUp as any} className="space-y-6">
+        <div className="flex items-center gap-4 px-1">
+          <h2 className="text-xl font-serif font-semibold text-foreground">Student Registry</h2>
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs font-mono text-muted-foreground">
+            {data?.count ?? 0} records
+          </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="w-full rounded-xl border border-border bg-card overflow-hidden">
           <Table>
-            <TableHeader className="bg-muted/30">
-              <TableRow className="hover:bg-transparent border-border/40">
-                <TableHead className="pl-8 font-mono text-[10px] uppercase tracking-widest py-6">
+            <TableHeader>
+              <TableRow className="bg-muted/50 dark:bg-muted/20 hover:bg-muted/50 dark:hover:bg-muted/20 border-b border-border">
+                <TableHead className="pl-6 font-mono text-[10px] uppercase tracking-widest py-4 text-muted-foreground">
                   Student
                 </TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest">
-                  Destination
+                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {isNational ? "Origin → Destination" : "Destination"}
                 </TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest">
-                  Dossier Status
+                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {isNational ? "File Transfer" : "Visa Status"}
                 </TableHead>
-                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest pr-8">
-                  Actions
+                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Status
+                </TableHead>
+                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest pr-6 text-muted-foreground">
+                  Details
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MOCK_STUDENTS.filter((s) => s.type === type).map((student) => (
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center">
+                    <Loader2 className="animate-spin mx-auto text-muted-foreground" size={24} />
+                  </TableCell>
+                </TableRow>
+              )}
+              {!isLoading && data?.data.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center text-muted-foreground text-sm">
+                    No mobility records found.
+                  </TableCell>
+                </TableRow>
+              )}
+              {data?.data.map((student) => (
                 <TableRow
                   key={student.id}
-                  className="group hover:bg-muted/10 border-border/40 transition-colors cursor-pointer"
+                  className="group hover:bg-muted/40 dark:hover:bg-muted/15 border-b border-border/60 transition-colors cursor-pointer"
                   onClick={() => setSelectedStudent(student)}
                 >
-                  <TableCell className="pl-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="size-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-serif font-bold border border-accent/20">
-                        {student.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                  {/* Student name + avatar */}
+                  <TableCell className="pl-6 py-5">
+                    <div className="flex items-center gap-3">
+                      <div className="size-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary text-xs font-bold border border-primary/20">
+                        {student.student_name.split(" ").map((n) => n[0]).join("")}
                       </div>
                       <div>
-                        <p className="font-bold text-foreground">
-                          {student.name}
+                        <p className="font-semibold text-sm text-foreground">
+                          {student.student_name}
                         </p>
                         <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                          {student.id}
+                          {student.reference_code}
                         </p>
                       </div>
                     </div>
                   </TableCell>
+
+                  {/* Destination */}
                   <TableCell>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground truncate max-w-[250px]">
-                            <Building2
-                              size={14}
-                              className="text-accent/60 shrink-0"
-                            />
-                            <span className="truncate">
-                              {student.destination}
-                            </span>
+                          <div className="flex flex-col gap-0.5 max-w-[280px]">
+                            {isNational && student.origin_university && (
+                              <span className="truncate text-xs text-muted-foreground">
+                                From: {student.origin_university}
+                              </span>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Building2 size={13} className="text-muted-foreground shrink-0" />
+                              <span className="truncate text-sm text-foreground">
+                                {student.destination}
+                              </span>
+                            </div>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{student.destination}</p>
+                        <TooltipContent className="bg-popover text-popover-foreground border border-border shadow-lg">
+                          {isNational && <p className="text-xs">Origin: {student.origin_university || "Not set"}</p>}
+                          <p className="text-xs">Destination: {student.destination}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   </TableCell>
+
+                  {/* Transfer / Visa status */}
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "text-[9px] font-bold uppercase tracking-widest px-3 py-1",
-                        student.status === "Completed"
-                          ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                          : "bg-amber-500/10 text-amber-600 border-amber-500/20",
-                      )}
-                    >
-                      {student.status}
-                    </Badge>
+                    <StatusBadge
+                      value={isNational ? (student.file_transfer_status || "pending") : (student.visa_status || "pending")}
+                    />
                   </TableCell>
-                  <TableCell className="text-right pr-8">
+
+                  {/* Overall status */}
+                  <TableCell>
+                    <StatusBadge value={student.status || "pending"} />
+                  </TableCell>
+
+                  {/* Action */}
+                  <TableCell className="text-right pr-6">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="rounded-xl hover:text-accent"
+                      className="rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
                     >
-                      <ArrowRight size={18} />
+                      <ArrowRight size={16} />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -330,71 +338,120 @@ export default function MobilityView({ type }: MobilityViewProps) {
         </div>
       </motion.div>
 
-      {/* Student Details Modal */}
-      <Dialog
-        open={!!selectedStudent}
-        onOpenChange={(open) => !open && setSelectedStudent(null)}
-      >
-        <DialogContent className="sm:max-w-[600px] border-border/50 rounded-[2.5rem] p-0 overflow-hidden shadow-2xl">
+      {/* ── Detail modal ── */}
+      <Dialog open={!!selectedStudent} onOpenChange={(open) => !open && setSelectedStudent(null)}>
+        <DialogContent className="sm:max-w-[580px] border-border rounded-2xl p-0 overflow-hidden shadow-xl bg-card">
           {selectedStudent && (
             <>
-              <div className="bg-foreground text-background p-10 relative overflow-hidden">
-                <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
-                <DialogHeader className="relative z-10">
-                  <DialogTitle className="text-3xl font-serif text-white">
-                    {selectedStudent.name}
+              {/* Modal header */}
+              <div className="bg-muted/60 dark:bg-muted/30 border-b border-border p-8">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-serif text-foreground">
+                    {selectedStudent.student_name}
                   </DialogTitle>
-                  <p className="text-muted-foreground font-mono text-[10px] uppercase tracking-[0.2em] mt-2">
-                    Dossier #{selectedStudent.id} •{" "}
-                    {selectedStudent.destination}
+                  <p className="text-muted-foreground font-mono text-[10px] uppercase tracking-[0.2em] mt-1">
+                    {selectedStudent.reference_code} • {selectedStudent.destination}
                   </p>
                 </DialogHeader>
               </div>
-              <div className="p-10 space-y-8">
-                <div className="grid grid-cols-1 gap-4">
-                  {selectedStudent.requirements.map((req, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-5 bg-muted/30 rounded-2xl border border-border/40 group hover:border-accent/30 transition-all"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={cn(
-                            "size-10 rounded-xl flex items-center justify-center",
-                            req.status === "Valid"
-                              ? "bg-emerald-500/10 text-emerald-600"
-                              : "bg-amber-500/10 text-amber-600",
-                          )}
-                        >
-                          {req.status === "Valid" ? (
-                            <CheckCircle2 size={20} />
-                          ) : (
-                            <Sparkles size={20} />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-foreground">
-                            {req.label}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
-                            {req.status}
-                          </p>
-                        </div>
+
+              {/* Modal body */}
+              <div className="p-8 space-y-6">
+                <h3 className="text-sm font-semibold text-foreground border-b border-border pb-2">
+                  Tracking Details
+                </h3>
+
+                {isNational ? (
+                  <div className="space-y-5">
+                    {/* Origin university */}
+                    <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-muted/40 dark:bg-muted/20 border border-border">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Origin University / Wilaya</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {selectedStudent.origin_university || "Not set"}
+                        </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="rounded-full text-[10px] font-bold uppercase tracking-widest text-accent"
-                      >
-                        Edit
-                      </Button>
                     </div>
-                  ))}
+
+                    {/* File transfer */}
+                    <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-muted/40 dark:bg-muted/20 border border-border">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">File Transfer Status</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Track student dossier transfer</p>
+                      </div>
+                      <Select
+                        value={selectedStudent.file_transfer_status || "pending"}
+                        onValueChange={(val) =>
+                          updateMutation.mutate({ id: selectedStudent.id, data: { file_transfer_status: val } })
+                        }
+                      >
+                        <SelectTrigger className="w-[140px] h-8 text-xs bg-background border-border">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="requested">Requested</SelectItem>
+                          <SelectItem value="transferred">Transferred</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-5">
+                    {/* Visa status */}
+                    <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-muted/40 dark:bg-muted/20 border border-border">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Visa Status</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Consular procedure status</p>
+                      </div>
+                      <Select
+                        value={selectedStudent.visa_status || "pending"}
+                        onValueChange={(val) =>
+                          updateMutation.mutate({ id: selectedStudent.id, data: { visa_status: val } })
+                        }
+                      >
+                        <SelectTrigger className="w-[140px] h-8 text-xs bg-background border-border">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Overall status */}
+                <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-muted/40 dark:bg-muted/20 border border-border">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Overall File Status</p>
+                  </div>
+                  <Select
+                    value={selectedStudent.status || "pending"}
+                    onValueChange={(val) =>
+                      updateMutation.mutate({ id: selectedStudent.id, data: { status: val } })
+                    }
+                  >
+                    <SelectTrigger className="w-[140px] h-8 text-xs bg-background border-border">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="pt-4 border-t border-border/40 flex justify-end">
+
+                {/* Close button */}
+                <div className="pt-4 border-t border-border flex justify-end">
                   <Button
                     onClick={() => setSelectedStudent(null)}
-                    className="rounded-full px-8 bg-foreground text-background hover:bg-foreground/90"
+                    variant="outline"
+                    className="rounded-full px-8"
                   >
                     Close
                   </Button>
@@ -407,56 +464,3 @@ export default function MobilityView({ type }: MobilityViewProps) {
     </motion.div>
   )
 }
-
-const MOCK_STUDENTS = [
-  {
-    id: "ST-001",
-    name: "Amine Kerroum",
-    destination: "Univ. Science Tech (USTHB)",
-    type: "nationale",
-    status: "Completed",
-    requirements: [
-      { label: "Academic Dossier", status: "Valid" },
-      { label: "Signed Convention", status: "Valid" },
-      { label: "Scholarship Certificate", status: "Valid" },
-    ],
-  },
-  {
-    id: "ST-002",
-    name: "Sofia Red",
-    destination: "Sorbonne University, FR",
-    type: "internationale",
-    status: "Pending",
-    requirements: [
-      { label: "Erasmus+ Dossier", status: "Valid" },
-      { label: "Consular Visa", status: "Pending" },
-      { label: "Health Insurance", status: "Pending" },
-      { label: "Mobility Contract", status: "Valid" },
-    ],
-  },
-  {
-    id: "ST-003",
-    name: "Malik Sahli",
-    destination: "Ecole Polytechnique (ENP)",
-    type: "nationale",
-    status: "Pending",
-    requirements: [
-      { label: "Academic Dossier", status: "Valid" },
-      { label: "Signed Convention", status: "Pending" },
-      { label: "Registration Form", status: "Valid" },
-    ],
-  },
-  {
-    id: "ST-004",
-    name: "Kenzy Ben",
-    destination: "MIT, USA",
-    type: "internationale",
-    status: "Completed",
-    requirements: [
-      { label: "Visa F-1", status: "Valid" },
-      { label: "Health Insurance", status: "Valid" },
-      { label: "Invitation Letter", status: "Valid" },
-      { label: "Fulbright Scholarship", status: "Valid" },
-    ],
-  },
-]

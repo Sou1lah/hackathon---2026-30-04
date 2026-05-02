@@ -16,9 +16,6 @@ function IndexPage() {
     return <Navigate to="/dashboard" replace />
   }
 
-  if (user.can_apply_internship) {
-    return <Navigate to="/stages" replace />
-  }
-
-  return <Navigate to="/mobilite" search={{ type: "nationale" }} replace />
+  // Students and teachers default to the Internship Request page
+  return <Navigate to="/stages" replace />
 }

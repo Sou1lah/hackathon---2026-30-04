@@ -47,7 +47,7 @@ def get_all_activity_logs(
     count = session.exec(count_statement).one()
     statement = (
         select(ActivityLog)
-        .options(selectinload(ActivityLog.feedback))
+        .options(selectinload(ActivityLog.feedback), selectinload(ActivityLog.owner))
         .order_by(col(ActivityLog.created_at).desc())
         .offset(skip)
         .limit(limit)

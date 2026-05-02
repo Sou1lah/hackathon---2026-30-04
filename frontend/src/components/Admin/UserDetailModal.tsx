@@ -6,6 +6,7 @@ import {
   Paperclip,
   Star,
   User as UserIcon,
+  Building2,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
@@ -107,6 +108,11 @@ export default function UserDetailModal({
             <p className="text-[12px] text-zinc-500 truncate">
               {user?.email} • {user?.role}
             </p>
+            {summaryData && !isLoadingSummary && summaryData.company_name && (
+              <p className="text-[12px] text-zinc-600 dark:text-zinc-400 font-medium truncate mt-1 flex items-center gap-1.5">
+                 <Building2 size={12} className="text-zinc-400" /> {summaryData.company_name}
+              </p>
+            )}
           </div>
         </div>
 

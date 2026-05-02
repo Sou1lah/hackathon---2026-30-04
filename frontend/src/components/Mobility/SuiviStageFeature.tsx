@@ -11,11 +11,13 @@ import {
   Star,
   TrendingUp,
   User as UserIcon,
+  Globe,
 } from "lucide-react"
 import { motion } from "motion/react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { OpenAPI } from "@/client"
+import UserDetailModal from "@/components/Admin/UserDetailModal"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,6 +33,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import useAuth from "@/hooks/useAuth"
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -62,7 +65,12 @@ const fetchWithAuth = async (path: string, options: RequestInit = {}) => {
 
 export default function SuiviStageFeature() {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
+  const isTutor = user?.can_review_applications || user?.is_superuser
+
   const [isLogOpen, setIsLogOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [newLog, setNewLog] = useState({
     title: "",
     content: "",
@@ -70,13 +78,14 @@ export default function SuiviStageFeature() {
   })
 
   const { data: logsData, isLoading: logsLoading } = useQuery({
-    queryKey: ["suivi-logs"],
-    queryFn: () => fetchWithAuth("/api/v1/suivi-stage/my-internship/logs"),
+    queryKey: ["suivi-logs", isTutor],
+    queryFn: () => fetchWithAuth(isTutor ? "/api/v1/suivi-stage/admin/logs" : "/api/v1/suivi-stage/my-internship/logs"),
   })
 
   const { data: feedbacks } = useQuery({
     queryKey: ["suivi-feedback"],
     queryFn: () => fetchWithAuth("/api/v1/suivi-stage/my-internship/feedback"),
+    enabled: !isTutor,
   })
 
   const createLogMutation = useMutation({
@@ -105,8 +114,9 @@ export default function SuiviStageFeature() {
     })
   }
 
-  const getFeedbackForLog = (logId: string) => {
-    return feedbacks?.find((f: any) => f.log_id === logId)
+  const getFeedbackForLog = (log: any) => {
+    if (log.feedback && log.feedback.length > 0) return log.feedback[0]
+    return feedbacks?.find((f: any) => f.log_id === log.id)
   }
 
   return (
@@ -134,99 +144,101 @@ export default function SuiviStageFeature() {
           </p>
         </div>
 
-        <Dialog open={isLogOpen} onOpenChange={setIsLogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              size="lg"
-              className="h-20 rounded-full px-12 gap-4 bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-2xl transition-all hover:scale-105 active:scale-95 border-8 border-white dark:border-zinc-950"
-            >
-              <Plus size={28} />
-              <span className="font-bold uppercase tracking-[0.2em] text-[12px]">
-                Create New Activity Log
-              </span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px] border-border/50 rounded-3xl overflow-hidden p-0">
-            <div className="bg-foreground text-background p-8 relative overflow-hidden">
-              <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
-              <DialogHeader className="relative z-10">
-                <DialogTitle className="text-2xl font-serif text-white">
-                  Record an activity
-                </DialogTitle>
-              </DialogHeader>
-            </div>
-            <div className="space-y-6 p-8">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="title"
-                  className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
-                >
-                  Mission Title
-                </Label>
-                <Input
-                  id="title"
-                  placeholder="Ex: Data flow analysis"
-                  className="rounded-xl border-border focus:ring-accent"
-                  value={newLog.title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNewLog({ ...newLog, title: e.target.value })
-                  }
-                />
+        {!isTutor && (
+          <Dialog open={isLogOpen} onOpenChange={setIsLogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                size="lg"
+                className="h-20 rounded-full px-12 gap-4 bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-2xl transition-all hover:scale-105 active:scale-95 border-8 border-white dark:border-zinc-950"
+              >
+                <Plus size={28} />
+                <span className="font-bold uppercase tracking-[0.2em] text-[12px]">
+                  Create New Activity Log
+                </span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px] border-border/50 rounded-3xl overflow-hidden p-0">
+              <div className="bg-foreground text-background p-8 relative overflow-hidden">
+                <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
+                <DialogHeader className="relative z-10">
+                  <DialogTitle className="text-2xl font-serif text-white">
+                    Record an activity
+                  </DialogTitle>
+                </DialogHeader>
               </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="content"
-                  className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
-                >
-                  Detailed Description
-                </Label>
-                <Textarea
-                  id="content"
-                  placeholder="What did you accomplish today?"
-                  className="rounded-xl min-h-[120px] border-border focus:ring-accent"
-                  value={newLog.content}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setNewLog({ ...newLog, content: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="attachment"
-                  className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
-                >
-                  Document Link (Optional)
-                </Label>
-                <div className="relative">
+              <div className="space-y-6 p-8">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="title"
+                    className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                  >
+                    Mission Title
+                  </Label>
                   <Input
-                    id="attachment"
-                    placeholder="https://docs.google.com/..."
-                    className="rounded-xl pl-10 border-border"
-                    value={newLog.attachment_url}
+                    id="title"
+                    placeholder="Ex: Data flow analysis"
+                    className="rounded-xl border-border focus:ring-accent"
+                    value={newLog.title}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNewLog({ ...newLog, attachment_url: e.target.value })
+                      setNewLog({ ...newLog, title: e.target.value })
                     }
                   />
-                  <Paperclip
-                    className="absolute left-3 top-2.5 text-muted-foreground"
-                    size={16}
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="content"
+                    className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                  >
+                    Detailed Description
+                  </Label>
+                  <Textarea
+                    id="content"
+                    placeholder="What did you accomplish today?"
+                    className="rounded-xl min-h-[120px] border-border focus:ring-accent"
+                    value={newLog.content}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setNewLog({ ...newLog, content: e.target.value })
+                    }
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="attachment"
+                    className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                  >
+                    Document Link (Optional)
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="attachment"
+                      placeholder="https://docs.google.com/..."
+                      className="rounded-xl pl-10 border-border"
+                      value={newLog.attachment_url}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setNewLog({ ...newLog, attachment_url: e.target.value })
+                      }
+                    />
+                    <Paperclip
+                      className="absolute left-3 top-2.5 text-muted-foreground"
+                      size={16}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <DialogFooter className="p-8 pt-0">
-              <Button
-                className="w-full rounded-xl py-6 font-bold uppercase tracking-widest text-[10px] bg-accent hover:bg-accent/90"
-                onClick={handleCreateLog}
-                disabled={createLogMutation.isPending}
-              >
-                {createLogMutation.isPending
-                  ? "Processing..."
-                  : "Confirm Entry"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter className="p-8 pt-0">
+                <Button
+                  className="w-full rounded-xl py-6 font-bold uppercase tracking-widest text-[10px] bg-accent hover:bg-accent/90"
+                  onClick={handleCreateLog}
+                  disabled={createLogMutation.isPending}
+                >
+                  {createLogMutation.isPending
+                    ? "Processing..."
+                    : "Confirm Entry"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </motion.div>
 
       {/* Stats Quick Look */}
@@ -297,12 +309,28 @@ export default function SuiviStageFeature() {
               ))
             ) : logsData?.data?.length > 0 ? (
               logsData.data.map((log: any) => {
-                const fb = getFeedbackForLog(log.id)
+                const fb = getFeedbackForLog(log)
                 return (
                   <motion.div key={log.id} variants={fadeInUp as any}>
-                    <Card className="group hover:border-accent/30 transition-all duration-500 border-border/50 overflow-hidden rounded-[2.5rem] bg-white dark:bg-zinc-950 shadow-sm hover:shadow-2xl">
-                      <div className="flex flex-col md:flex-row min-h-[280px]">
-                        <div className="md:w-48 bg-zinc-50 dark:bg-zinc-900/50 p-10 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-zinc-100 dark:border-zinc-900">
+                    <Card 
+                      className={cn(
+                        "group transition-all duration-500 border-zinc-200/50 dark:border-zinc-800/50 overflow-hidden rounded-[2.5rem] bg-white dark:bg-zinc-950 shadow-sm",
+                        isTutor ? "cursor-pointer hover:border-accent/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] hover:-translate-y-1" : "hover:border-accent/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] hover:-translate-y-1"
+                      )}
+                      onClick={() => {
+                        if (isTutor && log.owner) {
+                          setSelectedUser({
+                            id: log.owner.id,
+                            full_name: log.owner.full_name,
+                            email: log.owner.email,
+                            role: "Student",
+                          })
+                          setIsUserModalOpen(true)
+                        }
+                      }}
+                    >
+                      <div className="flex flex-col md:flex-row items-stretch min-h-[280px]">
+                        <div className="md:w-48 bg-zinc-50 dark:bg-zinc-900/50 p-10 pl-14 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-zinc-100 dark:border-zinc-900 shrink-0">
                           <span className="text-6xl font-serif text-foreground group-hover:scale-110 transition-transform">
                             {new Date(log.date).getDate()}
                           </span>
@@ -314,8 +342,13 @@ export default function SuiviStageFeature() {
                         </div>
                         <div className="flex-1 p-12 space-y-6">
                           <div className="flex items-center justify-between">
-                            <h3 className="text-3xl font-serif text-foreground group-hover:text-accent transition-colors leading-tight">
+                            <h3 className="text-3xl font-serif text-foreground group-hover:text-accent transition-colors leading-tight flex items-center gap-4 flex-wrap">
                               {log.title}
+                              {isTutor && log.owner && (
+                                <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest bg-muted/50 mt-1">
+                                  {log.owner.full_name || log.owner.email}
+                                </Badge>
+                              )}
                             </h3>
                             {log.attachment_url && (
                               <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl" asChild>
@@ -406,37 +439,37 @@ export default function SuiviStageFeature() {
             <CardContent className="p-6 space-y-6">
               <div className="space-y-1">
                 <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                  Host Organization
+                  {isTutor ? "System Overview" : "Host Organization"}
                 </p>
-                <p className="text-lg font-serif">Academic Team</p>
+                <p className="text-lg font-serif">{isTutor ? "Global Activity Feed" : "Academic Team"}</p>
               </div>
               <div className="pt-6 border-t border-border/40 space-y-4">
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-accent/5 border border-accent/10">
-                  <UserIcon size={18} className="text-accent" />
+                  {isTutor ? <Globe size={18} className="text-accent" /> : <UserIcon size={18} className="text-accent" />}
                   <div>
                     <p className="text-[9px] font-mono font-bold text-accent uppercase tracking-widest">
-                      Assigned Tutor
+                      {isTutor ? "Scope" : "Assigned Tutor"}
                     </p>
-                    <p className="text-sm font-bold">National Manager</p>
+                    <p className="text-sm font-bold">{isTutor ? "Multiple Host Organizations" : "National Manager"}</p>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-accent text-white border-none p-12 space-y-8 shadow-2xl shadow-accent/30 rounded-[2.5rem] relative overflow-hidden">
-            <div className="absolute inset-0 dot-pattern opacity-[0.1]" />
+          <Card className="bg-zinc-900 dark:bg-zinc-950 text-white border-none p-12 space-y-8 shadow-2xl shadow-zinc-900/20 rounded-[2.5rem] relative overflow-hidden group">
+            <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
             <div className="relative z-10 space-y-6">
-              <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center">
+              <div className="size-16 rounded-2xl bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
                 <FileText size={36} className="text-white" />
               </div>
-              <h3 className="text-3xl font-serif leading-tight">Internship Final Report</h3>
-              <p className="text-white/80 text-base leading-relaxed">
+              <h3 className="text-3xl font-serif leading-tight group-hover:text-zinc-200 transition-colors">Internship Final Report</h3>
+              <p className="text-zinc-400 text-base leading-relaxed">
                 Upon completion of your tenure, you are required to formalize your learnings into a comprehensive final report for academic validation.
               </p>
               <Button
                 variant="secondary"
-                className="w-full h-16 rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] bg-white text-accent hover:bg-white/95 shadow-xl transition-all"
+                className="w-full h-16 rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] bg-white text-zinc-900 hover:bg-zinc-200 shadow-xl transition-all hover:scale-[1.02] active:scale-95"
               >
                 Submission Portal Opening Soon
               </Button>
@@ -444,6 +477,14 @@ export default function SuiviStageFeature() {
           </Card>
         </div>
       </div>
+
+      {isTutor && selectedUser && (
+        <UserDetailModal
+          user={selectedUser}
+          isOpen={isUserModalOpen}
+          onClose={() => setIsUserModalOpen(false)}
+        />
+      )}
     </motion.div>
   )
 }
