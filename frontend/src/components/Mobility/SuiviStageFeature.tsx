@@ -636,7 +636,7 @@ export default function SuiviStageFeature() {
               </div>
             </CardContent>
           </Card>
-          <ActivityCalendar logs={logsData?.data || []} />
+          {!isTutor && <ActivityCalendar logs={logsData?.data || []} />}
 
           <Card className="bg-zinc-900 dark:bg-zinc-950 text-white border-none p-12 space-y-8 shadow-2xl shadow-zinc-900/20 rounded-[2.5rem] relative overflow-hidden group">
             <div className="absolute inset-0 dot-pattern opacity-[0.05]" />
