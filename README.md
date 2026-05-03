@@ -1,311 +1,827 @@
-# Mobility Hub - Full Stack FastAPI & React
+# Mobility Hub - Complete Documentation
 
-This project is a customized version of the Full Stack FastAPI Template, tailored for the **Mobility Hub** hackathon project.
+> [!info] Document Info **Version:** 0.1.0  
+> **Last Updated:** May 1, 2026  
+> **Project:** Full Stack FastAPI & React Application  
+> **Status:** Active Development
 
-## Quick Start (Development)
+---
 
-To get the project up and running after a restart:
+## Table of Contents
 
-### 1. Start the Backend & Database
-In the root directory, run:
-```bash
-docker compose up -d proxy db backend prestart
+- [[#Project Overview]]
+- [[#System Architecture]]
+- [[#Technology Stack]]
+- [[#Directory Structure]]
+- [[#Frontend Architecture]]
+- [[#Backend Architecture]]
+- [[#Database Schema]]
+- [[#API Endpoints]]
+- [[#Setup & Installation]]
+- [[#Development Workflow]]
+- [[#Deployment Guide]]
+- [[#Contributing]]
+
+---
+
+## Project Overview
+
+**Mobility Hub** is a customized version of the Full Stack FastAPI Template designed for managing internship and mobility programs in an educational context. The application facilitates:
+
+- **Internship Management**: Students can apply for internships, track their progress, and manage conventions
+- **Mobility Programs**: Support for both national and international mobility opportunities
+- **Administrative Dashboard**: Tools for admins and professors to review applications and manage partnerships
+- **PDF Document Handling**: Processing and extracting data from PDF files related to internships
+- **Recommendation Engine**: Intelligent matching of students with internship opportunities based on profiles and preferences
+- **Activity Tracking**: Comprehensive logging of user actions and system events
+
+### Key Features
+
+- Full-stack authentication (JWT-based)
+- Role-based access control (RBAC) with permission flags
+- PostgreSQL database with Alembic migrations
+- Real-time API documentation with Swagger UI
+- Comprehensive E2E testing with Playwright
+- Dark mode support
+- Email-based password recovery
+- Responsive UI with Tailwind CSS & shadcn/ui
+- APScheduler for background jobs
+- Sentry integration for error tracking
+
+---
+
+## System Architecture
+
+### High-Level System Architecture
+
+```mermaid
+graph TB
+    User["User Browser"]
+    React["React Frontend\nPort 5173"]
+    Nginx["Nginx Reverse Proxy\nPort 80"]
+    FastAPI["FastAPI Backend\nPort 8000"]
+    DB["PostgreSQL\nPort 5432"]
+    Cache["Cache Redis"]
+    Jobs["Background Jobs\nAPScheduler"]
+
+    User -->|HTTP REST| React
+    React -->|HTTP API| Nginx
+    Nginx -->|Proxy| FastAPI
+    FastAPI -->|SQL| DB
+    FastAPI --> Cache
+    FastAPI --> Jobs
 ```
-*Note: The database is configured to listen on port **5433** on the host to avoid conflicts with other local Postgres instances.*
 
-### 2. Start the Frontend
-In the root directory, run:
-```bash
-bun run dev
+### Request Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant User as User
+    participant Frontend as React
+    participant API as FastAPI
+    participant DB as Database
+
+    User->>Frontend: Click Button
+    Frontend->>Frontend: Validate Form (React Hook Form)
+    Frontend->>Frontend: Cache Check (TanStack Query)
+    Frontend->>API: HTTP Request + JWT Token
+    API->>API: Auth Middleware (Validate JWT)
+    API->>API: Dependency Injection
+    API->>DB: Execute Query (SQLModel ORM)
+    DB-->>API: Query Result
+    API-->>Frontend: JSON Response
+    Frontend->>Frontend: Update Cache
+    Frontend->>Frontend: Re-render Components
+    Frontend-->>User: Show Updated UI
 ```
-The frontend will be available at `http://localhost:5173`.
 
-### 3. Interactive API Documentation
-Once the backend is running, you can access the Swagger UI at:
-`http://localhost:8000/docs`
+### Component Dependency Chain
 
-<a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Docker+Compose%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Docker%20Compose/badge.svg" alt="Test Docker Compose"></a>
-<a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Backend%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Backend/badge.svg" alt="Test Backend"></a>
-<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
+```mermaid
+graph TD
+    UserInput["User Input"] -->|Data| form["React Hook Form"]
+    form -->|Validate| zod["Zod Validation"]
+    zod -->|Fetch| query["TanStack Query"]
+    query -->|Call| client["API Client"]
+    client -->|HTTP| api["Endpoints"]
+    api -->|Execute| crud["CRUD Operations"]
+    crud -->|Map| orm["SQLModel ORM"]
+    orm -->|Query| db["PostgreSQL"]
+    
+```
+---
 
-## Technology Stack and Features
+## Technology Stack
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-  - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
-  - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-  - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
-- 🚀 [React](https://react.dev) for the frontend.
-  - 💃 Using TypeScript, hooks, [Vite](https://vitejs.dev), and other parts of a modern frontend stack.
-  - 🎨 [Tailwind CSS](https://tailwindcss.com) and [shadcn/ui](https://ui.shadcn.com) for the frontend components.
-  - 🤖 An automatically generated frontend client.
-  - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
-  - 🦇 Dark mode support.
-- 🐋 [Docker Compose](https://www.docker.com) for development and production.
-- 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email based password recovery.
-- 📬 [Mailcatcher](https://mailcatcher.me) for local email testing during development.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
-- 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+### Frontend
 
-### Dashboard Login
+|Technology|Purpose|Version|
+|---|---|---|
+|React|UI Framework|19.1.1|
+|TypeScript|Type Safety|Latest|
+|Vite|Build Tool & Dev Server|Latest|
+|TanStack Router|Client-side Routing|1.163.3|
+|TanStack Query|Data Fetching & Caching|5.90.21|
+|Tailwind CSS|Utility-first CSS|4.1.18|
+|shadcn/ui|Accessible Components|Latest|
+|React Hook Form|Form State Management|7.68.0|
+|Zod|Schema Validation|Latest|
+|axios|HTTP Client|1.13.5|
+|Playwright|E2E Testing|Latest|
+|Biome|Linting & Formatting|Latest|
 
-[![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
+### Backend
 
-### Dashboard - Admin
+|Technology|Purpose|Version|
+|---|---|---|
+|FastAPI|Web Framework|>=0.114.2|
+|SQLModel|ORM + Data Validation|>=0.0.21|
+|SQLAlchemy|Database Toolkit|via SQLModel|
+|PostgreSQL|Database|18|
+|Alembic|Database Migrations|>=1.12.1|
+|Pydantic|Data Validation|>2.0|
+|PyJWT|JWT Authentication|>=2.8.0|
+|pwdlib|Password Hashing|>=0.3.0|
+|APScheduler|Background Jobs|>=3.10.0|
+|Sentry|Error Tracking|>=2.0.0|
+|BeautifulSoup4|HTML/XML Parsing|>=4.12.0|
+|PyPDF|PDF Processing|>=5.0.0|
+|Pytest|Testing Framework|>=7.4.3|
+|Mypy|Type Checking|>=1.8.0|
 
-[![API docs](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
+### Infrastructure
 
-### Dashboard - Items
+|Technology|Purpose|
+|---|---|
+|Docker & Docker Compose|Containerization & Orchestration|
+|Traefik|Reverse Proxy / Load Balancer|
+|Mailcatcher|Local Email Testing|
+|PostgreSQL|Primary Database|
+|Bun|JavaScript Package Manager|
+|uv|Python Package Manager|
 
-[![API docs](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
+---
 
-### Dashboard - Dark Mode
+## Directory Structure
 
-[![API docs](img/dashboard-dark.png)](https://github.com/fastapi/full-stack-fastapi-template)
+```
+/home/wael/hackathon/
+├── backend/
+│   ├── app/
+│   │   ├── main.py                   # FastAPI App Entry Point
+│   │   ├── models.py                 # User & Item SQLModels
+│   │   ├── models_mobility.py        # Mobility-related Models
+│   │   ├── models_partnership.py     # Partnership Models
+│   │   ├── models_suivi.py           # Internship Tracking Models
+│   │   ├── models_pdf.py             # PDF Document Models
+│   │   ├── models_recommendation.py  # Recommendation System Models
+│   │   ├── models_scraper.py         # Web Scraping Models
+│   │   ├── crud.py                   # CRUD Operations (User/Item)
+│   │   ├── crud_mobility.py          # Mobility CRUD
+│   │   ├── crud_partnership.py       # Partnership CRUD
+│   │   ├── crud_suivi.py             # Internship Tracking CRUD
+│   │   ├── api/
+│   │   │   ├── main.py               # API Router Setup
+│   │   │   ├── deps.py               # Shared Dependencies
+│   │   │   └── routes/               # API Endpoints
+│   │   ├── core/
+│   │   │   ├── config.py
+│   │   │   ├── db.py
+│   │   │   ├── security.py
+│   │   │   └── scheduler.py
+│   │   └── services/
+│   │       ├── dashboard_service.py
+│   │       ├── recommendation.py
+│   │       ├── nlp_processor.py
+│   │       ├── pdf_extractor.py
+│   │       ├── scraper.py
+│   │       └── sync_offers.py
+│   ├── tests/
+│   ├── scripts/
+│   ├── pyproject.toml
+│   ├── alembic.ini
+│   └── Dockerfile
+│
+├── frontend/
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── client/                   # Auto-generated OpenAPI Client
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── lib/
+│   │   └── routes/
+│   ├── tests/
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   └── Dockerfile
+│
+├── compose.yml
+├── compose.override.yml
+├── compose.traefik.yml
+└── nginx.conf
+```
 
-### Interactive API Documentation
+---
 
-[![API docs](img/docs.png)](https://github.com/fastapi/full-stack-fastapi-template)
+## Frontend Architecture
 
-## Database Schema & Architecture
+### Routing (TanStack Router)
 
-The project uses a normalized **PostgreSQL 18** schema designed to support complex internship and mobility workflows.
+- File-based routing system
+- Type-safe route definitions
+- Nested layouts support
+- Built-in search parameter handling
 
-### Entity Relationship Diagram
+### State Management
+
+- **TanStack Query**: Server state — automatic caching, background refetching, optimistic updates
+- **React Hook Form**: Client form state — minimal re-renders, Zod validation integration
+
+### Component Libraries
+
+- **shadcn/ui**: Accessible components built on Radix UI primitives
+- **Tailwind CSS**: Utility-first styling
+- **Lucide React**: Icon library
+- **Recharts**: Data visualization
+- **Sonner**: Toast notifications
+
+### Component Architecture
+
+```mermaid
+graph TD
+    Root["App Root __root.tsx"]
+    Layout["Layout Components"]
+    Nav["Navigation/Header"]
+    Sidebar["Sidebar"]
+    Pages["Page Routes"]
+    Dashboard["/dashboard"]
+    Login["/login"]
+    Admin["/admin"]
+    Internships["/internships"]
+    Conventions["/conventions"]
+    Hooks["Custom Hooks\nuseAuth, useUser"]
+    Query["TanStack Query"]
+    Form["React Hook Form"]
+    UI["shadcn/ui Components"]
+
+    Root --> Layout
+    Layout --> Nav
+    Layout --> Sidebar
+    Root --> Pages
+    Pages --> Dashboard
+    Pages --> Login
+    Pages --> Admin
+    Pages --> Internships
+    Pages --> Conventions
+    Dashboard --> Hooks
+    Dashboard --> Query
+    Dashboard --> Form
+    Dashboard --> UI
+```
+
+### API Integration
+
+```typescript
+// Auto-generated client from backend OpenAPI schema
+import { ApiClient } from '@/client'
+
+const client = new ApiClient()
+
+const { data: users } = useSuspenseQuery({
+  queryKey: ['users'],
+  queryFn: () => client.users.getUsersList()
+})
+```
+
+---
+
+## Backend Architecture
+
+### Core Layers
+
+**API Layer** (`api/`)
+
+- Router-based endpoint organization
+- Dependency injection for auth and database
+- Request/response validation via Pydantic
+
+**Models Layer** (`models*.py`)
+
+- SQLModel definitions (DB tables + Pydantic schemas)
+- Type-safe data structures with relationships
+
+**CRUD Layer** (`crud*.py`)
+
+- Database operations (Create, Read, Update, Delete)
+- Business logic encapsulation
+
+**Services Layer** (`services/`)
+
+- Complex business logic
+- External integrations (PDF, recommendations)
+- Background job coordination
+
+**Core Layer** (`core/`)
+
+- Configuration management
+- Database connection
+- Security utilities
+- Scheduler initialization
+
+### Request Lifecycle
+
+```mermaid
+flowchart TD
+    A["HTTP Request"]
+    B["FastAPI Router\napi/routes/*.py"]
+    C["Dependency Injection\ndeps.py"]
+    D["Validate JWT Token"]
+    E["Get DB Session"]
+    F["Endpoint Handler"]
+    G["CRUD / Service Layer"]
+    H["SQLModel ORM"]
+    I["PostgreSQL"]
+    J["Pydantic Response Validation"]
+    K["JSON Response"]
+
+    A --> B
+    B --> C
+    C --> D
+    C --> E
+    D --> F
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> H
+    H --> G
+    G --> J
+    J --> K
+```
+
+### Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant API as FastAPI
+    participant DB as Database
+
+    User->>API: POST /api/v1/login (email + password)
+    API->>DB: Lookup user by email
+    DB-->>API: User record
+    API->>API: Verify password (pwdlib/argon2)
+    API->>API: Generate JWT (PyJWT)
+    API-->>User: Return access_token
+    Note over User: Store token in frontend
+    User->>API: Subsequent requests with Bearer token
+    API->>API: Validate JWT middleware
+    API-->>User: Proceed with user context
+```
+
+### Key Models
+
+**User**
+
+- `id`: UUID (PK)
+- `email`: str — unique, `.univ.dz` domain
+- `role`: UserRole (student_national, student_international, prof, admin)
+- `hashed_password`, `is_active`, `is_superuser`
+- Permission flags: `can_access_dashboard`, `can_apply_internship`, `can_view_convention`, etc.
+- Profile data: `specialty`, `level`, `language`, `gpa`
+- Activity tracking: `last_login_at`, `total_sessions`, `engagement_score`
+
+**Item** — Basic CRUD template with owner FK
+
+**Domain Models** — InternshipRequest, Convention, MobilityFile, Partnership, ActivityLog
+
+---
+
+## Database Schema
 
 ```mermaid
 erDiagram
-    USER ||--o{ INTERNSHIP_REQUEST : "submits"
-    USER ||--o{ CONVENTION : "manages"
-    USER ||--o{ MOBILITY_FILE : "manages"
-    USER ||--o{ ACTIVITY_LOG_ENTRY : "logs"
-    
-    INTERNSHIP_REQUEST ||--o{ CONVENTION : "has"
-    INTERNSHIP_REQUEST ||--o{ ACTIVITY_LOG_ENTRY : "has"
+    USER ||--o{ ITEM : owns
+    USER ||--o{ INTERNSHIP_REQUEST : submits
+    USER ||--o{ CONVENTION : manages
+    USER ||--o{ MOBILITY_FILE : manages
+    USER ||--o{ ACTIVITY_LOG_ENTRY : logs
+    INTERNSHIP_REQUEST ||--o{ CONVENTION : has
+    INTERNSHIP_REQUEST ||--o{ ACTIVITY_LOG_ENTRY : relates_to
 
     USER {
         uuid id PK
         varchar email UK
-        user_role role
+        varchar full_name
+        varchar role
+        boolean is_active
+        boolean is_superuser
+        varchar specialty
+        varchar level
+        float gpa
+        boolean can_access_dashboard
+        boolean can_apply_internship
+        boolean can_view_convention
+        timestamptz created_at
+        timestamptz last_login_at
+        float engagement_score
+    }
+
+    ITEM {
+        uuid id PK
+        varchar title
+        varchar description
+        uuid owner_id FK
         timestamptz created_at
     }
 
     INTERNSHIP_REQUEST {
         uuid id PK
+        uuid student_id FK
         varchar student_name
-        internship_status status
+        varchar status
         int progress
-        timestamptz updated_at
+        timestamptz created_at
+    }
+
+    CONVENTION {
+        uuid id PK
+        uuid internship_request_id FK
+        uuid created_by_id FK
+        varchar agreement_type
+        timestamptz created_at
     }
 
     MOBILITY_FILE {
         uuid id PK
-        varchar reference_code
-        mobility_type type
-        priority_level priority
-        varchar status
+        uuid user_id FK
+        varchar file_name
+        varchar file_path
+        timestamptz created_at
+    }
+
+    ACTIVITY_LOG_ENTRY {
+        uuid id PK
+        uuid user_id FK
+        varchar action_type
+        text details
+        timestamptz timestamp
     }
 ```
 
-### Core Entities
-- **Users & Roles**: Multi-role system (Student, Professor, Admin) with institutional email validation (`@univ.dz`).
-- **Internships (PFE)**: Full lifecycle management from draft to completion, including verification and progress tracking.
-- **Conventions**: 8-step signature workflow for legal internship documents.
-- **Mobility**: National and international mobility file tracking with priority levels and approval status.
+### Key Constraints
 
-### Applying Database Changes
-If you modify the models in `backend/app/models.py` or `models_mobility.py`, run the following to update the database:
+```sql
+ALTER TABLE public.user ADD CONSTRAINT user_email_key UNIQUE (email);
+ALTER TABLE public.item ADD CONSTRAINT item_owner_id_fkey
+  FOREIGN KEY (owner_id) REFERENCES public.user(id);
 
-```bash
-# Generate a new migration
-docker compose exec backend alembic revision --autogenerate -m "Description of changes"
-
-# Apply migrations
-docker compose exec backend alembic upgrade head
+CREATE INDEX idx_user_email ON public.user(email);
+CREATE INDEX idx_item_owner_id ON public.item(owner_id);
+CREATE INDEX idx_activity_log_user_id ON activity_log(user_id);
 ```
 
-The full DDL is available for reference in `backend/app/schema.sql`.
+---
 
-## How To Use It
+## API Endpoints
 
-You can **just fork or clone** this repository and use it as is.
+**Base URL:** `http://localhost:8000/api/v1`
 
-✨ It just works. ✨
+### Authentication
 
-### How to Use a Private Repository
+|Method|Endpoint|Description|
+|---|---|---|
+|POST|`/login`|Login and get JWT token|
+|POST|`/login/access-token`|Refresh access token|
+|POST|`/register`|Register new user|
+|POST|`/password-recovery/{email}`|Request password reset|
+|POST|`/reset-password/`|Reset password with token|
 
-If you want to have a private repository, GitHub won't allow you to simply fork it as it doesn't allow changing the visibility of forks.
+### User Management
 
-But you can do the following:
+|Method|Endpoint|Description|
+|---|---|---|
+|GET|`/users`|List all users (admin only)|
+|GET|`/users/{user_id}`|Get user by ID|
+|POST|`/users`|Create new user (admin)|
+|PUT|`/users/{user_id}`|Update user (admin)|
+|DELETE|`/users/{user_id}`|Delete user (admin)|
+|GET|`/users/me`|Get current user|
+|PUT|`/users/me`|Update current user profile|
+|POST|`/users/me/password`|Change password|
 
-- Create a new GitHub repo, for example `my-full-stack`.
-- Clone this repository manually, set the name with the name of the project you want to use, for example `my-full-stack`:
+### Internship Management
 
-```bash
-git clone git@github.com:fastapi/full-stack-fastapi-template.git my-full-stack
-```
+|Method|Endpoint|Description|
+|---|---|---|
+|GET|`/internships`|List internships|
+|POST|`/internships`|Create internship request|
+|GET|`/internships/{id}`|Get internship details|
+|PUT|`/internships/{id}`|Update internship|
+|DELETE|`/internships/{id}`|Delete internship|
+|POST|`/internships/{id}/apply`|Apply to internship|
 
-- Enter into the new directory:
+### Conventions
 
-```bash
-cd my-full-stack
-```
+|Method|Endpoint|Description|
+|---|---|---|
+|GET|`/conventions`|List conventions|
+|POST|`/conventions`|Create convention|
+|GET|`/conventions/{id}`|Get convention details|
+|PUT|`/conventions/{id}`|Update convention|
+|DELETE|`/conventions/{id}`|Delete convention|
 
-- Set the new origin to your new repository, copy it from the GitHub interface, for example:
+### Mobility
 
-```bash
-git remote set-url origin git@github.com:octocat/my-full-stack.git
-```
+|Method|Endpoint|Description|
+|---|---|---|
+|GET|`/mobility`|List mobility files|
+|POST|`/mobility/upload`|Upload mobility file|
+|GET|`/mobility/{id}`|Get mobility file|
+|DELETE|`/mobility/{id}`|Delete mobility file|
 
-- Add this repo as another "remote" to allow you to get updates later:
+### PDF Processing
 
-```bash
-git remote add upstream git@github.com:fastapi/full-stack-fastapi-template.git
-```
+|Method|Endpoint|Description|
+|---|---|---|
+|POST|`/pdf/upload`|Upload and process PDF|
+|POST|`/pdf/extract`|Extract data from PDF|
+|GET|`/pdf/{id}`|Get PDF metadata|
 
-- Push the code to your new repository:
+### Recommendations
 
-```bash
-git push -u origin master
-```
+|Method|Endpoint|Description|
+|---|---|---|
+|GET|`/recommendations`|Get recommendations for user|
+|POST|`/recommendations/process`|Process user interactions|
+|GET|`/recommendations/stats`|Get recommendation stats|
 
-### Update From the Original Template
+### Dashboard & Monitoring
 
-After cloning the repository, and after doing changes, you might want to get the latest changes from this original template.
+|Method|Endpoint|Description|
+|---|---|---|
+|GET|`/overview`|Dashboard overview|
+|GET|`/overview/stats`|System statistics|
+|GET|`/activity-logs`|Activity logs|
+|GET|`/health`|Health check|
 
-- Make sure you added the original repository as a remote, you can check it with:
+**Interactive Docs:**
 
-```bash
-git remote -v
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+- OpenAPI JSON: `http://localhost:8000/api/v1/openapi.json`
 
-origin    git@github.com:octocat/my-full-stack.git (fetch)
-origin    git@github.com:octocat/my-full-stack.git (push)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (fetch)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (push)
-```
+---
 
-- Pull the latest changes without merging:
+## Setup & Installation
 
-```bash
-git pull --no-commit upstream master
-```
+### Prerequisites
 
-This will download the latest changes from this template without committing them, that way you can check everything is right before committing.
+- Docker & Docker Compose (recommended)
+- OR: Python 3.10+, PostgreSQL 18, Node.js 18+
+- `uv` — Python package manager: https://docs.astral.sh/uv/
+- `bun` — JavaScript runtime: https://bun.sh/
 
-- If there are conflicts, solve them in your editor.
-
-- Once you are done, commit the changes:
-
-```bash
-git merge --continue
-```
-
-### Configure
-
-You can then update configs in the `.env` files to customize your configurations.
-
-Before deploying it, make sure you change at least the values for:
-
-- `SECRET_KEY`
-- `FIRST_SUPERUSER_PASSWORD`
-- `POSTGRES_PASSWORD`
-
-You can (and should) pass these as environment variables from secrets.
-
-Read the [deployment.md](./deployment.md) docs for more details.
-
-### Generate Secret Keys
-
-Some environment variables in the `.env` file have a default value of `changethis`.
-
-You have to change them with a secret key, to generate secret keys you can run the following command:
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-Copy the content and use that as password / secret key. And run that again to generate another secure key.
-
-## How To Use It - Alternative With Copier
-
-This repository also supports generating a new project using [Copier](https://copier.readthedocs.io).
-
-It will copy all the files, ask you configuration questions, and update the `.env` files with your answers.
-
-### Install Copier
-
-You can install Copier with:
+### Option 1: Docker Compose (Recommended)
 
 ```bash
-pip install copier
+# Start backend services
+docker compose up -d proxy db backend prestart
+
+# Start frontend (separate terminal)
+cd frontend
+bun install
+bun run dev
 ```
 
-Or better, if you have [`pipx`](https://pipx.pypa.io/), you can run it with:
+- Frontend: `http://localhost:5173`
+- API Docs: `http://localhost:8000/docs`
+- Database: `psql -h localhost -p 5433 -U postgres -d app`
+
+### Option 2: Local Development
 
 ```bash
-pipx install copier
+# Backend
+cd backend
+uv sync
+source .venv/bin/activate
+cp .env.example .env      # Configure DATABASE_URL
+alembic upgrade head
+fastapi run --reload app/main.py
+
+# Frontend
+cd frontend
+bun install
+echo "VITE_API_URL=http://localhost:8000" > .env.local
+bun run dev
 ```
 
-**Note**: If you have `pipx`, installing copier is optional, you could run it directly.
-
-### Generate a Project With Copier
-
-Decide a name for your new project's directory, you will use it below. For example, `my-awesome-project`.
-
-Go to the directory that will be the parent of your project, and run the command with your project's name:
+### Database Migrations
 
 ```bash
-copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
+alembic revision --autogenerate -m "Describe changes"
+alembic upgrade head
+alembic history
+alembic downgrade -1
 ```
 
-If you have `pipx` and you didn't install `copier`, you can run it directly:
+### Environment Variables
+
+**Backend `.env`**
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/app
+ENVIRONMENT=local
+SECRET_KEY=your-secret-key-here
+PROJECT_NAME=Mobility Hub
+API_V1_STR=/api/v1
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+```
+
+**Frontend `.env`**
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+---
+
+## Development Workflow
+
+### Backend
 
 ```bash
-pipx run copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
+cd backend
+bash scripts/format.sh     # Format code
+bash scripts/lint.sh       # Lint
+mypy app/                  # Type checking
+bash scripts/test.sh       # Run tests
+coverage run -m pytest && coverage report
 ```
 
-**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
+### Frontend
 
-### Input Variables
+```bash
+cd frontend
+bun run lint               # Format & lint
+bun run build              # Production build
+bun run test               # E2E tests
+bun run test --headed      # Tests with visible browser
+```
 
-Copier will ask you for some data, you might want to have at hand before generating the project.
+### Hot Reload
 
-But don't worry, you can just update any of that in the `.env` files afterwards.
+```bash
+# Backend (Docker)
+docker compose watch
 
-The input variables, with their default values (some auto generated) are:
+# Frontend
+bun run dev    # HMR enabled by default
+```
 
-- `project_name`: (default: `"Mobility Hub"`) The name of the project, shown to API users (in .env).
-- `stack_name`: (default: `"mobility-app"`) The name of the stack used for Docker Compose labels and project name (no spaces, no periods) (in .env).
-- `secret_key`: (default: `"hackathon_secret_123"`) The secret key for the project, used for security, stored in .env.
-- `first_superuser`: (default: `"admin@example.com"`) The email of the first superuser (in .env).
-- `first_superuser_password`: (default: `"changethis123"`) The password of the first superuser (in .env).
-- `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env.
+### Git Workflow
 
-## Backend Development
+```bash
+git checkout -b feature/your-feature-name
+git add .
+git commit -m "feat: add new feature"
+git push origin feature/your-feature-name
+# Open PR → review → merge to main
+```
 
-Backend docs: [backend/README.md](./backend/README.md).
+---
 
-## Frontend Development
+## Deployment Guide
 
-Frontend docs: [frontend/README.md](./frontend/README.md).
+### Production Docker Compose
 
-## Deployment
+```bash
+docker compose build
+docker compose -f compose.yml up -d
+docker compose logs -f backend
+```
 
-Deployment docs: [deployment.md](./deployment.md).
+### Production Environment
 
-## Development
+```env
+ENVIRONMENT=production
+DEBUG=false
+ALLOWED_HOSTS=yourdomain.com
+DATABASE_URL=postgresql://user:pass@db-host:5432/app
+SECRET_KEY=use-strong-random-key
+SENTRY_DSN=your-sentry-dsn
+```
 
-General development docs: [development.md](./development.md).
+### Database Backup & Restore
 
-This includes using Docker Compose, custom local domains, `.env` configurations, etc.
+```bash
+# Backup
+docker compose exec db pg_dump -U postgres app > backup.sql
 
-## Release Notes
+# Restore
+docker compose exec db psql -U postgres app < backup.sql
+```
 
-Check the file [release-notes.md](./release-notes.md).
+### Scaling
 
-## License
+```yaml
+# compose.yml
+services:
+  backend:
+    deploy:
+      replicas: 3
+```
 
-The Full Stack FastAPI Template is licensed under the terms of the MIT license.
+---
+
+## Contributing
+
+### Code Style
+
+- Python: PEP 8, `ruff` for linting
+- TypeScript: ESLint config, `biome` for formatting
+- Commits: Conventional commits (`feat:`, `fix:`, `docs:`, etc.)
+
+### PR Guidelines
+
+- Clear title and description referencing related issues
+- Screenshots for UI changes
+- CI must pass before merge
+- No breaking changes without prior discussion
+- Code coverage must stay the same or improve
+
+---
+
+## Troubleshooting
+
+```bash
+# Backend won't start
+docker compose logs backend
+docker compose restart backend
+
+# Frontend port conflict
+VITE_PORT=3000 bun run dev
+
+# Database connection issues
+psql -h localhost -p 5433 -U postgres -d app
+
+# Regenerate API client
+cd frontend && bun run generate-client
+
+# Tests failing — clear cache
+rm -rf node_modules && bun install
+```
+
+---
+
+## Quick Command Reference
+
+```bash
+# Docker
+docker compose up -d
+docker compose down
+docker compose logs -f
+docker compose exec backend bash
+
+# Backend
+cd backend && source .venv/bin/activate
+fastapi run --reload app/main.py
+pytest
+alembic upgrade head
+mypy app/
+
+# Frontend
+cd frontend
+bun run dev
+bun run build
+bun run test
+bun run lint
+
+# Database
+psql -h localhost -p 5433 -U postgres -d app
+alembic revision --autogenerate -m "msg"
+alembic upgrade head
+```
+
+---
+
+## Additional Resources
+
+- [FastAPI Documentation](https://fastapi.tiangolo.com)
+- [SQLModel Documentation](https://sqlmodel.tiangolo.com)
+- [React Documentation](https://react.dev)
+- [TanStack Router](https://tanstack.com/router)
+- [TanStack Query](https://tanstack.com/query)
+- [Tailwind CSS](https://tailwindcss.com)
+- [shadcn/ui](https://ui.shadcn.com)
+- [PostgreSQL Docs](https://www.postgresql.org/docs/)
+- [Alembic Docs](https://alembic.sqlalchemy.org)
+- [Playwright Docs](https://playwright.dev)
+
+---
+
+**Last Updated:** May 1, 2026 **Documentation Version:** 1.0 **Project Status:** Active Development
