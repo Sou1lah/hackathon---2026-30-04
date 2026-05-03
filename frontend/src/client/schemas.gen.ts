@@ -385,7 +385,7 @@ export const ConventionCreateSchema = {
         },
         signature_step: {
             type: 'integer',
-            maximum: 8,
+            maximum: 10,
             minimum: 1,
             title: 'Signature Step',
             default: 1
@@ -426,7 +426,7 @@ export const ConventionPublicSchema = {
         },
         signature_step: {
             type: 'integer',
-            maximum: 8,
+            maximum: 10,
             minimum: 1,
             title: 'Signature Step',
             default: 1
@@ -530,7 +530,7 @@ export const ConventionUpdateSchema = {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 8,
+                    maximum: 10,
                     minimum: 1
                 },
                 {
@@ -1402,7 +1402,7 @@ export const InternshipRequestCreateSchema = {
         },
         current_step: {
             type: 'integer',
-            maximum: 8,
+            maximum: 10,
             minimum: 1,
             title: 'Current Step',
             default: 1
@@ -1550,7 +1550,7 @@ export const InternshipRequestPublicSchema = {
         },
         current_step: {
             type: 'integer',
-            maximum: 8,
+            maximum: 10,
             minimum: 1,
             title: 'Current Step',
             default: 1
@@ -1766,7 +1766,7 @@ export const InternshipRequestUpdateSchema = {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 8,
+                    maximum: 10,
                     minimum: 1
                 },
                 {
